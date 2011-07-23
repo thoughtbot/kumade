@@ -25,10 +25,12 @@ Feature: Deploying to Heroku
   Scenario: Deploying to staging
     When I successfully run `rake deploy:staging`
     Then the output should contain "[stub] Pushed master to staging"
+    And the output should contain "[stub] Pushed master to origin"
 
   Scenario: Deploying to production
     When I successfully run `rake deploy:production`
     Then the output should contain "[stub] Pushed master to production"
+    And the output should contain "[stub] Pushed master to origin"
 
   Scenario: Can't push to staging with a dirty git repo
     When I append to "Rakefile" with:

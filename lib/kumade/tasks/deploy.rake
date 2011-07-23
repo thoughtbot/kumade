@@ -13,7 +13,9 @@ class Kumade
       deployer.git_push('production')
     end
 
-    task :pre_deploy => [:clean_git, :rake_passes]
+    task :pre_deploy => [:clean_git, :rake_passes] do
+      deployer.git_push('origin')
+    end
 
     task :clean_git do
       ensure_clean_git
