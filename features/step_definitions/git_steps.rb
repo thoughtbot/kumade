@@ -18,7 +18,7 @@ When /^I stub out git push$/ do
 
     class Kumade::Deployer
       def git_push(remote)
-        puts "[stub] Deployed to " + remote
+        puts "[stub] Pushed master to " + remote
       end
     end
     """
