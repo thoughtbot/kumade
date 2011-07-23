@@ -45,3 +45,15 @@ Feature: Deploying to Heroku
     """
     And I run `rake deploy:production`
     Then the output should contain "Cannot deploy: repo is not clean"
+
+  Scenario: Can't push to staging unless rake passes
+    When I add a failing default task
+    And I commit everything in the current directory to git
+    And I run `rake deploy:staging`
+    Then the output should contain "Cannot deploy: tests did not pass"
+
+  Scenario: Can't push to production unless rake passes
+    When I add a failing default task
+    And I commit everything in the current directory to git
+    And I run `rake deploy:production`
+    Then the output should contain "Cannot deploy: tests did not pass"
