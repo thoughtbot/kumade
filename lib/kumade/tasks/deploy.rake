@@ -5,12 +5,12 @@ class Kumade
   namespace :deploy do
     desc "Deploy to Heroku staging"
     task :staging => :pre_deploy do
-      deployer.git_push('staging')
+      deployer.git_force_push('staging')
     end
 
     desc "Deploy to Heroku production"
     task :production => :pre_deploy do
-      deployer.git_push('production')
+      deployer.git_force_push('production')
     end
 
     task :pre_deploy => [:clean_git, :rake_passes] do

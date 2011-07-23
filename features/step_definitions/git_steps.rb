@@ -24,6 +24,21 @@ When /^I stub out git push$/ do
     """
   }
 end
+When /^I stub out git force push$/ do
+  prepend_require_kumade_to_rakefile!
+
+  steps %{
+    When I append to "Rakefile" with:
+    """
+
+    class Kumade::Deployer
+      def git_force_push(remote)
+        puts "[stub] Force pushed master to " + remote
+      end
+    end
+    """
+  }
+end
 
 Given /^that pushing to origin fails$/ do
   prepend_require_kumade_to_rakefile!

@@ -11,6 +11,13 @@ class Kumade
     def git_push(remote)
       run_or_raise("git push #{remote} master",
                    "Failed to push master -> #{remote}")
+      puts "Pushed master -> #{remote}"
+    end
+
+    def git_force_push(remote)
+      run_or_raise("git push -f #{remote} master",
+                   "Failed to force push master -> #{remote}")
+      puts "Force pushed master -> #{remote}"
     end
 
     def run(command)

@@ -14,22 +14,23 @@ Feature: Deploying to Heroku
     """
     And I add "kumade" from this project as a dependency
     And I stub out git push
+    And I stub out git force push
     And I load the tasks
     And I initialize a git repo
     And I commit everything in the current directory to git
 
   Scenario: deploy task is an alias for deploy:staging
     When I successfully run `rake deploy`
-    Then the output should contain "[stub] Pushed master to staging"
+    Then the output should contain "[stub] Force pushed master to staging"
 
   Scenario: Deploying to staging
     When I successfully run `rake deploy:staging`
-    Then the output should contain "[stub] Pushed master to staging"
+    Then the output should contain "[stub] Force pushed master to staging"
     And the output should contain "[stub] Pushed master to origin"
 
   Scenario: Deploying to production
     When I successfully run `rake deploy:production`
-    Then the output should contain "[stub] Pushed master to production"
+    Then the output should contain "[stub] Force pushed master to production"
     And the output should contain "[stub] Pushed master to origin"
 
   Scenario: Pushing to origin fails
