@@ -24,7 +24,6 @@ class Kumade
 
   def self.git_dirty?
     git_changed = `git status --short 2> /dev/null | tail -n1`
-    puts git_changed
     dirty = git_changed.size > 0
   end
 end
