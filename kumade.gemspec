@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email       = ["gabe@thoughtbot.com"]
   s.homepage    = ""
   s.summary     = %q{Simple rake tasks for deploying to Heroku}
-  s.description = %q{Simple rake tasks for deploying to Heroku}
+  s.description = s.summary
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
