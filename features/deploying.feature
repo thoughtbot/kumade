@@ -13,7 +13,8 @@ Feature: Deploying to Heroku
     gem "kumade"
     """
     And I add "kumade" from this project as a dependency
-    And I load the tasks with a stub for git push
+    And I stub out git push
+    And I load the tasks
     And I initialize a git repo
     And I commit everything in the current directory to git
 

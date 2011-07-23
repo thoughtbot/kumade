@@ -9,17 +9,18 @@ When /^I commit everything in the current directory to git$/ do
   }
 end
 
-When /^I load the tasks with a stub for git push$/ do
+When /^I stub out git push$/ do
+  prepend_require_kumade_to_rakefile!
+
   steps %{
-    When I write to "Rakefile" with:
+    When I append to "Rakefile" with:
     """
-    require 'kumade'
+
     class Kumade::Deployer
       def git_push(remote)
         puts "[stub] Deployed to " + remote
       end
     end
-    Kumade.load_tasks
     """
   }
 end
