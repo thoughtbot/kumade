@@ -16,13 +16,13 @@ Feature: Deploying to Heroku
     And I load the tasks with a stub for git push
 
   Scenario: deploy task is an alias for deploy:staging
-    When I run `rake deploy`
+    When I successfully run `rake deploy`
     Then the output should contain "[stub] Deployed to staging"
 
   Scenario: Deploying to staging
-    When I run `rake deploy:staging`
+    When I successfully run `rake deploy:staging`
     Then the output should contain "[stub] Deployed to staging"
 
   Scenario: Deploying to production
-    When I run `rake deploy:production`
+    When I successfully run `rake deploy:production`
     Then the output should contain "[stub] Deployed to production"
