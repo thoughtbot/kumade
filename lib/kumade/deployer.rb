@@ -9,7 +9,18 @@ class Kumade
     end
 
     def git_push(remote)
-      system "git push #{remote} master"
+      run_or_raise("git push #{remote} master",
+                   "Failed to push master -> #{remote}")
+    end
+
+    def run(command)
+      puts "+ #{command}"
+      puts "- #{system command}"
+      $?.success?
+    end
+
+    def run_or_raise(command, error_message)
+      raise(error_message) unless run(command)
     end
   end
 end

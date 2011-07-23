@@ -24,3 +24,24 @@ When /^I stub out git push$/ do
     """
   }
 end
+
+Given /^that pushing to origin fails$/ do
+  prepend_require_kumade_to_rakefile!
+
+  steps %{
+    When I append to "Rakefile" with:
+    """
+
+    class Kumade::Deployer
+      def git_push(remote)
+        if remote == 'origin'
+          raise "[stub] Failed to push master -> origin"
+        else
+          puts "[stub] Pushed master to " + remote
+        end
+      end
+    end
+    """
+    And I commit everything in the current directory to git
+  }
+end
