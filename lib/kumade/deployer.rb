@@ -1,8 +1,4 @@
 class Kumade
-  def self.deployer
-    @deployer ||= Deployer.new
-  end
-
   class Deployer
     def load_tasks
       load 'kumade/tasks/deploy.rake'
