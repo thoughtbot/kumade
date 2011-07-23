@@ -2,5 +2,6 @@
 .bundle
 Gemfile.lock
 pkg/*
+tmp/
 .rake_tasks
 *.sw[op]
