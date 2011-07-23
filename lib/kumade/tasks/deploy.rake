@@ -18,11 +18,11 @@ class Kumade
     end
 
     task :clean_git do
-      ensure_clean_git
+      deployer.ensure_clean_git
     end
 
     task :rake_passes do
-      ensure_rake_passes
+      deployer.ensure_rake_passes
     end
   end
 end
