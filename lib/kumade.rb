@@ -2,7 +2,7 @@ require 'kumade/deployer'
 
 class Kumade
   def self.load_tasks
-    Deployer.new.load_tasks
+    deployer.load_tasks
   end
 
   def self.ensure_clean_git
