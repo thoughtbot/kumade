@@ -1,6 +1,6 @@
 class Kumade
   def self.deployer
-    Deployer.new
+    @deployer ||= Deployer.new
   end
 
   class Deployer
