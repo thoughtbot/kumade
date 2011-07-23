@@ -11,7 +11,6 @@ Gem::Specification.new do |s|
   s.homepage    = ""
   s.summary     = %q{Simple rake tasks for deploying to Heroku}
   s.description = %q{Simple rake tasks for deploying to Heroku}
-  s.description = %q{TODO: Write a gem description}
 
   s.rubyforge_project = "kumade"
 
