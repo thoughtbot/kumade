@@ -23,6 +23,16 @@ Feature: Deploying to Heroku
     When I successfully run `rake deploy`
     Then the output should contain "Force pushed master -> staging"
 
+  Scenario: Deploying to staging calls pre-deploy hook
+    When I stub out the pre-deploy task
+    And I successfully run `rake deploy:staging`
+    Then the output should contain "[stub] Successfully ran pre-deploy hook"
+
+  Scenario: Deploying to production calls pre-deploy hook
+    When I stub out the pre-deploy task
+    And I successfully run `rake deploy:production`
+    Then the output should contain "[stub] Successfully ran pre-deploy hook"
+
   Scenario: Deploying to staging
     When I successfully run `rake deploy:staging`
     Then the output should contain "Force pushed master -> staging"
