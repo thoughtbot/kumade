@@ -17,8 +17,13 @@ When /^I stub out git push$/ do
     """
 
     class Kumade::Deployer
-      def git_push(remote)
-        puts "[stub] Pushed master to " + remote
+      alias :original_run_or_raise :run_or_raise
+      def run_or_raise(command, error_message)
+        if command =~ /^git push [^-]/
+          true
+        else
+          original_run_or_raise(command, error_message)
+        end
       end
     end
     """
@@ -32,8 +37,13 @@ When /^I stub out git force push$/ do
     """
 
     class Kumade::Deployer
-      def git_force_push(remote)
-        puts "[stub] Force pushed master to " + remote
+      alias :original_run_or_raise :run_or_raise
+      def run_or_raise(command, error_message)
+        if command =~ /^git push -f/
+          true
+        else
+          original_run_or_raise(command, error_message)
+        end
       end
     end
     """

@@ -21,22 +21,22 @@ Feature: Deploying to Heroku
 
   Scenario: deploy task is an alias for deploy:staging
     When I successfully run `rake deploy`
-    Then the output should contain "[stub] Force pushed master to staging"
+    Then the output should contain "Force pushed master -> staging"
 
   Scenario: Deploying to staging
     When I successfully run `rake deploy:staging`
-    Then the output should contain "[stub] Force pushed master to staging"
-    And the output should contain "[stub] Pushed master to origin"
+    Then the output should contain "Force pushed master -> staging"
+    And the output should contain "Pushed master -> origin"
 
   Scenario: Deploying to production
     When I successfully run `rake deploy:production`
-    Then the output should contain "[stub] Force pushed master to production"
-    And the output should contain "[stub] Pushed master to origin"
+    Then the output should contain "Force pushed master -> production"
+    And the output should contain "Pushed master -> origin"
 
   Scenario: Pushing to origin fails
     Given that pushing to origin fails
     When I run `rake deploy:staging`
-    Then the output should contain "[stub] Failed to push master -> origin"
+    Then the output should contain "Failed to push master -> origin"
 
   Scenario: Can't push to staging with a dirty git repo
     When I append to "Rakefile" with:
