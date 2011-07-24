@@ -45,33 +45,19 @@ Feature: Deploying to Heroku
 
   Scenario: Pushing to origin fails
     Given that pushing to origin fails
-    When I run `rake deploy:staging`
+    When I run `rake deploy:pre_deploy`
     Then the output should contain "Failed to push master -> origin"
 
-  Scenario: Can't push to staging with a dirty git repo
+  Scenario: Pre-deploy hook checks for clean git repo
     When I append to "Rakefile" with:
     """
     # Dirtying up your git repo
     """
-    And I run `rake deploy:staging`
+    And I run `rake deploy:pre_deploy`
     Then the output should contain "Cannot deploy: repo is not clean"
 
-  Scenario: Can't push to production with a dirty git repo
-    When I append to "Rakefile" with:
-    """
-    # Dirtying up your git repo
-    """
-    And I run `rake deploy:production`
-    Then the output should contain "Cannot deploy: repo is not clean"
-
-  Scenario: Can't push to staging unless rake passes
+  Scenario: Pre-deploy hook checks that rake passes
     When I add a failing default task
     And I commit everything in the current directory to git
-    And I run `rake deploy:staging`
-    Then the output should contain "Cannot deploy: tests did not pass"
-
-  Scenario: Can't push to production unless rake passes
-    When I add a failing default task
-    And I commit everything in the current directory to git
-    And I run `rake deploy:production`
+    And I run `rake deploy:pre_deploy`
     Then the output should contain "Cannot deploy: tests did not pass"
