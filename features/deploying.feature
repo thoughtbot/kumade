@@ -10,7 +10,6 @@ Feature: Deploying to Heroku
     """
     source "http://rubygems.org"
     gem "rake", "0.8.7"
-    gem "kumade"
     """
     And I add "kumade" from this project as a dependency
     And I stub out git push
