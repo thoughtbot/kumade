@@ -23,7 +23,7 @@ When /^I add a failing default task$/ do
   }
 end
 
-When /^I stub out the pre\-deploy task$/ do
+Given /^I stub out the "([^"]+)" task$/ do |task_name|
   insert_after_tasks_are_loaded(<<-CONTENT)
     class Rake::Task
       def overwrite(&block)
@@ -32,8 +32,8 @@ When /^I stub out the pre\-deploy task$/ do
       end
     end
 
-    Rake::Task['deploy:pre_deploy'].overwrite do
-      puts "[stub] Successfully ran pre-deploy hook"
+    Rake::Task['#{task_name}'].overwrite do
+      puts "[stub] Ran #{task_name}"
     end
   CONTENT
 end

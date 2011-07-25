@@ -6,7 +6,7 @@ Feature: Deploying to Heroku
   Background:
     Given a directory named "deployer"
     When I cd to "deployer"
-     And I write to "Gemfile" with:
+    And I write to "Gemfile" with:
     """
     source "http://rubygems.org"
     gem "rake", "0.8.7"
@@ -23,15 +23,15 @@ Feature: Deploying to Heroku
     When I successfully run `rake deploy`
     Then the output should contain "Force pushed master -> staging"
 
-  Scenario: Deploying to staging calls pre-deploy hook
-    When I stub out the pre-deploy task
+  Scenario: Deploying to staging calls pre_deploy task
+    Given I stub out the "deploy:pre_deploy" task
     And I successfully run `rake deploy:staging`
-    Then the output should contain "[stub] Successfully ran pre-deploy hook"
+    Then the output should contain "[stub] Ran deploy:pre_deploy"
 
-  Scenario: Deploying to production calls pre-deploy hook
-    When I stub out the pre-deploy task
-    And I successfully run `rake deploy:production`
-    Then the output should contain "[stub] Successfully ran pre-deploy hook"
+  Scenario: Deploying to production calls pre_deploy task
+    Given I stub out the "deploy:pre_deploy" task
+    When I successfully run `rake deploy:production`
+    Then the output should contain "[stub] Ran deploy:pre_deploy"
 
   Scenario: Deploying to staging
     When I successfully run `rake deploy:staging`
