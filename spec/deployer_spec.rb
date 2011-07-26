@@ -104,7 +104,7 @@ class Kumade
 
     context "when `git push` fails" do
       before do
-        subject.stub(:run).and_return(false)
+        subject.stub(:run => false)
       end
 
       it "raises an error" do
@@ -116,11 +116,11 @@ class Kumade
 
     context "when `git push` succeeds" do
       before do
-        subject.stub(:run).and_return(true)
+        subject.stub(:run => true)
       end
 
       it "does not raise an error" do
-        subject.stub(:announce).and_return(false)
+        subject.stub(:announce => false)
         lambda do
           subject.git_push(remote)
         end.should_not raise_error
@@ -148,7 +148,7 @@ class Kumade
 
     context "when `git push -f` fails" do
       before do
-        subject.stub(:run).and_return(false)
+        subject.stub(:run => false)
       end
 
       it "raises an error" do
@@ -160,7 +160,7 @@ class Kumade
 
     context "when `git push -f` succeeds" do
       before do
-        subject.stub(:run).and_return(true)
+        subject.stub(:run => true)
       end
 
       it "does not raise an error" do
@@ -180,7 +180,7 @@ class Kumade
 
   describe Deployer, "#ensure_clean_git" do
     context "when git is dirty" do
-      before { subject.stub(:git_dirty?).and_return(true) }
+      before { subject.stub(:git_dirty? => true) }
 
       it "raises an error" do
         lambda do
@@ -190,7 +190,7 @@ class Kumade
     end
 
     context "when git is clean" do
-      before { subject.stub(:git_dirty?).and_return(false) }
+      before { subject.stub(:git_dirty? => false) }
 
       it "does not raise an error" do
         lambda do
@@ -203,18 +203,18 @@ class Kumade
   describe Deployer, "#ensure_rake_passes" do
     context "with a default task" do
       before do
-        subject.stub(:default_task_exists?).and_return(true)
+        subject.stub(:default_task_exists? => true)
       end
 
       it "does not raise an error if the default task succeeds" do
-        subject.stub(:rake_succeeded?).and_return(true)
+        subject.stub(:rake_succeeded? => true)
         lambda do
           subject.ensure_rake_passes
         end.should_not raise_error
       end
 
       it "raises an error if the default task failse" do
-        subject.stub(:rake_succeeded?).and_return(false)
+        subject.stub(:rake_succeeded? => false)
         lambda do
           subject.ensure_rake_passes
         end.should raise_error("Cannot deploy: tests did not pass")
@@ -321,8 +321,8 @@ class Kumade
     end
 
     it "calls git_add_and_commit_all_assets_in if assets were added" do
-      subject.stub(:git_dirty?).and_return(true)
-      subject.stub(:absolute_assets_path => 'blerg')
+      subject.stub(:git_dirty? => true,
+                   :absolute_assets_path => 'blerg')
       subject.should_receive(:git_add_and_commit_all_assets_in).
         with('blerg').
         and_return(true)
@@ -331,7 +331,7 @@ class Kumade
     end
 
     it "does not call git_add_and_commit_all_jammit_assets if no assets were added" do
-      subject.stub(:git_dirty?).and_return(false)
+      subject.stub(:git_dirty? => false)
       subject.should_receive(:git_add_and_commit_all_assets_in).exactly(0).times
 
       subject.package_with_jammit
@@ -340,9 +340,9 @@ class Kumade
 
   describe Deployer, "#package_with_more" do
     before do
-      subject.stub(:git_add_and_commit_all_assets_in).and_return(true)
-      subject.stub(:announce)
-      subject.stub(:more_assets_path => 'assets')
+      subject.stub(:git_add_and_commit_all_assets_in => true,
+                   :more_assets_path => 'assets',
+                   :announce         => nil)
       Rake::Task.clear
       Rake::Task.define_task('more:generate'){}
     end
@@ -380,8 +380,8 @@ class Kumade
     end
 
     it "calls git_add_and_commit_all_assets_in if assets were added" do
-      subject.stub(:git_dirty?).and_return(true)
-      subject.stub(:more_assets_path).and_return('blerg')
+      subject.stub(:git_dirty?       => true,
+                   :more_assets_path => 'blerg')
       subject.should_receive(:git_add_and_commit_all_assets_in).
         with('blerg').
         and_return(true)
@@ -390,7 +390,7 @@ class Kumade
     end
 
     it "does not call git_add_and_commit_all_more_assets if no assets were added" do
-      subject.stub(:git_dirty?).and_return(false)
+      subject.stub(:git_dirty? => false)
       subject.should_receive(:git_add_and_commit_all_assets_in).exactly(0).times
 
       subject.package_with_more
@@ -399,8 +399,8 @@ class Kumade
 
   describe Deployer, "#git_add_and_commit_all_assets_in" do
     before do
-      subject.stub(:announce)
-      subject.stub(:run).and_return(true)
+      subject.stub(:run     => true,
+                  :announce => nil)
     end
 
     it "announces the correct message" do
@@ -417,7 +417,7 @@ class Kumade
     end
 
     it "raises an error if it could not add and commit assets" do
-      subject.stub(:run).and_return(false)
+      subject.stub(:run => false)
 
       lambda do
         subject.git_add_and_commit_all_assets_in('blerg')
