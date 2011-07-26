@@ -13,12 +13,12 @@ class Kumade
 
     def deploy_to_staging
       pre_deploy
-      git_force_push('staging')
+      git_force_push(Kumade.staging)
     end
 
     def deploy_to_production
       pre_deploy
-      git_force_push('production')
+      git_force_push(Kumade.production)
     end
 
     def git_push(remote)

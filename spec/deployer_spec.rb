@@ -41,6 +41,15 @@ class Kumade
 
       subject.deploy_to_staging
     end
+
+    it "deploys to Kumade.staging" do
+      subject.stub(:pre_deploy => true)
+      Kumade.staging = 'orange'
+
+      subject.should_receive(:git_force_push).with('orange')
+
+      subject.deploy_to_staging
+    end
   end
 
   describe Deployer, "#deploy_to_production" do
@@ -53,6 +62,15 @@ class Kumade
         ordered.
         with('production').
         and_return(true)
+
+      subject.deploy_to_production
+    end
+
+    it "deploys to Kumade.production" do
+      subject.stub(:pre_deploy => true)
+      Kumade.production = 'orange'
+
+      subject.should_receive(:git_force_push).with('orange')
 
       subject.deploy_to_production
     end
