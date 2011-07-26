@@ -24,8 +24,5 @@ class Kumade
     task :rake_passes do
       deployer.ensure_rake_passes
     end
-
-    task :package_assets do
-    end
   end
 end

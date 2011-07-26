@@ -60,8 +60,3 @@ Feature: Deploying to Heroku
     And I commit everything in the current directory to git
     And I run the rake task "deploy:pre_deploy"
     Then the output should contain "Cannot deploy: tests did not pass"
-
-  Scenario: Pre-deploy hook runs package_assets task
-    Given I stub out the "deploy:package_assets" task
-    When I run the rake task "deploy:pre_deploy"
-    Then the output should contain "[stub] Ran deploy:package_assets"
