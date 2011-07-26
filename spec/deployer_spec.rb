@@ -220,28 +220,38 @@ class Kumade
   end
 
   describe Deployer, "#package_assets" do
+    context "with Jammit installed" do
+      it "calls package_with_jammit" do
+        subject.should_receive(:package_with_jammit)
+        subject.package_assets
+      end
+    end
+
+    context "with Jammit not installed" do
+      before { subject.stub(:jammit_installed? => false) }
+      it "does not call package_with_jammit" do
+        subject.should_receive(:package_with_jammit).exactly(0).times
+        subject.package_assets
+      end
+    end
+  end
+
+  describe Deployer, "#package_with_jammit" do
     before do
-      subject.stub(:git_add_and_commit_all_assets).and_return(true)
+      subject.stub(:git_add_and_commit_all_jammit_assets).and_return(true)
       subject.stub(:announce)
       Jammit.stub(:package!)
     end
 
     it "calls Jammit.package!" do
       Jammit.should_receive(:package!).once
-      subject.package_assets
-    end
-
-    it "rescues from LoadError" do
-      Jammit.stub(:package!){ raise LoadError }
-      lambda do
-        subject.package_assets
-      end.should_not raise_error
+      subject.package_with_jammit
     end
 
     it "prints the correct message if packaging succeeded" do
       subject.should_receive(:announce).with("Successfully packaged with Jammit")
 
-      subject.package_assets
+      subject.package_with_jammit
     end
 
     it "raises an error if packaging failed" do
@@ -250,26 +260,26 @@ class Kumade
       end
 
       lambda do
-        subject.package_assets
+        subject.package_with_jammit
       end.should raise_error(Jammit::MissingConfiguration)
     end
 
-    it "calls git_add_and_commit_all_assets if assets were added" do
+    it "calls git_add_and_commit_all_jammit_assets if assets were added" do
       subject.stub(:git_dirty?).and_return(true)
-      subject.should_receive(:git_add_and_commit_all_assets).and_return(true)
+      subject.should_receive(:git_add_and_commit_all_jammit_assets).and_return(true)
 
-      subject.package_assets
+      subject.package_with_jammit
     end
 
-    it "does not call git_add_and_commit_all_assets if no assets were added" do
+    it "does not call git_add_and_commit_all_jammit_assets if no assets were added" do
       subject.stub(:git_dirty?).and_return(false)
-      subject.should_receive(:git_add_and_commit_all_assets).exactly(0).times
+      subject.should_receive(:git_add_and_commit_all_jammit_assets).exactly(0).times
 
-      subject.package_assets
+      subject.package_with_jammit
     end
   end
 
-  describe Deployer, "#git_add_and_commit_all_assets" do
+  describe Deployer, "#git_add_and_commit_all_jammit_assets" do
     before do
       subject.stub(:announce)
       subject.stub(:run).and_return(true)
@@ -278,7 +288,7 @@ class Kumade
     it "announces the correct message" do
       subject.should_receive(:announce).with("Committing assets")
 
-      subject.git_add_and_commit_all_assets
+      subject.git_add_and_commit_all_jammit_assets
     end
 
     it "runs the correct commands" do
@@ -286,14 +296,14 @@ class Kumade
       subject.should_receive(:run).
         with("git add blerg && git commit -m 'Assets'")
 
-      subject.git_add_and_commit_all_assets
+      subject.git_add_and_commit_all_jammit_assets
     end
 
     it "raises an error if it could not add and commit assets" do
       subject.stub(:run).and_return(false)
 
       lambda do
-        subject.git_add_and_commit_all_assets
+        subject.git_add_and_commit_all_jammit_assets
       end.should raise_error("Cannot deploy: couldn't commit assets")
     end
   end
@@ -303,6 +313,12 @@ class Kumade
       Jammit.stub(:package_path => 'blerg')
       current_dir = File.expand_path(Dir.pwd)
       subject.absolute_assets_path.should == File.join(current_dir, 'public', 'blerg')
+    end
+  end
+
+  describe Deployer, "#jammit_installed?" do
+    it "returns true because it's loaded by the Gemfile" do
+      subject.jammit_installed?.should be_true
     end
   end
 end

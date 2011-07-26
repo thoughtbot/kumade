@@ -46,26 +46,35 @@ class Kumade
     end
 
     def package_assets
-      begin
-        require 'jammit'
-        Jammit.package!
-        announce("Successfully packaged with Jammit")
-        if git_dirty?
-          git_add_and_commit_all_assets
-        end
-      rescue LoadError
+      package_with_jammit if jammit_installed?
+    end
+
+    def package_with_jammit
+      Jammit.package!
+      announce("Successfully packaged with Jammit")
+      if git_dirty?
+        git_add_and_commit_all_jammit_assets
       end
     end
 
-    def git_add_and_commit_all_assets
+    def git_add_and_commit_all_jammit_assets
       announce "Committing assets"
       run_or_raise("git add #{absolute_assets_path} && git commit -m 'Assets'",
                     "Cannot deploy: couldn't commit assets")
     end
 
     def absolute_assets_path
-      require 'jammit'
       File.join(Jammit::PUBLIC_ROOT, Jammit.package_path)
+    end
+
+    def jammit_installed?
+      @jammit_installed ||=
+        (defined?(Jammit) ||
+          begin
+            require 'jammit'
+          rescue LoadError
+            false
+          end)
     end
 
     def default_task_exists?
