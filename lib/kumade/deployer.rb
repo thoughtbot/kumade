@@ -7,6 +7,7 @@ class Kumade
     def pre_deploy
       ensure_clean_git
       ensure_rake_passes
+      package_assets
       git_push('origin')
     end
 
@@ -42,6 +43,29 @@ class Kumade
       if default_task_exists?
         raise "Cannot deploy: tests did not pass" unless rake_succeeded?
       end
+    end
+
+    def package_assets
+      begin
+        require 'jammit'
+        Jammit.package!
+        announce("Successfully packaged with Jammit")
+        if git_dirty?
+          git_add_and_commit_all_assets
+        end
+      rescue LoadError
+      end
+    end
+
+    def git_add_and_commit_all_assets
+      announce "Committing assets"
+      run_or_raise("git add #{absolute_assets_path} && git commit -m 'Assets'",
+                    "Cannot deploy: couldn't commit assets")
+    end
+
+    def absolute_assets_path
+      require 'jammit'
+      File.join(Jammit::PUBLIC_ROOT, Jammit.package_path)
     end
 
     def default_task_exists?

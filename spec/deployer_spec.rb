@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'jammit'
 
 class Kumade
   describe Deployer, "#load_tasks" do
@@ -17,6 +18,7 @@ class Kumade
       %w(
         ensure_clean_git
         ensure_rake_passes
+        package_assets
         git_push
         ).each do |task|
         subject.should_receive(task).ordered.and_return(true)
@@ -214,6 +216,93 @@ class Kumade
     it "returns false if the default task failed" do
       Rake::Task.define_task(:default){ fail "blerg" }
       subject.rake_succeeded?.should be_false
+    end
+  end
+
+  describe Deployer, "#package_assets" do
+    before do
+      subject.stub(:git_add_and_commit_all_assets).and_return(true)
+      subject.stub(:announce)
+      Jammit.stub(:package!)
+    end
+
+    it "calls Jammit.package!" do
+      Jammit.should_receive(:package!).once
+      subject.package_assets
+    end
+
+    it "rescues from LoadError" do
+      Jammit.stub(:package!){ raise LoadError }
+      lambda do
+        subject.package_assets
+      end.should_not raise_error
+    end
+
+    it "prints the correct message if packaging succeeded" do
+      subject.should_receive(:announce).with("Successfully packaged with Jammit")
+
+      subject.package_assets
+    end
+
+    it "raises an error if packaging failed" do
+      Jammit.stub(:package!) do
+        raise Jammit::MissingConfiguration.new("random Jammit error")
+      end
+
+      lambda do
+        subject.package_assets
+      end.should raise_error(Jammit::MissingConfiguration)
+    end
+
+    it "calls git_add_and_commit_all_assets if assets were added" do
+      subject.stub(:git_dirty?).and_return(true)
+      subject.should_receive(:git_add_and_commit_all_assets).and_return(true)
+
+      subject.package_assets
+    end
+
+    it "does not call git_add_and_commit_all_assets if no assets were added" do
+      subject.stub(:git_dirty?).and_return(false)
+      subject.should_receive(:git_add_and_commit_all_assets).exactly(0).times
+
+      subject.package_assets
+    end
+  end
+
+  describe Deployer, "#git_add_and_commit_all_assets" do
+    before do
+      subject.stub(:announce)
+      subject.stub(:run).and_return(true)
+    end
+
+    it "announces the correct message" do
+      subject.should_receive(:announce).with("Committing assets")
+
+      subject.git_add_and_commit_all_assets
+    end
+
+    it "runs the correct commands" do
+      subject.stub(:absolute_assets_path).and_return("blerg")
+      subject.should_receive(:run).
+        with("git add blerg && git commit -m 'Assets'")
+
+      subject.git_add_and_commit_all_assets
+    end
+
+    it "raises an error if it could not add and commit assets" do
+      subject.stub(:run).and_return(false)
+
+      lambda do
+        subject.git_add_and_commit_all_assets
+      end.should raise_error("Cannot deploy: couldn't commit assets")
+    end
+  end
+
+  describe Deployer, "#absolute_assets_path" do
+    it "returns the correct asset path" do
+      Jammit.stub(:package_path => 'blerg')
+      current_dir = File.expand_path(Dir.pwd)
+      subject.absolute_assets_path.should == File.join(current_dir, 'public', 'blerg')
     end
   end
 end
