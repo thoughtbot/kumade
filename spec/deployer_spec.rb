@@ -361,6 +361,7 @@ class Kumade
     end
 
     it "prints the correct message if packaging succeeded" do
+      subject.stub(:git_dirty? => true)
       subject.should_receive(:announce).with("Successfully packaged with More")
 
       subject.package_with_more
