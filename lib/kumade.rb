@@ -5,6 +5,10 @@ class Kumade
     deployer.load_tasks
   end
 
+  def self.deployer
+    @deployer ||= Deployer.new
+  end
+
   class << self
     attr_writer :staging, :production
     attr_accessor :staging_app, :production_app
@@ -24,9 +28,5 @@ class Kumade
     def production
       @production ||= 'production'
     end
-  end
-
-  def self.deployer
-    @deployer ||= Deployer.new
   end
 end
