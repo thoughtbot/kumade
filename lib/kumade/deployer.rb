@@ -47,6 +47,7 @@ class Kumade
 
     def package_assets
       package_with_jammit if jammit_installed?
+      package_with_more if more_installed?
     end
 
     def package_with_jammit
@@ -57,9 +58,24 @@ class Kumade
       end
     end
 
+    def package_with_more
+      Rake::Task['more:generate'].invoke
+      if git_dirty?
+        announce("Successfully packaged with More")
+
+        git_add_and_commit_all_more_assets
+      end
+    end
+
     def git_add_and_commit_all_jammit_assets
       announce "Committing assets"
       run_or_raise("git add #{absolute_assets_path} && git commit -m 'Assets'",
+                    "Cannot deploy: couldn't commit assets")
+    end
+
+    def git_add_and_commit_all_more_assets
+      announce "Committing assets"
+      run_or_raise("git add #{more_assets_path} && git commit -m 'Assets'",
                     "Cannot deploy: couldn't commit assets")
     end
 
@@ -67,11 +83,25 @@ class Kumade
       File.join(Jammit::PUBLIC_ROOT, Jammit.package_path)
     end
 
+    def more_assets_path
+      File.join('public', Less::More.destination_path)
+    end
+
     def jammit_installed?
       @jammit_installed ||=
         (defined?(Jammit) ||
           begin
             require 'jammit'
+          rescue LoadError
+            false
+          end)
+    end
+
+    def more_installed?
+      @more_installed ||=
+        (defined?(Less::More) ||
+          begin
+            require 'less/more'
           rescue LoadError
             false
           end)

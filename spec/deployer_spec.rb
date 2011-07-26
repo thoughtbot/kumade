@@ -234,6 +234,30 @@ class Kumade
         subject.package_assets
       end
     end
+
+    context "with More installed" do
+      before do
+        subject.stub(:jammit_installed? => false)
+        subject.stub(:more_installed? => true)
+      end
+
+      it "calls package_with_more" do
+        subject.should_receive(:package_with_more)
+        subject.package_assets
+      end
+    end
+
+    context "with More not installed" do
+      before do
+        subject.stub(:jammit_installed? => false)
+        subject.stub(:more_installed? => false)
+      end
+
+      it "does not call package_with_more" do
+        subject.should_receive(:package_with_more).exactly(0).times
+        subject.package_assets
+      end
+    end
   end
 
   describe Deployer, "#package_with_jammit" do
@@ -279,6 +303,60 @@ class Kumade
     end
   end
 
+  describe Deployer, "#package_with_more" do
+    before do
+      subject.stub(:git_add_and_commit_all_more_assets).and_return(true)
+      subject.stub(:announce)
+      Rake::Task.clear
+      Rake::Task.define_task('more:generate'){}
+    end
+
+    it "calls the more:generate task" do
+      Rake::Task.clear
+      more_generate_task = Rake::Task.define_task('more:generate'){}
+      more_generate_task.should_receive(:invoke).once
+      subject.package_with_more
+    end
+
+    it "prints the correct message if packaging succeeded" do
+      subject.should_receive(:announce).with("Successfully packaged with More")
+
+      subject.package_with_more
+    end
+
+    it "prints no message if packaging was a no-op" do
+      subject.stub(:git_dirty? => false)
+      subject.should_receive(:announce).exactly(0).times
+
+      subject.package_with_more
+    end
+
+    it "raises an error if packaging failed" do
+      Rake::Task.clear
+      Rake::Task.define_task('more:generate') do
+        fail "blerg"
+      end
+
+      lambda do
+        subject.package_with_more
+      end.should raise_error("blerg")
+    end
+
+    it "calls git_add_and_commit_all_more_assets if assets were added" do
+      subject.stub(:git_dirty?).and_return(true)
+      subject.should_receive(:git_add_and_commit_all_more_assets).and_return(true)
+
+      subject.package_with_more
+    end
+
+    it "does not call git_add_and_commit_all_more_assets if no assets were added" do
+      subject.stub(:git_dirty?).and_return(false)
+      subject.should_receive(:git_add_and_commit_all_more_assets).exactly(0).times
+
+      subject.package_with_more
+    end
+  end
+
   describe Deployer, "#git_add_and_commit_all_jammit_assets" do
     before do
       subject.stub(:announce)
@@ -316,9 +394,36 @@ class Kumade
     end
   end
 
+  describe Deployer, "#more_assets_path" do
+    it "returns the correct asset path" do
+      module Less
+        class More
+          def self.destination_path
+            'blerg'
+          end
+        end
+      end
+      subject.more_assets_path.should == 'public/blerg'
+    end
+  end
+
   describe Deployer, "#jammit_installed?" do
     it "returns true because it's loaded by the Gemfile" do
       subject.jammit_installed?.should be_true
+    end
+  end
+
+  describe Deployer, "#more_installed?" do
+    it "returns false if it does not find Less::More" do
+      subject.more_installed?.should be_false
+    end
+
+    it "returns true if it finds Less::More" do
+      module Less
+        class More
+        end
+      end
+      subject.more_installed?.should be_true
     end
   end
 end
