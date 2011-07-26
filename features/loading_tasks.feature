@@ -12,7 +12,6 @@ Feature: Loading tasks
     gem "rake", "0.8.7"
     gem "kumade"
     """
-    And I add "kumade" from this project as a dependency
     And I write to "Rakefile" with:
     """
     require 'kumade'

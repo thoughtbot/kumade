@@ -10,38 +10,6 @@ When /^I load the tasks$/ do
   }
 end
 
-When /^I add a failing default task$/ do
-  steps %{
-    When I append to "Rakefile" with:
-    """
-
-    task :failing_task do
-      raise "I am the failboat!"
-    end
-    task :default => :failing_task
-    """
-  }
-end
-
 When /^I successfully run the rake task "([^"]*)"$/ do |task_name|
   When %{I successfully run `bundle exec rake #{task_name}`}
-end
-
-When /^I run the rake task "([^"]*)"$/ do |task_name|
-  When %{I run `bundle exec rake #{task_name}`}
-end
-
-Given /^I stub out the "([^"]+)" task$/ do |task_name|
-  insert_after_tasks_are_loaded(<<-CONTENT)
-    class Rake::Task
-      def overwrite(&block)
-        @actions.clear
-        enhance(&block)
-      end
-    end
-
-    Rake::Task['#{task_name}'].overwrite do
-      puts "[stub] Ran #{task_name}"
-    end
-  CONTENT
 end
