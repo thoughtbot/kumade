@@ -5,3 +5,4 @@ pkg/*
 tmp/
 .rake_tasks
 *.sw[op]
+.rvmrc
