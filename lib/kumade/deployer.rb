@@ -54,7 +54,7 @@ class Kumade
       Jammit.package!
       announce("Successfully packaged with Jammit")
       if git_dirty?
-        git_add_and_commit_all_jammit_assets
+        git_add_and_commit_all_assets_in(absolute_assets_path)
       end
     end
 
@@ -63,13 +63,13 @@ class Kumade
       if git_dirty?
         announce("Successfully packaged with More")
 
-        git_add_and_commit_all_more_assets
+        git_add_and_commit_all_assets_in(more_assets_path)
       end
     end
 
-    def git_add_and_commit_all_jammit_assets
+    def git_add_and_commit_all_assets_in(dir)
       announce "Committing assets"
-      run_or_raise("git add #{absolute_assets_path} && git commit -m 'Assets'",
+      run_or_raise("git add #{dir} && git commit -m 'Assets'",
                     "Cannot deploy: couldn't commit assets")
     end
 
@@ -84,7 +84,7 @@ class Kumade
     end
 
     def more_assets_path
-      File.join('public', Less::More.destination_path)
+      File.join('public', ::Less::More.destination_path)
     end
 
     def jammit_installed?

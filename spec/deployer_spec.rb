@@ -262,7 +262,7 @@ class Kumade
 
   describe Deployer, "#package_with_jammit" do
     before do
-      subject.stub(:git_add_and_commit_all_jammit_assets).and_return(true)
+      subject.stub(:git_add_and_commit_all_assets_in)
       subject.stub(:announce)
       Jammit.stub(:package!)
     end
@@ -288,16 +288,19 @@ class Kumade
       end.should raise_error(Jammit::MissingConfiguration)
     end
 
-    it "calls git_add_and_commit_all_jammit_assets if assets were added" do
+    it "calls git_add_and_commit_all_assets_in if assets were added" do
       subject.stub(:git_dirty?).and_return(true)
-      subject.should_receive(:git_add_and_commit_all_jammit_assets).and_return(true)
+      subject.stub(:absolute_assets_path => 'blerg')
+      subject.should_receive(:git_add_and_commit_all_assets_in).
+        with('blerg').
+        and_return(true)
 
       subject.package_with_jammit
     end
 
     it "does not call git_add_and_commit_all_jammit_assets if no assets were added" do
       subject.stub(:git_dirty?).and_return(false)
-      subject.should_receive(:git_add_and_commit_all_jammit_assets).exactly(0).times
+      subject.should_receive(:git_add_and_commit_all_assets_in).exactly(0).times
 
       subject.package_with_jammit
     end
@@ -305,10 +308,17 @@ class Kumade
 
   describe Deployer, "#package_with_more" do
     before do
-      subject.stub(:git_add_and_commit_all_more_assets).and_return(true)
+      subject.stub(:git_add_and_commit_all_assets_in).and_return(true)
       subject.stub(:announce)
       Rake::Task.clear
       Rake::Task.define_task('more:generate'){}
+      module ::Less
+        class More
+          def self.destination_path
+            'blerg'
+          end
+        end
+      end
     end
 
     it "calls the more:generate task" do
@@ -342,22 +352,25 @@ class Kumade
       end.should raise_error("blerg")
     end
 
-    it "calls git_add_and_commit_all_more_assets if assets were added" do
+    it "calls git_add_and_commit_all_assets_in if assets were added" do
       subject.stub(:git_dirty?).and_return(true)
-      subject.should_receive(:git_add_and_commit_all_more_assets).and_return(true)
+      subject.stub(:more_assets_path).and_return('blerg')
+      subject.should_receive(:git_add_and_commit_all_assets_in).
+        with('blerg').
+        and_return(true)
 
       subject.package_with_more
     end
 
     it "does not call git_add_and_commit_all_more_assets if no assets were added" do
       subject.stub(:git_dirty?).and_return(false)
-      subject.should_receive(:git_add_and_commit_all_more_assets).exactly(0).times
+      subject.should_receive(:git_add_and_commit_all_assets_in).exactly(0).times
 
       subject.package_with_more
     end
   end
 
-  describe Deployer, "#git_add_and_commit_all_jammit_assets" do
+  describe Deployer, "#git_add_and_commit_all_assets_in" do
     before do
       subject.stub(:announce)
       subject.stub(:run).and_return(true)
@@ -366,22 +379,21 @@ class Kumade
     it "announces the correct message" do
       subject.should_receive(:announce).with("Committing assets")
 
-      subject.git_add_and_commit_all_jammit_assets
+      subject.git_add_and_commit_all_assets_in('blerg')
     end
 
     it "runs the correct commands" do
-      subject.stub(:absolute_assets_path).and_return("blerg")
       subject.should_receive(:run).
         with("git add blerg && git commit -m 'Assets'")
 
-      subject.git_add_and_commit_all_jammit_assets
+      subject.git_add_and_commit_all_assets_in('blerg')
     end
 
     it "raises an error if it could not add and commit assets" do
       subject.stub(:run).and_return(false)
 
       lambda do
-        subject.git_add_and_commit_all_jammit_assets
+        subject.git_add_and_commit_all_assets_in('blerg')
       end.should raise_error("Cannot deploy: couldn't commit assets")
     end
   end
@@ -396,7 +408,7 @@ class Kumade
 
   describe Deployer, "#more_assets_path" do
     it "returns the correct asset path" do
-      module Less
+      module ::Less
         class More
           def self.destination_path
             'blerg'
@@ -414,6 +426,12 @@ class Kumade
   end
 
   describe Deployer, "#more_installed?" do
+    before do
+      if defined?(Less)
+        Object.send(:remove_const, :Less)
+      end
+    end
+
     it "returns false if it does not find Less::More" do
       subject.more_installed?.should be_false
     end
