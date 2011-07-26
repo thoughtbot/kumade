@@ -7,10 +7,14 @@ class Kumade
 
   class << self
     attr_writer :staging, :production
+    attr_accessor :staging_app, :production_app
 
-    def reset_remotes!
-      @staging = nil
+    def reset!
+      @staging    = nil
       @production = nil
+
+      @staging_app    = nil
+      @production_app = nil
     end
 
     def staging

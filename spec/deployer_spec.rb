@@ -30,6 +30,8 @@ class Kumade
 
   describe Deployer, "#deploy_to_staging" do
     it "calls the correct methods in order" do
+      subject.stub(:run => true)
+
       subject.should_receive(:pre_deploy).
         ordered.
         and_return(true)
@@ -39,11 +41,16 @@ class Kumade
         with('staging').
         and_return(true)
 
+      subject.should_receive(:heroku_migrate).
+        ordered.
+        with(:staging)
+
       subject.deploy_to_staging
     end
 
     it "deploys to Kumade.staging" do
-      subject.stub(:pre_deploy => true)
+      subject.stub(:pre_deploy => true,
+                   :run        => true)
       Kumade.staging = 'orange'
 
       subject.should_receive(:git_force_push).with('orange')
@@ -54,6 +61,8 @@ class Kumade
 
   describe Deployer, "#deploy_to_production" do
     it "calls the correct methods in order" do
+      subject.stub(:run => true)
+
       subject.should_receive(:pre_deploy).
         ordered.
         and_return(true)
@@ -63,11 +72,16 @@ class Kumade
         with('production').
         and_return(true)
 
+      subject.should_receive(:heroku_migrate).
+        ordered.
+        with(:production)
+
       subject.deploy_to_production
     end
 
     it "deploys to Kumade.production" do
-      subject.stub(:pre_deploy => true)
+      subject.stub(:pre_deploy => true,
+                   :run        => true)
       Kumade.production = 'orange'
 
       subject.should_receive(:git_force_push).with('orange')
@@ -460,6 +474,31 @@ class Kumade
         end
       end
       subject.more_installed?.should be_true
+    end
+  end
+
+  describe Deployer, "#heroku_migrate" do
+    let(:staging_app)   { 'staging-sushi' }
+    let(:production_app){ 'production-sushi' }
+
+    before do
+      Kumade.reset!
+      Kumade.staging_app    = staging_app
+      Kumade.production_app = production_app
+    end
+
+    it "runs db:migrate with the correct staging app" do
+      subject.should_receive(:run).
+        with("bundle exec heroku rake db:migrate --app #{staging_app}")
+
+      subject.heroku_migrate(:staging)
+    end
+
+    it "runs db:migrate with the correct production app" do
+      subject.should_receive(:run).
+        with("bundle exec heroku rake db:migrate --app #{production_app}")
+
+      subject.heroku_migrate(:production)
     end
   end
 end

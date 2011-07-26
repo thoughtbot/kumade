@@ -14,11 +14,13 @@ class Kumade
     def deploy_to_staging
       pre_deploy
       git_force_push(Kumade.staging)
+      heroku_migrate(:staging)
     end
 
     def deploy_to_production
       pre_deploy
       git_force_push(Kumade.production)
+      heroku_migrate(:production)
     end
 
     def git_push(remote)
@@ -31,6 +33,16 @@ class Kumade
       run_or_raise("git push -f #{remote} master",
                    "Failed to force push master -> #{remote}")
       announce "Force pushed master -> #{remote}"
+    end
+
+    def heroku_migrate(environment)
+      app = if environment == :staging
+              Kumade.staging_app
+            elsif environment == :production
+              Kumade.production_app
+            end
+
+      run("bundle exec heroku rake db:migrate --app #{app}")
     end
 
     def ensure_clean_git
