@@ -46,5 +46,5 @@ rake deploy:staging     # Deploy to Heroku staging
 ```
 
 ## What's with the name?
-Kumade ([http://translate.google.com/#ja|en|熊手](pronunciation here)) means
+Kumade ([pronunciation here](http://translate.google.com/#ja|en|熊手)) means
 "bamboo rake" in Japanese.
