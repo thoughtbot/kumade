@@ -342,15 +342,9 @@ class Kumade
     before do
       subject.stub(:git_add_and_commit_all_assets_in).and_return(true)
       subject.stub(:announce)
+      subject.stub(:more_assets_path => 'assets')
       Rake::Task.clear
       Rake::Task.define_task('more:generate'){}
-      module ::Less
-        class More
-          def self.destination_path
-            'blerg'
-          end
-        end
-      end
     end
 
     it "calls the more:generate task" do
