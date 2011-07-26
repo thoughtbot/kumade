@@ -23,6 +23,14 @@ When /^I add a failing default task$/ do
   }
 end
 
+When /^I successfully run the rake task "([^"]*)"$/ do |task_name|
+  When %{I successfully run `bundle exec rake #{task_name}`}
+end
+
+When /^I run the rake task "([^"]*)"$/ do |task_name|
+  When %{I run `bundle exec rake #{task_name}`}
+end
+
 Given /^I stub out the "([^"]+)" task$/ do |task_name|
   insert_after_tasks_are_loaded(<<-CONTENT)
     class Rake::Task

@@ -19,32 +19,32 @@ Feature: Deploying to Heroku
     And I commit everything in the current directory to git
 
   Scenario: deploy task is an alias for deploy:staging
-    When I successfully run `rake deploy`
+    When I successfully run the rake task "deploy"
     Then the output should contain "Force pushed master -> staging"
 
   Scenario: Deploying to staging calls pre_deploy task
     Given I stub out the "deploy:pre_deploy" task
-    And I successfully run `rake deploy:staging`
+    And I successfully run the rake task "deploy:staging"
     Then the output should contain "[stub] Ran deploy:pre_deploy"
 
   Scenario: Deploying to production calls pre_deploy task
     Given I stub out the "deploy:pre_deploy" task
-    When I successfully run `rake deploy:production`
+    When I successfully run the rake task "deploy:production"
     Then the output should contain "[stub] Ran deploy:pre_deploy"
 
   Scenario: Deploying to staging
-    When I successfully run `rake deploy:staging`
+    When I successfully run the rake task "deploy:staging"
     Then the output should contain "Force pushed master -> staging"
     And the output should contain "Pushed master -> origin"
 
   Scenario: Deploying to production
-    When I successfully run `rake deploy:production`
+    When I successfully run the rake task "deploy:production"
     Then the output should contain "Force pushed master -> production"
     And the output should contain "Pushed master -> origin"
 
   Scenario: Pushing to origin fails
     Given that pushing to origin fails
-    When I run `rake deploy:pre_deploy`
+    When I run the rake task "deploy:pre_deploy"
     Then the output should contain "Failed to push master -> origin"
 
   Scenario: Pre-deploy hook checks for clean git repo
@@ -52,16 +52,16 @@ Feature: Deploying to Heroku
     """
     # Dirtying up your git repo
     """
-    And I run `rake deploy:pre_deploy`
+    And I run the rake task "deploy:pre_deploy"
     Then the output should contain "Cannot deploy: repo is not clean"
 
   Scenario: Pre-deploy hook checks that rake passes
     When I add a failing default task
     And I commit everything in the current directory to git
-    And I run `rake deploy:pre_deploy`
+    And I run the rake task "deploy:pre_deploy"
     Then the output should contain "Cannot deploy: tests did not pass"
 
   Scenario: Pre-deploy hook runs package_assets task
     Given I stub out the "deploy:package_assets" task
-    When I run `rake deploy:pre_deploy`
+    When I run the rake task "deploy:pre_deploy"
     Then the output should contain "[stub] Ran deploy:package_assets"
