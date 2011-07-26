@@ -4,6 +4,22 @@ class Kumade
       load 'kumade/tasks/deploy.rake'
     end
 
+    def pre_deploy
+      ensure_clean_git
+      ensure_rake_passes
+      git_push('origin')
+    end
+
+    def deploy_to_staging
+      pre_deploy
+      git_force_push('staging')
+    end
+
+    def deploy_to_production
+      pre_deploy
+      git_force_push('production')
+    end
+
     def git_push(remote)
       run_or_raise("git push #{remote} master",
                    "Failed to push master -> #{remote}")

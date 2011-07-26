@@ -12,6 +12,50 @@ class Kumade
     end
   end
 
+  describe Deployer, "#pre_deploy" do
+    it "calls the correct methods in order" do
+      %w(
+        ensure_clean_git
+        ensure_rake_passes
+        git_push
+        ).each do |task|
+        subject.should_receive(task).ordered.and_return(true)
+      end
+
+      subject.pre_deploy
+    end
+  end
+
+  describe Deployer, "#deploy_to_staging" do
+    it "calls the correct methods in order" do
+      subject.should_receive(:pre_deploy).
+        ordered.
+        and_return(true)
+
+      subject.should_receive(:git_force_push).
+        ordered.
+        with('staging').
+        and_return(true)
+
+      subject.deploy_to_staging
+    end
+  end
+
+  describe Deployer, "#deploy_to_production" do
+    it "calls the correct methods in order" do
+      subject.should_receive(:pre_deploy).
+        ordered.
+        and_return(true)
+
+      subject.should_receive(:git_force_push).
+        ordered.
+        with('production').
+        and_return(true)
+
+      subject.deploy_to_production
+    end
+  end
+
   describe Deployer, "#git_push" do
     let(:remote){ 'origin' }
 
