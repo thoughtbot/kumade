@@ -22,11 +22,20 @@ class Kumade
     end
 
     def staging
-      @staging ||= 'staging'
+      @staging ||= local_remote_for_app(Kumade.staging_app)
     end
 
     def production
-      @production ||= 'production'
+      @production ||= local_remote_for_app(Kumade.production_app)
+    end
+
+    def local_remote_for_app(app_name)
+      heroku_remote_url = heroku_remote_url_for_app(app_name)
+      `git remote -v | grep push | grep '#{heroku_remote_url}' | cut -f1`.strip
+    end
+
+    def heroku_remote_url_for_app(app_name)
+      "git@heroku.com:#{app_name}.git"
     end
   end
 end

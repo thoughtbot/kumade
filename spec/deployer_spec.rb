@@ -38,7 +38,6 @@ class Kumade
 
       subject.should_receive(:git_force_push).
         ordered.
-        with('staging').
         and_return(true)
 
       subject.should_receive(:heroku_migrate).
@@ -69,7 +68,6 @@ class Kumade
 
       subject.should_receive(:git_force_push).
         ordered.
-        with('production').
         and_return(true)
 
       subject.should_receive(:heroku_migrate).
