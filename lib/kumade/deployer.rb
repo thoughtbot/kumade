@@ -12,12 +12,14 @@ class Kumade
     end
 
     def deploy_to_staging
+      ensure_staging_app_is_present
       pre_deploy
       git_force_push(Kumade.staging)
       heroku_migrate(:staging)
     end
 
     def deploy_to_production
+      ensure_production_app_is_present
       pre_deploy
       git_force_push(Kumade.production)
       heroku_migrate(:production)
@@ -148,6 +150,22 @@ class Kumade
 
     def announce(message)
       puts message
+    end
+
+    def string_present?(maybe_string)
+      maybe_string.is_a?(String) && maybe_string.size > 0
+    end
+
+    def ensure_staging_app_is_present
+      unless string_present?(Kumade.staging_app)
+        raise "Cannot deploy: Kumade.staging_app is not present"
+      end
+    end
+
+    def ensure_production_app_is_present
+      unless string_present?(Kumade.production_app)
+        raise "Cannot deploy: Kumade.production_app is not present"
+      end
     end
   end
 end

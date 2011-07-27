@@ -32,6 +32,9 @@ class Kumade
     it "calls the correct methods in order" do
       subject.stub(:run => true)
 
+      subject.should_receive(:ensure_staging_app_is_present).
+        ordered
+
       subject.should_receive(:pre_deploy).
         ordered.
         and_return(true)
@@ -50,6 +53,7 @@ class Kumade
     it "deploys to Kumade.staging" do
       subject.stub(:pre_deploy => true,
                    :run        => true)
+      subject.stub(:ensure_staging_app_is_present)
       Kumade.staging = 'orange'
 
       subject.should_receive(:git_force_push).with('orange')
@@ -61,6 +65,9 @@ class Kumade
   describe Deployer, "#deploy_to_production" do
     it "calls the correct methods in order" do
       subject.stub(:run => true)
+
+      subject.should_receive(:ensure_production_app_is_present).
+        ordered
 
       subject.should_receive(:pre_deploy).
         ordered.
@@ -80,9 +87,11 @@ class Kumade
     it "deploys to Kumade.production" do
       subject.stub(:pre_deploy => true,
                    :run        => true)
-      Kumade.production = 'orange'
+      subject.stub(:ensure_production_app_is_present)
 
-      subject.should_receive(:git_force_push).with('orange')
+      Kumade.production = 'bamboo'
+
+      subject.should_receive(:git_force_push).with('bamboo')
 
       subject.deploy_to_production
     end
@@ -492,6 +501,64 @@ class Kumade
         with("bundle exec heroku rake db:migrate --app #{production_app}")
 
       subject.heroku_migrate(:production)
+    end
+  end
+
+  describe Deployer, "#string_present?" do
+    it "returns false for nil" do
+      subject.string_present?(nil).should be_false
+    end
+
+    it "returns false for false" do
+      subject.string_present?(false).should be_false
+    end
+
+    it "returns false for true" do
+      subject.string_present?(true).should be_false
+    end
+
+    it "returns false for an empty string" do
+      subject.string_present?('').should be_false
+    end
+
+    it "returns true for a non-empty string" do
+      subject.string_present?('abc').should be_true
+    end
+  end
+
+  describe Deployer, "#ensure_staging_app_is_present" do
+    after { Kumade.reset! }
+
+    it "does not raise an error if Kumade.staging_app is present" do
+      Kumade.staging_app = 'abc'
+      lambda do
+        subject.ensure_staging_app_is_present
+      end.should_not raise_error
+    end
+
+    it "raises an error if Kumade.staging_app is not present" do
+      Kumade.staging_app = ''
+      lambda do
+        subject.ensure_staging_app_is_present
+      end.should raise_error("Cannot deploy: Kumade.staging_app is not present")
+    end
+  end
+
+  describe Deployer, "#ensure_production_app_is_present" do
+    after { Kumade.reset! }
+
+    it "does not raise an error if Kumade.production_app is present" do
+      Kumade.production_app = 'abc'
+      lambda do
+        subject.ensure_production_app_is_present
+      end.should_not raise_error
+    end
+
+    it "raises an error if Kumade.production_app is not present" do
+      Kumade.production_app = ''
+      lambda do
+        subject.ensure_production_app_is_present
+      end.should raise_error("Cannot deploy: Kumade.production_app is not present")
     end
   end
 end
