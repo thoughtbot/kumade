@@ -45,6 +45,9 @@ rake deploy:production  # Deploy to Heroku production
 rake deploy:staging     # Deploy to Heroku staging
 ```
 
+## Compatibility
+Tested on MRI 1.8.7 and 1.9.2.
+
 ## What's with the name?
 Kumade ([pronunciation here](http://translate.google.com/#ja|en|熊手)) means
 "bamboo rake" in Japanese.
