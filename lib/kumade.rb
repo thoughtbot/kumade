@@ -5,6 +5,10 @@ class Kumade
     deployer.load_tasks
   end
 
+  def self.load_namespaced_tasks
+    deployer.load_namespaced_tasks
+  end
+
   def self.deployer
     @deployer ||= Deployer.new
   end

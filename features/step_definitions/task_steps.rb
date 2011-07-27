@@ -1,4 +1,4 @@
-When /^I load the tasks$/ do
+Given /^I load the non\-namespaced tasks$/ do
   prepend_require_kumade_to_rakefile!
 
   steps %{
@@ -6,6 +6,18 @@ When /^I load the tasks$/ do
     """
 
     Kumade.load_tasks
+    """
+  }
+end
+
+Given /^I load the namespaced tasks$/ do
+  prepend_require_kumade_to_rakefile!
+
+  steps %{
+    When I append to "Rakefile" with:
+    """
+
+    Kumade.load_namespaced_tasks
     """
   }
 end
