@@ -54,7 +54,7 @@ class Kumade
       subject.stub(:pre_deploy => true,
                    :run        => true)
       subject.stub(:ensure_staging_app_is_present)
-      Kumade.staging = 'orange'
+      Kumade.staging_remote = 'orange'
 
       subject.should_receive(:git_force_push).with('orange')
 
@@ -89,7 +89,7 @@ class Kumade
                    :run        => true)
       subject.stub(:ensure_production_app_is_present)
 
-      Kumade.production = 'bamboo'
+      Kumade.production_remote = 'bamboo'
 
       subject.should_receive(:git_force_push).with('bamboo')
 

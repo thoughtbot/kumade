@@ -10,23 +10,23 @@ class Kumade
   end
 
   class << self
-    attr_writer :staging, :production
+    attr_writer :staging_remote, :production_remote
     attr_accessor :staging_app, :production_app
 
     def reset!
-      @staging    = nil
-      @production = nil
+      @staging_remote    = nil
+      @production_remote = nil
 
       @staging_app    = nil
       @production_app = nil
     end
 
-    def staging
-      @staging ||= local_remote_for_app(Kumade.staging_app)
+    def staging_remote
+      @staging_remote ||= local_remote_for_app(Kumade.staging_app)
     end
 
-    def production
-      @production ||= local_remote_for_app(Kumade.production_app)
+    def production_remote
+      @production_remote ||= local_remote_for_app(Kumade.production_app)
     end
 
     def local_remote_for_app(app_name)

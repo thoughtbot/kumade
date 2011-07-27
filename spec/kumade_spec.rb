@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade, "staging remote" do
+describe Kumade, ".staging_remote" do
   let(:staging_app){ 'purple' }
   let(:staging_remote){ 'staging_test' }
 
@@ -12,13 +12,13 @@ describe Kumade, "staging remote" do
   after { `git remote rm #{staging_remote}` }
 
   it "can be set" do
-    Kumade.staging = 'orange'
-    Kumade.staging.should == 'orange'
+    Kumade.staging_remote = 'orange'
+    Kumade.staging_remote.should == 'orange'
   end
 
   it "is autodetected if staging app is set" do
     Kumade.staging_app = staging_app
-    Kumade.staging.should == staging_remote
+    Kumade.staging_remote.should == staging_remote
   end
 end
 
@@ -35,7 +35,7 @@ describe Kumade, "staging app" do
   end
 end
 
-describe Kumade, "production remote" do
+describe Kumade, ".production_remote" do
   let(:production_app){ 'purple' }
   let(:production_remote){ 'production_test' }
 
@@ -47,13 +47,13 @@ describe Kumade, "production remote" do
   after { `git remote rm #{production_remote}` }
 
   it "can be set" do
-    Kumade.production = 'orange'
-    Kumade.production.should == 'orange'
+    Kumade.production_remote = 'orange'
+    Kumade.production_remote.should == 'orange'
   end
 
   it "is autodetected if production app is set" do
     Kumade.production_app = production_app
-    Kumade.production.should == production_remote
+    Kumade.production_remote.should == production_remote
   end
 end
 

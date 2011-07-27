@@ -14,14 +14,14 @@ class Kumade
     def deploy_to_staging
       ensure_staging_app_is_present
       pre_deploy
-      git_force_push(Kumade.staging)
+      git_force_push(Kumade.staging_remote)
       heroku_migrate(:staging)
     end
 
     def deploy_to_production
       ensure_production_app_is_present
       pre_deploy
-      git_force_push(Kumade.production)
+      git_force_push(Kumade.production_remote)
       heroku_migrate(:production)
     end
 
