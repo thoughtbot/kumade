@@ -9,7 +9,7 @@ After that, it packages assets using
 [Jammit](http://documentcloud.github.com/jammit/) and/or
 [More](https://github.com/cloudhead/more), commits them, and pushes to
 origin. Then it force pushes to the staging or production remote as
-appropriate and runs rake db:migrate on the Heroku app.
+appropriate and runs `rake db:migrate` on the Heroku app.
 
 If any step fails, it immediately raises an error and stops the deploy
 process.
