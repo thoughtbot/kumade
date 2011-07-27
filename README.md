@@ -26,23 +26,42 @@ In your Rakefile:
 
 ```ruby
 Kumade.load_tasks
-# Set the name of the staging remote (default: 'staging')
-Kumade.staging = 'staging'
-# Set the name of the production remote (default: 'production')
-Kumade.production = 'production'
+## Set the name of the staging remote (autodetected by default)
+# Kumade.staging_remote = 'staging'
+## Set the name of the production remote (autodetected by default)
+# Kumade.production_remote = 'production'
 
-# Set the name of the staging app on Heroku
+# Set the name of the staging app on Heroku (required)
 Kumade.staging_app = 'my-staging-app'
-# Set the name of the production app on Heroku
+# Set the name of the production app on Heroku (required)
 Kumade.production_app = 'my-production-app'
 ```
 
 Now running `rake -T` shows the new tasks:
 
 ```bash
-rake deploy             # Alias for deploy:staging
-rake deploy:production  # Deploy to Heroku production
-rake deploy:staging     # Deploy to Heroku staging
+rake deploy             # Alias for kumade:deploy
+rake deploy:production  # Alias for kumade:deploy:production
+rake deploy:staging     # Alias for kumade:deploy:staging
+
+rake kumade:deploy             # Alias for kumade:deploy:staging
+rake kumade:deploy:production  # Deploy to Heroku production
+rake kumade:deploy:staging     # Deploy to Heroku staging
+```
+
+If you only want the namespaced tasks (the ones with "kumade:" in front), do
+this in your Rakefile:
+
+```ruby
+Kumade.load_namespaced_tasks
+```
+
+Now `rake -T` will only show this:
+
+```bash
+rake kumade:deploy             # Alias for kumade:deploy:staging
+rake kumade:deploy:production  # Deploy to Heroku production
+rake kumade:deploy:staging     # Deploy to Heroku staging
 ```
 
 ## Compatibility
