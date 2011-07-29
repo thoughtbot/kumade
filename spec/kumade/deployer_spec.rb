@@ -3,6 +3,8 @@ require 'jammit'
 
 module Kumade
   describe Deployer, "#pre_deploy" do
+    before { subject.stub(:say) }
+
     it "calls the correct methods in order" do
       %w(
         ensure_clean_git
@@ -34,7 +36,11 @@ module Kumade
     let(:remote_name){ 'staging' }
     let(:app_name){ 'kumade-staging' }
 
-    before { add_heroku_remote(remote_name, app_name) }
+    before do
+      subject.stub(:say)
+      add_heroku_remote(remote_name, app_name)
+    end
+
     after  { remove_remote(remote_name) }
 
     it "calls the correct methods in order" do
@@ -73,7 +79,7 @@ module Kumade
   describe Deployer, "#git_push" do
     let(:remote){ 'origin' }
 
-    before { subject.stub(:announce) }
+    before { subject.stub(:say) }
 
     it "calls `git push`" do
       subject.should_receive(:run).
@@ -83,9 +89,7 @@ module Kumade
     end
 
     context "when `git push` fails" do
-      before do
-        subject.stub(:run => false)
-      end
+      before { subject.stub(:run => false) }
 
       it "prints an error message" do
         subject.should_receive(:error).with("Failed to push master -> #{remote}")
@@ -95,12 +99,9 @@ module Kumade
     end
 
     context "when `git push` succeeds" do
-      before do
-        subject.stub(:run => true)
-      end
+      before { subject.stub(:run => true) }
 
       it "does not raise an error" do
-        subject.stub(:announce => false)
         subject.should_not_receive(:error)
         subject.git_push(remote)
       end
@@ -115,7 +116,7 @@ module Kumade
 
   describe Deployer, "#git_force_push" do
     let(:remote){ 'origin' }
-    before { subject.stub(:announce) }
+    before { subject.stub(:say) }
 
     it "calls `git push -f`" do
       subject.should_receive(:run).
@@ -138,6 +139,7 @@ module Kumade
     context "when `git push -f` succeeds" do
       before do
         subject.stub(:run => true)
+        subject.stub(:say)
       end
 
       it "does not raise an error" do
@@ -155,6 +157,8 @@ module Kumade
   end
 
   describe Deployer, "#ensure_clean_git" do
+    before { subject.stub(:say) }
+
     context "when git is dirty" do
       before { subject.stub(:git_dirty? => true) }
 
@@ -272,7 +276,7 @@ module Kumade
   describe Deployer, "#package_with_jammit" do
     before do
       subject.stub(:git_add_and_commit_all_assets_in)
-      subject.stub(:announce)
+      subject.stub(:say)
       Jammit.stub(:package!)
     end
 
@@ -328,8 +332,8 @@ module Kumade
   describe Deployer, "#package_with_more" do
     before do
       subject.stub(:git_add_and_commit_all_assets_in => true,
-                   :more_assets_path => 'assets',
-                   :announce         => nil)
+                   :more_assets_path                 => 'assets')
+      subject.stub(:say)
       Rake::Task.clear
       Rake::Task.define_task('more:generate'){}
     end
@@ -390,8 +394,8 @@ module Kumade
 
   describe Deployer, "#git_add_and_commit_all_assets_in" do
     before do
-      subject.stub(:run     => true,
-                  :announce => nil)
+      subject.stub(:run => true)
+      subject.stub(:say)
     end
 
     it "prints a success message" do
@@ -466,7 +470,10 @@ module Kumade
     let(:environment){ 'staging' }
     let(:app_name){ 'sushi' }
 
-    before { add_heroku_remote(environment, app_name) }
+    before do
+      subject.stub(:say)
+      add_heroku_remote(environment, app_name)
+    end
 
     after { remove_remote(environment) }
 
@@ -507,6 +514,7 @@ module Kumade
     let(:staging_app_name) { 'staging-sushi' }
 
     before do
+      subject.stub(:say)
       add_heroku_remote(environment, staging_app_name)
       `git remote add #{bad_environment} blerg@example.com`
     end
@@ -516,43 +524,45 @@ module Kumade
       remove_remote(bad_environment)
     end
 
-    it "does not print an error if the remote points to Heroku" do
-      subject.should_not_receive(:error)
+    context "when the remote points to Heroku" do
+      it "does not print an error" do
+        subject.should_not_receive(:error)
 
-      subject.ensure_heroku_remote_exists_for(environment)
+        subject.ensure_heroku_remote_exists_for(environment)
+      end
+
+      it "prints a success message" do
+        subject.should_receive(:success).with("#{environment} is a Heroku remote")
+
+        subject.ensure_heroku_remote_exists_for(environment)
+      end
     end
 
-    it "prints a success message if the remote points to Heroku" do
-      subject.should_receive(:success).with("#{environment} is a Heroku remote")
 
-      subject.ensure_heroku_remote_exists_for(environment)
+    context "when the remote does not exist" do
+      before { remove_remote(environment) }
+
+      it "prints an error" do
+        subject.should_receive(:error).with(%{Cannot deploy: "#{environment}" remote does not exist})
+
+        subject.ensure_heroku_remote_exists_for(environment)
+      end
     end
 
-    it "prints an error if the remote does not exist" do
-      remove_remote(environment)
+    context "when the remote does not point to Heroku" do
+      it "prints an error" do
+        subject.should_receive(:error).with(%{Cannot deploy: "#{bad_environment}" remote does not point to Heroku})
 
-      subject.should_receive(:error).with(%{Cannot deploy: "#{environment}" remote does not exist})
-
-      subject.ensure_heroku_remote_exists_for(environment)
-    end
-
-    it "prints an error if the remote does not point to Heroku" do
-      subject.should_receive(:error).with(%{Cannot deploy: "#{bad_environment}" remote does not point to Heroku})
-
-      subject.ensure_heroku_remote_exists_for(bad_environment)
+        subject.ensure_heroku_remote_exists_for(bad_environment)
+      end
     end
   end
 
   describe Deployer, "#remote_exists?" do
     let(:remote_name){ 'staging' }
 
-    before do
-      add_heroku_remote(remote_name, 'i-am-a-heroku-app')
-    end
-
-    after do
-      remove_remote(remote_name)
-    end
+    before { add_heroku_remote(remote_name, 'i-am-a-heroku-app') }
+    after  { remove_remote(remote_name) }
 
     it "returns true if the remote exists" do
       subject.remote_exists?(remote_name).should be_true
