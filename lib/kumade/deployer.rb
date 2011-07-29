@@ -1,8 +1,8 @@
-require 'thor/shell/basic'
+require 'thor/shell'
 require 'rake'
 
 module Kumade
-  class Deployer < Thor::Shell::Basic
+  class Deployer < Thor::Shell::Color
     def pre_deploy
       ensure_clean_git
       ensure_rake_passes
