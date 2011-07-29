@@ -15,6 +15,19 @@ class Kumade
 
       subject.pre_deploy
     end
+
+    it "pushes to origin" do
+      %w(
+        ensure_clean_git
+        ensure_rake_passes
+        package_assets
+      ).each do |task|
+        subject.stub(task)
+      end
+
+      subject.should_receive(:git_push).with('origin')
+      subject.pre_deploy
+    end
   end
 
   describe Deployer, "#deploy_to_staging" do
