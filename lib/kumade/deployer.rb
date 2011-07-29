@@ -87,7 +87,6 @@ module Kumade
     end
 
     def git_add_and_commit_all_assets_in(dir)
-      announce "Committing assets"
       run_or_error("git add #{dir} && git commit -m 'Assets'",
                     "Cannot deploy: couldn't commit assets")
 
