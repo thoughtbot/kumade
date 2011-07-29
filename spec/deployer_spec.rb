@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'jammit'
 
-class Kumade
+module Kumade
   describe Deployer, "#pre_deploy" do
     it "calls the correct methods in order" do
       %w(

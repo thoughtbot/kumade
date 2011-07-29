@@ -1,6 +1,6 @@
 require 'thor'
 
-class Kumade
+module Kumade
   class ThorTask < Thor
     default_task :deploy
 

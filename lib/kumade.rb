@@ -1,7 +1,7 @@
 require 'kumade/deployer'
 require 'kumade/thor_task'
 
-class Kumade
+module Kumade
   def self.deployer
     @deployer ||= Deployer.new
   end

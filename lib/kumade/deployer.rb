@@ -1,4 +1,4 @@
-class Kumade
+module Kumade
   class Deployer
     def pre_deploy
       ensure_clean_git

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-class Kumade
+module Kumade
   describe ThorTask, "deploy" do
     before { subject.stub(:say) }
 
