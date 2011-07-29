@@ -7,18 +7,19 @@ class Kumade
       git_push('origin')
     end
 
-    def deploy_to_staging
-      ensure_heroku_remote_exists_for(:staging)
+    def deploy_to(environment)
+      ensure_heroku_remote_exists_for(environment)
       pre_deploy
-      git_force_push('staging')
-      heroku_migrate(:staging)
+      git_force_push(environment)
+      heroku_migrate(environment)
+    end
+
+    def deploy_to_staging
+      deploy_to(:staging)
     end
 
     def deploy_to_production
-      ensure_heroku_remote_exists_for(:production)
-      pre_deploy
-      git_force_push('production')
-      heroku_migrate(:production)
+      deploy_to(:production)
     end
 
     def git_push(remote)

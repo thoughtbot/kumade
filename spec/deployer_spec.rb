@@ -30,6 +30,46 @@ class Kumade
     end
   end
 
+  describe Deployer, "#deploy_to" do
+    let(:remote_name){ 'staging' }
+    let(:app_name){ 'kumade-staging' }
+
+    before { add_heroku_remote(remote_name, app_name) }
+    after  { remove_remote(remote_name) }
+
+    it "calls the correct methods in order" do
+      subject.stub(:run => true)
+
+      subject.should_receive(:ensure_heroku_remote_exists_for).
+        ordered.
+        with(:staging)
+
+      subject.should_receive(:pre_deploy).
+        ordered.
+        and_return(true)
+
+      subject.should_receive(:git_force_push).
+        ordered.
+        and_return(true)
+
+      subject.should_receive(:heroku_migrate).
+        ordered.
+        with(:staging)
+
+      subject.deploy_to(:staging)
+    end
+
+    it "deploys to the staging remote" do
+      subject.stub(:ensure_heroku_remote_exists_for => true,
+                   :pre_deploy                      => true,
+                   :run                             => true)
+
+      subject.should_receive(:git_force_push).with(:staging)
+
+      subject.deploy_to(:staging)
+    end
+  end
+
   describe Deployer, "#deploy_to_staging" do
     let(:remote_name){ 'staging' }
     let(:app_name){ 'kumade-staging' }
@@ -64,7 +104,7 @@ class Kumade
                    :pre_deploy                      => true,
                    :run                             => true)
 
-      subject.should_receive(:git_force_push).with('staging')
+      subject.should_receive(:git_force_push).with(:staging)
 
       subject.deploy_to_staging
     end
@@ -104,7 +144,7 @@ class Kumade
                    :pre_deploy                      => true,
                    :run                             => true)
 
-      subject.should_receive(:git_force_push).with('production')
+      subject.should_receive(:git_force_push).with(:production)
 
       subject.deploy_to_production
     end
