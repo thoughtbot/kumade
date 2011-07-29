@@ -11,8 +11,4 @@ module Kumade
       ""
     end
   end
-
-  def self.heroku_remote_url_for_app(app_name)
-    "git@heroku.com:#{app_name}.git"
-  end
 end

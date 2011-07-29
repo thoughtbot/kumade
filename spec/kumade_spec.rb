@@ -27,9 +27,3 @@ describe Kumade, ".app_for" do
     Kumade.app_for(not_a_heroku_env).should == ""
   end
 end
-
-describe Kumade, "heroku_remote_url_for_app" do
-  it "returns the Heroku remote_url for an app" do
-    Kumade.heroku_remote_url_for_app('blerg').should == 'git@heroku.com:blerg.git'
-  end
-end
