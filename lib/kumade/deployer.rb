@@ -8,16 +8,16 @@ class Kumade
     end
 
     def deploy_to_staging
-      ensure_staging_app_is_present
+      ensure_heroku_remote_exists_for(:staging)
       pre_deploy
-      git_force_push(Kumade.staging_remote)
+      git_force_push('staging')
       heroku_migrate(:staging)
     end
 
     def deploy_to_production
-      ensure_production_app_is_present
+      ensure_heroku_remote_exists_for(:production)
       pre_deploy
-      git_force_push(Kumade.production_remote)
+      git_force_push('production')
       heroku_migrate(:production)
     end
 
@@ -34,11 +34,7 @@ class Kumade
     end
 
     def heroku_migrate(environment)
-      app = if environment == :staging
-              Kumade.staging_app
-            elsif environment == :production
-              Kumade.production_app
-            end
+      app = Kumade.app_for(environment)
 
       run("bundle exec heroku rake db:migrate --app #{app}")
     end
@@ -152,16 +148,21 @@ class Kumade
       maybe_string.is_a?(String) && maybe_string.size > 0
     end
 
-    def ensure_staging_app_is_present
-      unless string_present?(Kumade.staging_app)
-        raise "Cannot deploy: Kumade.staging_app is not present"
+    def ensure_heroku_remote_exists_for(environment)
+      if remote_exists?(environment)
+        if Kumade.app_for(environment)
+          app_name = Kumade.app_for(environment)
+          unless string_present?(app_name)
+            raise %{Cannot deploy: "#{environment}" remote does not exist}
+          end
+        end
+      else
+        raise %{Cannot deploy: "#{environment}" remote does not exist}
       end
     end
 
-    def ensure_production_app_is_present
-      unless string_present?(Kumade.production_app)
-        raise "Cannot deploy: Kumade.production_app is not present"
-      end
+    def remote_exists?(remote_name)
+      `git remote`.split("\n").include?(remote_name)
     end
   end
 end

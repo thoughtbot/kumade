@@ -6,33 +6,17 @@ class Kumade
     @deployer ||= Deployer.new
   end
 
-  class << self
-    attr_writer :staging_remote, :production_remote
-    attr_accessor :staging_app, :production_app
-
-    def reset!
-      @staging_remote    = nil
-      @production_remote = nil
-
-      @staging_app    = nil
-      @production_app = nil
+  def self.app_for(environment)
+    heroku_git_url = `git remote show -n #{environment} | grep 'Push  URL' | cut -d' ' -f6`.strip
+    match = heroku_git_url.match(/:(.+)\.git$/)
+    if match
+      match[1]
+    else
+      ""
     end
+  end
 
-    def staging_remote
-      @staging_remote ||= local_remote_for_app(Kumade.staging_app)
-    end
-
-    def production_remote
-      @production_remote ||= local_remote_for_app(Kumade.production_app)
-    end
-
-    def local_remote_for_app(app_name)
-      heroku_remote_url = heroku_remote_url_for_app(app_name)
-      `git remote -v | grep push | grep '#{heroku_remote_url}' | cut -f1`.strip
-    end
-
-    def heroku_remote_url_for_app(app_name)
-      "git@heroku.com:#{app_name}.git"
-    end
+  def self.heroku_remote_url_for_app(app_name)
+    "git@heroku.com:#{app_name}.git"
   end
 end

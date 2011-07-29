@@ -1,72 +1,18 @@
 require 'spec_helper'
 
-describe Kumade, ".staging_remote" do
-  let(:staging_app){ 'purple' }
-  let(:staging_remote){ 'staging_test' }
+describe Kumade, ".app_for" do
+  let(:environment){ 'staging' }
+  let(:app_name){ 'staging_test' }
 
-  before do
-    Kumade.reset!
-    `git remote add #{staging_remote} git@heroku.com:#{staging_app}.git`
+  before { add_heroku_remote(environment, app_name) }
+  after  { remove_remote(environment) }
+
+  it "autodetects the Heroku app name" do
+    Kumade.app_for(environment).should == app_name
   end
 
-  after { `git remote rm #{staging_remote}` }
-
-  it "can be set" do
-    Kumade.staging_remote = 'orange'
-    Kumade.staging_remote.should == 'orange'
-  end
-
-  it "is autodetected if staging app is set" do
-    Kumade.staging_app = staging_app
-    Kumade.staging_remote.should == staging_remote
-  end
-end
-
-describe Kumade, "staging app" do
-  before { Kumade.reset! }
-
-  it "defaults to nil" do
-    Kumade.staging_app.should be_nil
-  end
-
-  it "can be set" do
-    Kumade.staging_app = 'orange'
-    Kumade.staging_app.should == 'orange'
-  end
-end
-
-describe Kumade, ".production_remote" do
-  let(:production_app){ 'purple' }
-  let(:production_remote){ 'production_test' }
-
-  before do
-    Kumade.reset!
-    `git remote add #{production_remote} git@heroku.com:#{production_app}.git`
-  end
-
-  after { `git remote rm #{production_remote}` }
-
-  it "can be set" do
-    Kumade.production_remote = 'orange'
-    Kumade.production_remote.should == 'orange'
-  end
-
-  it "is autodetected if production app is set" do
-    Kumade.production_app = production_app
-    Kumade.production_remote.should == production_remote
-  end
-end
-
-describe Kumade, "production app" do
-  before { Kumade.reset! }
-
-  it "defaults to nil" do
-    Kumade.production_app.should be_nil
-  end
-
-  it "can be set" do
-    Kumade.production_app = 'orange'
-    Kumade.production_app.should == 'orange'
+  it "returns an empty string if the app cannot be found" do
+    Kumade.app_for('xyz').should == ""
   end
 end
 

@@ -2,17 +2,6 @@ require 'spec_helper'
 require 'jammit'
 
 class Kumade
-  describe Deployer, "#load_tasks" do
-    it "loads the deploy tasks" do
-      Rake.application.tasks.should be_empty
-      subject.load_tasks
-      task_names = Rake.application.tasks.map{|task| task.name }
-      %w(deploy deploy:production deploy:staging).each do |expected_name|
-        task_names.should include expected_name
-      end
-    end
-  end
-
   describe Deployer, "#pre_deploy" do
     it "calls the correct methods in order" do
       %w(
@@ -29,11 +18,18 @@ class Kumade
   end
 
   describe Deployer, "#deploy_to_staging" do
+    let(:remote_name){ 'staging' }
+    let(:app_name){ 'kumade-staging' }
+
+    before { add_heroku_remote(remote_name, app_name) }
+    after  { remove_remote(remote_name) }
+
     it "calls the correct methods in order" do
       subject.stub(:run => true)
 
-      subject.should_receive(:ensure_staging_app_is_present).
-        ordered
+      subject.should_receive(:ensure_heroku_remote_exists_for).
+        ordered.
+        with(:staging)
 
       subject.should_receive(:pre_deploy).
         ordered.
@@ -50,24 +46,30 @@ class Kumade
       subject.deploy_to_staging
     end
 
-    it "deploys to Kumade.staging" do
-      subject.stub(:pre_deploy => true,
-                   :run        => true)
-      subject.stub(:ensure_staging_app_is_present)
-      Kumade.staging_remote = 'orange'
+    it "deploys to the staging remote" do
+      subject.stub(:ensure_heroku_remote_exists_for => true,
+                   :pre_deploy                      => true,
+                   :run                             => true)
 
-      subject.should_receive(:git_force_push).with('orange')
+      subject.should_receive(:git_force_push).with('staging')
 
       subject.deploy_to_staging
     end
   end
 
   describe Deployer, "#deploy_to_production" do
+    let(:remote_name){ 'production' }
+    let(:app_name){ 'kumade-production' }
+
+    before { add_heroku_remote(remote_name, app_name) }
+    after  { remove_remote(remote_name) }
+
     it "calls the correct methods in order" do
       subject.stub(:run => true)
 
-      subject.should_receive(:ensure_production_app_is_present).
-        ordered
+      subject.should_receive(:ensure_heroku_remote_exists_for).
+        ordered.
+        with(:production)
 
       subject.should_receive(:pre_deploy).
         ordered.
@@ -84,14 +86,12 @@ class Kumade
       subject.deploy_to_production
     end
 
-    it "deploys to Kumade.production" do
-      subject.stub(:pre_deploy => true,
-                   :run        => true)
-      subject.stub(:ensure_production_app_is_present)
+    it "deploys to the production remote" do
+      subject.stub(:ensure_heroku_remote_exists_for => true,
+                   :pre_deploy                      => true,
+                   :run                             => true)
 
-      Kumade.production_remote = 'bamboo'
-
-      subject.should_receive(:git_force_push).with('bamboo')
+      subject.should_receive(:git_force_push).with('production')
 
       subject.deploy_to_production
     end
@@ -480,25 +480,29 @@ class Kumade
   end
 
   describe Deployer, "#heroku_migrate" do
-    let(:staging_app)   { 'staging-sushi' }
-    let(:production_app){ 'production-sushi' }
+    let(:staging_app_name)   { 'staging-sushi' }
+    let(:production_app_name){ 'production-sushi' }
 
     before do
-      Kumade.reset!
-      Kumade.staging_app    = staging_app
-      Kumade.production_app = production_app
+      add_heroku_remote('staging', staging_app_name)
+      add_heroku_remote('production', production_app_name)
+    end
+
+    after do
+      remove_remote('staging')
+      remove_remote('production')
     end
 
     it "runs db:migrate with the correct staging app" do
       subject.should_receive(:run).
-        with("bundle exec heroku rake db:migrate --app #{staging_app}")
+        with("bundle exec heroku rake db:migrate --app #{staging_app_name}")
 
       subject.heroku_migrate(:staging)
     end
 
     it "runs db:migrate with the correct production app" do
       subject.should_receive(:run).
-        with("bundle exec heroku rake db:migrate --app #{production_app}")
+        with("bundle exec heroku rake db:migrate --app #{production_app_name}")
 
       subject.heroku_migrate(:production)
     end
@@ -526,39 +530,63 @@ class Kumade
     end
   end
 
-  describe Deployer, "#ensure_staging_app_is_present" do
-    after { Kumade.reset! }
+  describe Deployer, "#ensure_heroku_remote_exists_for" do
+    let(:environment){ 'staging' }
+    let(:bad_environment){ 'bad' }
+    let(:staging_app_name) { 'staging-sushi' }
 
-    it "does not raise an error if Kumade.staging_app is present" do
-      Kumade.staging_app = 'abc'
+    before do
+      add_heroku_remote(environment, staging_app_name)
+      `git remote add #{bad_environment} blerg@example.com`
+    end
+
+    after do
+      remove_remote(environment)
+      remove_remote(bad_environment)
+    end
+
+    it "does not raise an error if the remote points to Heroku" do
       lambda do
-        subject.ensure_staging_app_is_present
+        subject.ensure_heroku_remote_exists_for(environment)
       end.should_not raise_error
     end
 
-    it "raises an error if Kumade.staging_app is not present" do
-      Kumade.staging_app = ''
+    it "raises an error if the remote does not exist" do
+      remove_remote(environment)
+
       lambda do
-        subject.ensure_staging_app_is_present
-      end.should raise_error("Cannot deploy: Kumade.staging_app is not present")
+        subject.ensure_heroku_remote_exists_for(environment)
+      end.should raise_error(%{Cannot deploy: "#{environment}" remote does not exist})
+    end
+
+    it "raises an error if the remote does not point to Heroku" do
+      remove_remote(environment)
+
+      lambda do
+        subject.ensure_heroku_remote_exists_for(environment)
+      end.should raise_error(%{Cannot deploy: "#{environment}" remote does not exist})
     end
   end
 
-  describe Deployer, "#ensure_production_app_is_present" do
-    after { Kumade.reset! }
+  describe Deployer, "#remote_exists?" do
+    let(:remote_name){ 'staging' }
 
-    it "does not raise an error if Kumade.production_app is present" do
-      Kumade.production_app = 'abc'
-      lambda do
-        subject.ensure_production_app_is_present
-      end.should_not raise_error
+    before do
+      add_heroku_remote(remote_name, 'i-am-a-heroku-app')
     end
 
-    it "raises an error if Kumade.production_app is not present" do
-      Kumade.production_app = ''
-      lambda do
-        subject.ensure_production_app_is_present
-      end.should raise_error("Cannot deploy: Kumade.production_app is not present")
+    after do
+      remove_remote(remote_name)
+    end
+
+    it "returns true if the remote exists" do
+      subject.remote_exists?(remote_name).should be_true
+    end
+
+    it "returns false if the remote does not exist" do
+      remove_remote(remote_name)
+
+      subject.remote_exists?(remote_name).should be_false
     end
   end
 end
