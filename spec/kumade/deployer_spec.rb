@@ -533,11 +533,9 @@ module Kumade
     end
 
     it "raises an error if the remote does not point to Heroku" do
-      remove_remote(environment)
-
       lambda do
-        subject.ensure_heroku_remote_exists_for(environment)
-      end.should raise_error(%{Cannot deploy: "#{environment}" remote does not exist})
+        subject.ensure_heroku_remote_exists_for(bad_environment)
+      end.should raise_error(%{Cannot deploy: "#{bad_environment}" remote does not point to Heroku})
     end
   end
 

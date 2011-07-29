@@ -147,7 +147,7 @@ module Kumade
         if Kumade.app_for(environment)
           app_name = Kumade.app_for(environment)
           unless string_present?(app_name)
-            raise %{Cannot deploy: "#{environment}" remote does not exist}
+            raise %{Cannot deploy: "#{environment}" remote does not point to Heroku}
           end
         end
       else
