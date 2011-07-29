@@ -68,6 +68,7 @@ module Kumade
     it "deploys to the correct remote" do
       subject.stub(:ensure_heroku_remote_exists_for => true,
                    :pre_deploy                      => true,
+                   :on_cedar?                       => false,
                    :run                             => true)
 
       subject.should_receive(:git_force_push).with(remote_name)
@@ -469,8 +470,9 @@ module Kumade
     after { remove_remote(environment) }
 
     it "runs db:migrate with the correct app" do
-      subject.should_receive(:run).
-        with("bundle exec heroku rake db:migrate --app #{app_name}")
+      subject.stub(:run => true)
+      subject.should_receive(:heroku).
+        with("rake db:migrate", app_name)
       subject.should_receive(:success).with("Migrated #{app_name}")
 
       subject.heroku_migrate(environment)
@@ -563,6 +565,26 @@ module Kumade
       remove_remote(remote_name)
 
       subject.remote_exists?(remote_name).should be_false
+    end
+  end
+
+  describe Deployer, "#heroku" do
+    let(:app_name){ 'sushi' }
+
+    context "when on Cedar" do
+      before { subject.stub(:on_cedar? => true) }
+      it "runs commands with `run`" do
+        subject.should_receive(:run).with("bundle exec heroku run rake --app #{app_name}")
+        subject.heroku("rake", app_name)
+      end
+    end
+
+    context "when not on Cedar" do
+      before { subject.stub(:on_cedar? => false) }
+      it "runs commands without `run`" do
+        subject.should_receive(:run).with("bundle exec heroku rake --app #{app_name}")
+        subject.heroku("rake", app_name)
+      end
     end
   end
 

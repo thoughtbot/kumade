@@ -45,9 +45,22 @@ module Kumade
       app = Kumade.app_for(environment)
 
       unless pretending
-        run("bundle exec heroku rake db:migrate --app #{app}")
+        heroku("rake db:migrate", app)
       end
       success("Migrated #{app}")
+    end
+
+    def heroku(command, app)
+      heroku_command = if on_cedar?(app)
+                         "bundle exec heroku run"
+                       else
+                         "bundle exec heroku"
+                       end
+      run("#{heroku_command} #{command} --app #{app}")
+    end
+
+    def on_cedar?(app)
+      `heroku stack --app '#{app}'`.grep(/^\*/).first.include?('cedar')
     end
 
     def ensure_clean_git
