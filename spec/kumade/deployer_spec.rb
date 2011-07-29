@@ -101,7 +101,7 @@ module Kumade
 
       it "does not raise an error" do
         subject.stub(:announce => false)
-        subject.should_receive(:error).exactly(0).times
+        subject.should_not_receive(:error)
         subject.git_push(remote)
       end
 
@@ -141,7 +141,7 @@ module Kumade
       end
 
       it "does not raise an error" do
-        subject.should_receive(:error).exactly(0).times
+        subject.should_not_receive(:error)
         subject.git_force_push(remote)
       end
 
@@ -168,7 +168,7 @@ module Kumade
       before { subject.stub(:git_dirty? => false) }
 
       it "prints a success message" do
-        subject.should_receive(:error).exactly(0).times
+        subject.should_not_receive(:error)
         subject.should_receive(:success).with("Git repo is clean")
 
         subject.ensure_clean_git
@@ -184,7 +184,7 @@ module Kumade
 
       it "prints a success message if the default task succeeds" do
         subject.stub(:rake_succeeded? => true)
-        subject.should_receive(:error).exactly(0).times
+        subject.should_not_receive(:error)
         subject.should_receive(:success).with("Rake passed")
 
         subject.ensure_rake_passes
@@ -239,7 +239,7 @@ module Kumade
     context "with Jammit not installed" do
       before { subject.stub(:jammit_installed? => false) }
       it "does not call package_with_jammit" do
-        subject.should_receive(:package_with_jammit).exactly(0).times
+        subject.should_not_receive(:package_with_jammit)
         subject.package_assets
       end
     end
@@ -263,7 +263,7 @@ module Kumade
       end
 
       it "does not call package_with_more" do
-        subject.should_receive(:package_with_more).exactly(0).times
+        subject.should_not_receive(:package_with_more)
         subject.package_assets
       end
     end
@@ -370,7 +370,7 @@ module Kumade
 
       it "does not call git_add_and_commit_all_more_assets" do
         subject.stub(:git_dirty? => false)
-        subject.should_receive(:git_add_and_commit_all_assets_in).exactly(0).times
+        subject.should_not_receive(:git_add_and_commit_all_assets_in)
 
         subject.package_with_more
       end
@@ -517,7 +517,7 @@ module Kumade
     end
 
     it "does not print an error if the remote points to Heroku" do
-      subject.should_receive(:error).exactly(0).times
+      subject.should_not_receive(:error)
 
       subject.ensure_heroku_remote_exists_for(environment)
     end
