@@ -213,6 +213,7 @@ module Kumade
     end
 
     it "returns false if a default task does not exist" do
+      subject.stub(:initialize_rake)
       subject.default_task_exists?.should be_false
     end
   end
@@ -588,11 +589,6 @@ module Kumade
 
       task_names = Rake.application.tasks.map{|t| t.name}
       %w(cucumber default spec).each{|expected| task_names.should include expected }
-    end
-
-    it "is called on initialize" do
-      Deployer.any_instance.should_receive(:initialize_rake)
-      Deployer.new
     end
   end
 

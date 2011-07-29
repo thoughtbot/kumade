@@ -3,9 +3,11 @@ require 'rake'
 
 module Kumade
   class Deployer < Thor::Shell::Color
-    def initialize
+    attr_reader :pretending
+
+    def initialize(pretending = false)
       super()
-      initialize_rake
+      @pretending = !!pretending
     end
 
     def pre_deploy
@@ -24,26 +26,32 @@ module Kumade
     end
 
     def git_push(remote)
-      run_or_error("git push #{remote} master",
-                   "Failed to push master -> #{remote}")
+      unless pretending
+        run_or_error("git push #{remote} master",
+                    "Failed to push master -> #{remote}")
+      end
       success("Pushed master -> #{remote}")
     end
 
     def git_force_push(remote)
-      run_or_error("git push -f #{remote} master",
-                   "Failed to force push master -> #{remote}")
+      unless pretending
+        run_or_error("git push -f #{remote} master",
+                    "Failed to force push master -> #{remote}")
+      end
       success("Force pushed master -> #{remote}")
     end
 
     def heroku_migrate(environment)
       app = Kumade.app_for(environment)
 
-      run("bundle exec heroku rake db:migrate --app #{app}")
+      unless pretending
+        run("bundle exec heroku rake db:migrate --app #{app}")
+      end
       success("Migrated #{app}")
     end
 
     def ensure_clean_git
-      if git_dirty?
+      if git_dirty? && ! pretending
         error("Cannot deploy: repo is not clean.")
       else
         success("Git repo is clean")
@@ -52,7 +60,7 @@ module Kumade
 
     def ensure_rake_passes
       if default_task_exists?
-        if rake_succeeded?
+        if pretending || rake_succeeded?
           success("Rake passed")
         else
           error("Cannot deploy: tests did not pass")
@@ -67,11 +75,17 @@ module Kumade
 
     def package_with_jammit
       begin
-        Jammit.package!
+        success_message = "Packaged assets with Jammit"
 
-        if git_dirty?
-          success("Packaged assets with Jammit")
-          git_add_and_commit_all_assets_in(jammit_assets_path)
+        if pretending
+          success(success_message)
+        else
+          Jammit.package!
+
+          if git_dirty?
+            success(success_message)
+            git_add_and_commit_all_assets_in(jammit_assets_path)
+          end
         end
       rescue => jammit_error
         error("Error: #{jammit_error.class}: #{jammit_error.message}")
@@ -80,6 +94,7 @@ module Kumade
 
     def package_with_more
       begin
+        initialize_rake
         Rake::Task['more:generate'].invoke
         if git_dirty?
           success("Packaged assets with More")
@@ -127,11 +142,13 @@ module Kumade
     end
 
     def default_task_exists?
+      initialize_rake
       Rake::Task.task_defined?('default')
     end
 
     def rake_succeeded?
       begin
+        initialize_rake
         Rake::Task[:default].invoke
       rescue
         false
@@ -150,8 +167,10 @@ module Kumade
     end
 
     def run_or_error(command, error_message)
-      unless run(command)
-        error(error_message)
+      if ! pretending
+        unless run(command)
+          error(error_message)
+        end
       end
     end
 
@@ -188,12 +207,18 @@ module Kumade
     end
 
     def remote_exists?(remote_name)
-      `git remote`.split("\n").include?(remote_name)
+      if pretending
+        true
+      else
+        `git remote`.split("\n").include?(remote_name)
+      end
     end
 
     def initialize_rake
-      Rake.application.init
-      Rake.application.load_rakefile
+      if Rake.application.tasks.empty?
+        Rake.application.options.rakelib = ['rakelib']
+        Rake.application.load_rakefile
+      end
     end
   end
 end
