@@ -4,7 +4,7 @@ describe Kumade, ".app_for" do
   let(:environment){ 'staging' }
   let(:app_name){ 'staging_test' }
 
-  before { add_heroku_remote(environment, app_name) }
+  before { force_add_heroku_remote(environment, app_name) }
   after  { remove_remote(environment) }
 
   it "autodetects the Heroku app name" do

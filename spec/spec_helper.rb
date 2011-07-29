@@ -8,7 +8,8 @@ RSpec.configure do |spec|
 end
 
 module GitRemoteHelpers
-  def add_heroku_remote(remote_name, app_name)
+  def force_add_heroku_remote(remote_name, app_name)
+    remove_remote(remote_name)
     `git remote add #{remote_name} git@heroku.com:#{app_name}.git`
   end
 

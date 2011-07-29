@@ -38,7 +38,7 @@ module Kumade
 
     before do
       subject.stub(:say)
-      add_heroku_remote(remote_name, app_name)
+      force_add_heroku_remote(remote_name, app_name)
     end
 
     after  { remove_remote(remote_name) }
@@ -463,7 +463,7 @@ module Kumade
 
     before do
       subject.stub(:say)
-      add_heroku_remote(environment, app_name)
+      force_add_heroku_remote(environment, app_name)
     end
 
     after { remove_remote(environment) }
@@ -506,7 +506,7 @@ module Kumade
 
     before do
       subject.stub(:say)
-      add_heroku_remote(environment, staging_app_name)
+      force_add_heroku_remote(environment, staging_app_name)
       `git remote add #{bad_environment} blerg@example.com`
     end
 
@@ -552,7 +552,7 @@ module Kumade
   describe Deployer, "#remote_exists?" do
     let(:remote_name){ 'staging' }
 
-    before { add_heroku_remote(remote_name, 'i-am-a-heroku-app') }
+    before { force_add_heroku_remote(remote_name, 'i-am-a-heroku-app') }
     after  { remove_remote(remote_name) }
 
     it "returns true if the remote exists" do
