@@ -295,7 +295,7 @@ module Kumade
       end
 
       it "calls git_add_and_commit_all_assets_in" do
-        subject.stub(:absolute_assets_path => 'blerg')
+        subject.stub(:jammit_assets_path => 'blerg')
         subject.should_receive(:git_add_and_commit_all_assets_in).
           with('blerg').
           and_return(true)
@@ -419,11 +419,11 @@ module Kumade
     end
   end
 
-  describe Deployer, "#absolute_assets_path" do
+  describe Deployer, "#jammit_assets_path" do
     it "returns the correct asset path" do
       Jammit.stub(:package_path => 'blerg')
       current_dir = File.expand_path(Dir.pwd)
-      subject.absolute_assets_path.should == File.join(current_dir, 'public', 'blerg')
+      subject.jammit_assets_path.should == File.join(current_dir, 'public', 'blerg')
     end
   end
 

@@ -66,7 +66,7 @@ module Kumade
 
         if git_dirty?
           success("Packaged assets with Jammit")
-          git_add_and_commit_all_assets_in(absolute_assets_path)
+          git_add_and_commit_all_assets_in(jammit_assets_path)
         end
       rescue => jammit_error
         error("Error: #{jammit_error.class}: #{jammit_error.message}")
@@ -94,7 +94,7 @@ module Kumade
       success("Added and committed all assets")
     end
 
-    def absolute_assets_path
+    def jammit_assets_path
       File.join(Jammit::PUBLIC_ROOT, Jammit.package_path)
     end
 
