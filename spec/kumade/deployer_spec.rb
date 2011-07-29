@@ -561,4 +561,22 @@ module Kumade
       subject.remote_exists?(remote_name).should be_false
     end
   end
+
+  describe Deployer, "#announce" do
+    it "exists" do
+      subject.should respond_to(:announce)
+    end
+  end
+
+  describe Deployer, "#success" do
+    it "exists" do
+      subject.should respond_to(:success)
+    end
+  end
+
+  describe Deployer, "#error" do
+    it "exists" do
+      subject.should respond_to(:error)
+    end
+  end
 end
