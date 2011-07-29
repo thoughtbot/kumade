@@ -94,12 +94,6 @@ module Kumade
       success("Added and committed all assets")
     end
 
-    def git_add_and_commit_all_more_assets
-      announce "Committing assets"
-      run_or_error("git add #{more_assets_path} && git commit -m 'Assets'",
-                    "Cannot deploy: couldn't commit assets")
-    end
-
     def absolute_assets_path
       File.join(Jammit::PUBLIC_ROOT, Jammit.package_path)
     end
