@@ -38,6 +38,10 @@ The default task is to deploy to staging:
 
     $ kumade # equivalent to "kumade deploy staging"
 
+## Does it support the Cedar stack?
+
+Yes.
+
 ## Sample Output
 
 ### Normal mode
