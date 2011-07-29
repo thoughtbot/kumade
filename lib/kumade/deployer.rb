@@ -154,6 +154,7 @@ module Kumade
 
     def error(message)
       say("==> ! #{message}", :red)
+      exit 1
     end
 
     def string_present?(maybe_string)
