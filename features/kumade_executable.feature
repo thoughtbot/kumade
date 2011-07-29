@@ -29,13 +29,7 @@ Feature: Kumade executable
     When I run `kumade -p`
     Then the output should contain "==> Deployed to: staging"
 
-  Scenario Outline: Can deploy to arbitrary environment
-    When I run `kumade deploy <env>`
-    Then the output should contain "==> Deploying to: <env>"
+  Scenario: Can deploy to arbitrary environment
+    When I run `kumade deploy bamboo`
+    Then the output should contain "==> Deploying to: bamboo"
     Then the output should match /Cannot deploy: /
-
-    Examples:
-      | env        |
-      | staging    |
-      | production |
-      | bamboo     |
