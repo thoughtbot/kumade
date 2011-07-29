@@ -105,9 +105,8 @@ module Kumade
         subject.git_push(remote)
       end
 
-      it "prints the correct message" do
-        subject.should_receive(:announce).
-          with("Pushed master -> #{remote}")
+      it "prints a success message" do
+        subject.should_receive(:success).with("Pushed master -> #{remote}")
 
         subject.git_push(remote)
       end
@@ -146,8 +145,8 @@ module Kumade
         subject.git_force_push(remote)
       end
 
-      it "prints the correct message" do
-        subject.should_receive(:announce).
+      it "prints a success message" do
+        subject.should_receive(:success).
           with("Force pushed master -> #{remote}")
 
         subject.git_force_push(remote)
@@ -168,8 +167,10 @@ module Kumade
     context "when git is clean" do
       before { subject.stub(:git_dirty? => false) }
 
-      it "does not print an error" do
+      it "prints a success message" do
         subject.should_receive(:error).exactly(0).times
+        subject.should_receive(:success).with("Git repo is clean")
+
         subject.ensure_clean_git
       end
     end
@@ -181,9 +182,10 @@ module Kumade
         subject.stub(:default_task_exists? => true)
       end
 
-      it "does not raise an error if the default task succeeds" do
+      it "prints a success message if the default task succeeds" do
         subject.stub(:rake_succeeded? => true)
         subject.should_receive(:error).exactly(0).times
+        subject.should_receive(:success).with("Rake passed")
 
         subject.ensure_rake_passes
       end
@@ -280,7 +282,7 @@ module Kumade
     end
 
     it "prints the correct message if packaging succeeded" do
-      subject.should_receive(:announce).with("Successfully packaged with Jammit")
+      subject.should_receive(:success).with("Packaged assets with Jammit")
 
       subject.package_with_jammit
     end
@@ -304,11 +306,19 @@ module Kumade
       subject.package_with_jammit
     end
 
-    it "does not call git_add_and_commit_all_jammit_assets if no assets were added" do
-      subject.stub(:git_dirty? => false)
-      subject.should_receive(:git_add_and_commit_all_assets_in).exactly(0).times
+    context "no assets were added" do
+      before { subject.stub(:git_dirty? => false) }
 
-      subject.package_with_jammit
+      it "does not call git_add_and_commit_all_jammit_assets" do
+        subject.should_not_receive(:git_add_and_commit_all_assets_in)
+
+        subject.package_with_jammit
+      end
+
+      it "does not print a success message" do
+        subject.should_not_receive(:success)
+        subject.package_with_jammit
+      end
     end
   end
 
@@ -328,18 +338,39 @@ module Kumade
       subject.package_with_more
     end
 
-    it "prints the correct message if packaging succeeded" do
-      subject.stub(:git_dirty? => true)
-      subject.should_receive(:announce).with("Successfully packaged with More")
+    context "with changed assets" do
+      it "prints a success message" do
+        subject.stub(:git_dirty? => true)
+        subject.should_receive(:success).with("Packaged assets with More")
 
-      subject.package_with_more
+        subject.package_with_more
+      end
+
+      it "calls git_add_and_commit_all_assets_in if assets were added" do
+        subject.stub(:git_dirty?       => true,
+                     :more_assets_path => 'blerg')
+        subject.should_receive(:git_add_and_commit_all_assets_in).
+          with('blerg').
+          and_return(true)
+
+        subject.package_with_more
+      end
     end
 
-    it "prints no message if packaging was a no-op" do
-      subject.stub(:git_dirty? => false)
-      subject.should_receive(:announce).exactly(0).times
+    context "with no changed assets" do
+      it "prints no message" do
+        subject.stub(:git_dirty? => false)
+        subject.should_not_receive(:say)
 
-      subject.package_with_more
+        subject.package_with_more
+      end
+
+      it "does not call git_add_and_commit_all_more_assets" do
+        subject.stub(:git_dirty? => false)
+        subject.should_receive(:git_add_and_commit_all_assets_in).exactly(0).times
+
+        subject.package_with_more
+      end
     end
 
     it "prints an error if packaging failed" do
@@ -352,23 +383,6 @@ module Kumade
 
       subject.package_with_more
     end
-
-    it "calls git_add_and_commit_all_assets_in if assets were added" do
-      subject.stub(:git_dirty?       => true,
-                   :more_assets_path => 'blerg')
-      subject.should_receive(:git_add_and_commit_all_assets_in).
-        with('blerg').
-        and_return(true)
-
-      subject.package_with_more
-    end
-
-    it "does not call git_add_and_commit_all_more_assets if no assets were added" do
-      subject.stub(:git_dirty? => false)
-      subject.should_receive(:git_add_and_commit_all_assets_in).exactly(0).times
-
-      subject.package_with_more
-    end
   end
 
   describe Deployer, "#git_add_and_commit_all_assets_in" do
@@ -377,8 +391,8 @@ module Kumade
                   :announce => nil)
     end
 
-    it "announces the correct message" do
-      subject.should_receive(:announce).with("Committing assets")
+    it "prints a success message" do
+      subject.should_receive(:success).with("Added and committed all assets")
 
       subject.git_add_and_commit_all_assets_in('blerg')
     end
@@ -456,6 +470,7 @@ module Kumade
     it "runs db:migrate with the correct app" do
       subject.should_receive(:run).
         with("bundle exec heroku rake db:migrate --app #{app_name}")
+      subject.should_receive(:success).with("Migrated #{app_name}")
 
       subject.heroku_migrate(environment)
     end
@@ -498,8 +513,14 @@ module Kumade
       remove_remote(bad_environment)
     end
 
-    it "does not raise an error if the remote points to Heroku" do
+    it "does not print an error if the remote points to Heroku" do
       subject.should_receive(:error).exactly(0).times
+
+      subject.ensure_heroku_remote_exists_for(environment)
+    end
+
+    it "prints a success message if the remote points to Heroku" do
+      subject.should_receive(:success).with("#{environment} is a Heroku remote")
 
       subject.ensure_heroku_remote_exists_for(environment)
     end

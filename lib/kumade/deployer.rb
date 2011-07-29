@@ -21,30 +21,37 @@ module Kumade
     def git_push(remote)
       run_or_error("git push #{remote} master",
                    "Failed to push master -> #{remote}")
-      announce "Pushed master -> #{remote}"
+      success("Pushed master -> #{remote}")
     end
 
     def git_force_push(remote)
       run_or_error("git push -f #{remote} master",
                    "Failed to force push master -> #{remote}")
-      announce "Force pushed master -> #{remote}"
+      success("Force pushed master -> #{remote}")
     end
 
     def heroku_migrate(environment)
       app = Kumade.app_for(environment)
 
       run("bundle exec heroku rake db:migrate --app #{app}")
+      success("Migrated #{app}")
     end
 
     def ensure_clean_git
       if git_dirty?
         error("Cannot deploy: repo is not clean.")
+      else
+        success("Git repo is clean")
       end
     end
 
     def ensure_rake_passes
       if default_task_exists?
-        error("Cannot deploy: tests did not pass") unless rake_succeeded?
+        if rake_succeeded?
+          success("Rake passed")
+        else
+          error("Cannot deploy: tests did not pass")
+        end
       end
     end
 
@@ -56,9 +63,9 @@ module Kumade
     def package_with_jammit
       begin
         Jammit.package!
-        announce("Successfully packaged with Jammit")
 
         if git_dirty?
+          success("Packaged assets with Jammit")
           git_add_and_commit_all_assets_in(absolute_assets_path)
         end
       rescue => jammit_error
@@ -70,7 +77,7 @@ module Kumade
       begin
         Rake::Task['more:generate'].invoke
         if git_dirty?
-          announce("Successfully packaged with More")
+          success("Packaged assets with More")
 
           git_add_and_commit_all_assets_in(more_assets_path)
         end
@@ -83,6 +90,8 @@ module Kumade
       announce "Committing assets"
       run_or_error("git add #{dir} && git commit -m 'Assets'",
                     "Cannot deploy: couldn't commit assets")
+
+      success("Added and committed all assets")
     end
 
     def git_add_and_commit_all_more_assets
@@ -157,6 +166,10 @@ module Kumade
       exit 1
     end
 
+    def success(message)
+      say("==> #{message}", :green)
+    end
+
     def string_present?(maybe_string)
       maybe_string.is_a?(String) && maybe_string.size > 0
     end
@@ -165,7 +178,9 @@ module Kumade
       if remote_exists?(environment)
         if Kumade.app_for(environment)
           app_name = Kumade.app_for(environment)
-          unless string_present?(app_name)
+          if string_present?(app_name)
+            success("#{environment} is a Heroku remote")
+          else
             error(%{Cannot deploy: "#{environment}" remote does not point to Heroku})
           end
         end
