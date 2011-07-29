@@ -4,14 +4,11 @@ module Kumade
   describe ThorTask, "deploy" do
     before { subject.stub(:say) }
 
-    it "calls the staging deploy method when called with staging" do
-      Deployer.any_instance.should_receive(:deploy_to).with(:staging)
-      subject.deploy('staging')
-    end
+    let(:environment){ 'bamboo' }
 
-    it "calls the production deploy method when called with production" do
-      Deployer.any_instance.should_receive(:deploy_to).with(:production)
-      subject.deploy('production')
+    it "calls the deploy method with the correct environment" do
+      Deployer.any_instance.should_receive(:deploy_to).with(environment)
+      subject.deploy(environment)
     end
   end
 end

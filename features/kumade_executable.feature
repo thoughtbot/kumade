@@ -16,15 +16,13 @@ Feature: Kumade executable
     Then the output should contain "==> Deploying to: staging"
     And the output should contain "==> Deployed to: staging"
 
-  Scenario: Can deploy to staging
-    When I run `kumade deploy staging`
-    Then the output should match /Cannot deploy: "staging" remote does not exist/
+  Scenario Outline: Can deploy to arbitrary environment
+    When I run `kumade deploy <env>`
+    Then the output should contain "==> Deploying to: <env>"
+    Then the output should match /Cannot deploy: "<env>" remote does not exist/
 
-  Scenario: Can deploy to production
-    When I run `kumade deploy production`
-    Then the output should match /Cannot deploy: "production" remote does not exist/
-
-  Scenario: Cannot deploy to arbitrary environment
-    When I run `kumade deploy bamboo -p`
-    Then the output should contain "==> Deploying to: bamboo"
-    And the output should contain "==> Cannot deploy: env must be either staging or production"
+    Examples:
+      | env        |
+      | staging    |
+      | production |
+      | bamboo     |

@@ -10,20 +10,11 @@ module Kumade
       say("==> In Pretend Mode", :red) if options[:pretend]
       say "==> Deploying to: #{environment}"
 
-      case environment
-      when 'staging'
-        unless options[:pretend]
-          Kumade.deployer.deploy_to(:staging)
-        end
-        say "==> Deployed to: staging", :green
-      when 'production'
-        unless options[:pretend]
-          Kumade.deployer.deploy_to(:production)
-        end
-        say "==> Deployed to: production", :green
-      else
-        say "==> Cannot deploy: env must be either staging or production"
+      unless options[:pretend]
+        Kumade.deployer.deploy_to(environment)
       end
+
+      say "==> Deployed to: #{environment}", :green
     end
   end
 end
