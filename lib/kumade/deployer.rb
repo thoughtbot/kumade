@@ -141,10 +141,7 @@ module Kumade
     end
 
     def default_task_exists?
-      tasks = `rake -T default`.split("\n")
-      # Remove (in /this/dir) header
-      tasks.shift
-      ! tasks.first.match(/^rake default/).nil?
+      `rake -s -P | grep 'rake default'`.strip.size > 0
     end
 
     def rake_succeeded?
