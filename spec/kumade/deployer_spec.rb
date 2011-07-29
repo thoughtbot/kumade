@@ -575,6 +575,27 @@ module Kumade
     end
   end
 
+  describe Deployer, "#initialize_rake" do
+    let!(:old_application) { Rake.application.clone }
+
+    before { Rake.application = Rake::Application.new }
+    after  { Rake.application = old_application }
+
+    it "finds Rake tasks" do
+      Rake.application.tasks.should be_empty
+      subject.initialize_rake
+      Rake.application.tasks.should_not be_empty
+
+      task_names = Rake.application.tasks.map{|t| t.name}
+      %w(cucumber default spec).each{|expected| task_names.should include expected }
+    end
+
+    it "is called on initialize" do
+      Deployer.any_instance.should_receive(:initialize_rake)
+      Deployer.new
+    end
+  end
+
   describe Deployer, "#announce" do
     it "exists" do
       subject.should respond_to(:announce)

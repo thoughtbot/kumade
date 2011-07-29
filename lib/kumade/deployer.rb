@@ -3,6 +3,11 @@ require 'rake'
 
 module Kumade
   class Deployer < Thor::Shell::Color
+    def initialize
+      super()
+      initialize_rake
+    end
+
     def pre_deploy
       ensure_clean_git
       ensure_rake_passes
@@ -184,6 +189,11 @@ module Kumade
 
     def remote_exists?(remote_name)
       `git remote`.split("\n").include?(remote_name)
+    end
+
+    def initialize_rake
+      Rake.application.init
+      Rake.application.load_rakefile
     end
   end
 end
