@@ -122,6 +122,7 @@ The default task is to deploy to staging:
 
 ## Compatibility
 Tested against:
+
 * MRI 1.8.7
 * MRI 1.9.2
 * REE 1.8.7
