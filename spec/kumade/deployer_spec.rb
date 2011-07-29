@@ -295,9 +295,9 @@ module Kumade
       end
 
       it "calls git_add_and_commit_all_assets_in" do
-        subject.stub(:jammit_assets_path => 'blerg')
+        subject.stub(:jammit_assets_path => 'jammit-assets')
         subject.should_receive(:git_add_and_commit_all_assets_in).
-          with('blerg').
+          with('jammit-assets').
           and_return(true)
 
         subject.package_with_jammit
