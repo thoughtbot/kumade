@@ -33,3 +33,7 @@ Feature: Kumade executable
     When I run `kumade deploy bamboo`
     Then the output should contain "==> Deploying to: bamboo"
     Then the output should match /Cannot deploy: /
+
+  Scenario: Deploying to a non-Heroku remote fails
+    When I run `kumade deploy origin`
+    Then the output should match /==> ! Cannot deploy: "origin" remote does not point to Heroku/
