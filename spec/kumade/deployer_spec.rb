@@ -87,10 +87,10 @@ module Kumade
         subject.stub(:run => false)
       end
 
-      it "raises an error" do
-        lambda do
-          subject.git_push(remote)
-        end.should raise_error("Failed to push master -> #{remote}")
+      it "prints an error message" do
+        subject.should_receive(:error).with("Failed to push master -> #{remote}")
+
+        subject.git_push(remote)
       end
     end
 
@@ -101,9 +101,8 @@ module Kumade
 
       it "does not raise an error" do
         subject.stub(:announce => false)
-        lambda do
-          subject.git_push(remote)
-        end.should_not raise_error
+        subject.should_receive(:error).exactly(0).times
+        subject.git_push(remote)
       end
 
       it "prints the correct message" do
@@ -131,10 +130,9 @@ module Kumade
         subject.stub(:run => false)
       end
 
-      it "raises an error" do
-        lambda do
-          subject.git_force_push(remote)
-        end.should raise_error("Failed to force push master -> #{remote}")
+      it "prints an error" do
+        subject.should_receive(:error).with("Failed to force push master -> #{remote}")
+        subject.git_force_push(remote)
       end
     end
 
@@ -144,9 +142,8 @@ module Kumade
       end
 
       it "does not raise an error" do
-        lambda do
-          subject.git_force_push(remote)
-        end.should_not raise_error
+        subject.should_receive(:error).exactly(0).times
+        subject.git_force_push(remote)
       end
 
       it "prints the correct message" do
@@ -162,20 +159,18 @@ module Kumade
     context "when git is dirty" do
       before { subject.stub(:git_dirty? => true) }
 
-      it "raises an error" do
-        lambda do
-          subject.ensure_clean_git
-        end.should raise_error("Cannot deploy: repo is not clean.")
+      it "prints an error" do
+        subject.should_receive(:error).with("Cannot deploy: repo is not clean.")
+        subject.ensure_clean_git
       end
     end
 
     context "when git is clean" do
       before { subject.stub(:git_dirty? => false) }
 
-      it "does not raise an error" do
-        lambda do
-          subject.ensure_clean_git
-        end.should_not raise_error
+      it "does not print an error" do
+        subject.should_receive(:error).exactly(0).times
+        subject.ensure_clean_git
       end
     end
   end
@@ -188,16 +183,16 @@ module Kumade
 
       it "does not raise an error if the default task succeeds" do
         subject.stub(:rake_succeeded? => true)
-        lambda do
-          subject.ensure_rake_passes
-        end.should_not raise_error
+        subject.should_receive(:error).exactly(0).times
+
+        subject.ensure_rake_passes
       end
 
-      it "raises an error if the default task failse" do
+      it "prints an error if the default task failse" do
         subject.stub(:rake_succeeded? => false)
-        lambda do
-          subject.ensure_rake_passes
-        end.should raise_error("Cannot deploy: tests did not pass")
+        subject.should_receive(:error).with("Cannot deploy: tests did not pass")
+
+        subject.ensure_rake_passes
       end
     end
   end
@@ -290,14 +285,13 @@ module Kumade
       subject.package_with_jammit
     end
 
-    it "raises an error if packaging failed" do
+    it "prints an error if packaging failed" do
       Jammit.stub(:package!) do
         raise Jammit::MissingConfiguration.new("random Jammit error")
       end
+      subject.should_receive(:error).with("Error: Jammit::MissingConfiguration: random Jammit error")
 
-      lambda do
-        subject.package_with_jammit
-      end.should raise_error(Jammit::MissingConfiguration)
+      subject.package_with_jammit
     end
 
     it "calls git_add_and_commit_all_assets_in if assets were added" do
@@ -348,15 +342,15 @@ module Kumade
       subject.package_with_more
     end
 
-    it "raises an error if packaging failed" do
+    it "prints an error if packaging failed" do
       Rake::Task.clear
       Rake::Task.define_task('more:generate') do
         fail "blerg"
       end
 
-      lambda do
-        subject.package_with_more
-      end.should raise_error("blerg")
+      subject.should_receive(:error).with("Error: RuntimeError: blerg")
+
+      subject.package_with_more
     end
 
     it "calls git_add_and_commit_all_assets_in if assets were added" do
@@ -396,12 +390,11 @@ module Kumade
       subject.git_add_and_commit_all_assets_in('blerg')
     end
 
-    it "raises an error if it could not add and commit assets" do
+    it "prints an error if it could not add and commit assets" do
       subject.stub(:run => false)
+      subject.should_receive(:error).with("Cannot deploy: couldn't commit assets")
 
-      lambda do
-        subject.git_add_and_commit_all_assets_in('blerg')
-      end.should raise_error("Cannot deploy: couldn't commit assets")
+      subject.git_add_and_commit_all_assets_in('blerg')
     end
   end
 
@@ -519,23 +512,23 @@ module Kumade
     end
 
     it "does not raise an error if the remote points to Heroku" do
-      lambda do
-        subject.ensure_heroku_remote_exists_for(environment)
-      end.should_not raise_error
+      subject.should_receive(:error).exactly(0).times
+
+      subject.ensure_heroku_remote_exists_for(environment)
     end
 
-    it "raises an error if the remote does not exist" do
+    it "prints an error if the remote does not exist" do
       remove_remote(environment)
 
-      lambda do
-        subject.ensure_heroku_remote_exists_for(environment)
-      end.should raise_error(%{Cannot deploy: "#{environment}" remote does not exist})
+      subject.should_receive(:error).with(%{Cannot deploy: "#{environment}" remote does not exist})
+
+      subject.ensure_heroku_remote_exists_for(environment)
     end
 
-    it "raises an error if the remote does not point to Heroku" do
-      lambda do
-        subject.ensure_heroku_remote_exists_for(bad_environment)
-      end.should raise_error(%{Cannot deploy: "#{bad_environment}" remote does not point to Heroku})
+    it "prints an error if the remote does not point to Heroku" do
+      subject.should_receive(:error).with(%{Cannot deploy: "#{bad_environment}" remote does not point to Heroku})
+
+      subject.ensure_heroku_remote_exists_for(bad_environment)
     end
   end
 
