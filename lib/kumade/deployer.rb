@@ -94,8 +94,7 @@ module Kumade
 
     def package_with_more
       begin
-        initialize_rake
-        Rake::Task['more:generate'].invoke
+        system "rake more:generate"
         if git_dirty?
           success("Packaged assets with More")
 
@@ -142,14 +141,15 @@ module Kumade
     end
 
     def default_task_exists?
-      initialize_rake
-      Rake::Task.task_defined?('default')
+      tasks = `rake -T default`.split("\n")
+      # Remove (in /this/dir) header
+      tasks.shift
+      ! tasks.first.match(/^rake default/).nil?
     end
 
     def rake_succeeded?
       begin
-        initialize_rake
-        Rake::Task[:default].invoke
+        system "rake"
       rescue
         false
       end

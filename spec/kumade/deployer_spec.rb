@@ -204,31 +204,20 @@ module Kumade
   end
 
   describe Deployer, "#default_task_exists?" do
-    before { Rake::Task.clear }
-
-    it "returns true if a default task does exist" do
-      Rake::Task.define_task(:default){}
-
+    it "returns true because a default task does exist" do
       subject.default_task_exists?.should be_true
-    end
-
-    it "returns false if a default task does not exist" do
-      subject.stub(:initialize_rake)
-      subject.default_task_exists?.should be_false
     end
   end
 
   describe Deployer, "#rake_succeeded?" do
-    before { Rake::Task.clear }
-
     it "returns true if the default task passed" do
-      Rake::Task.define_task(:default){}
+      subject.should_receive(:system).with('rake').and_return(true)
 
       subject.rake_succeeded?.should be_true
     end
 
     it "returns false if the default task failed" do
-      Rake::Task.define_task(:default){ fail "blerg" }
+      subject.should_receive(:system).with('rake').and_raise("blerg")
       subject.rake_succeeded?.should be_false
     end
   end
@@ -335,19 +324,16 @@ module Kumade
       subject.stub(:git_add_and_commit_all_assets_in => true,
                    :more_assets_path                 => 'assets')
       subject.stub(:say)
-      Rake::Task.clear
-      Rake::Task.define_task('more:generate'){}
     end
 
     it "calls the more:generate task" do
-      Rake::Task.clear
-      more_generate_task = Rake::Task.define_task('more:generate'){}
-      more_generate_task.should_receive(:invoke).once
+      subject.should_receive(:system).with("rake more:generate")
       subject.package_with_more
     end
 
     context "with changed assets" do
       it "prints a success message" do
+        subject.stub(:system).with("rake more:generate")
         subject.stub(:git_dirty? => true)
         subject.should_receive(:success).with("Packaged assets with More")
 
@@ -357,6 +343,7 @@ module Kumade
       it "calls git_add_and_commit_all_assets_in if assets were added" do
         subject.stub(:git_dirty?       => true,
                      :more_assets_path => 'blerg')
+        subject.stub(:system).with("rake more:generate")
         subject.should_receive(:git_add_and_commit_all_assets_in).
           with('blerg').
           and_return(true)
@@ -367,6 +354,7 @@ module Kumade
 
     context "with no changed assets" do
       it "prints no message" do
+        subject.stub(:system).with("rake more:generate")
         subject.stub(:git_dirty? => false)
         subject.should_not_receive(:say)
 
@@ -374,6 +362,7 @@ module Kumade
       end
 
       it "does not call git_add_and_commit_all_more_assets" do
+        subject.stub(:system).with("rake more:generate")
         subject.stub(:git_dirty? => false)
         subject.should_not_receive(:git_add_and_commit_all_assets_in)
 
@@ -382,9 +371,10 @@ module Kumade
     end
 
     it "prints an error if packaging failed" do
-      Rake::Task.clear
-      Rake::Task.define_task('more:generate') do
-        fail "blerg"
+      subject.stub(:system) do |arg|
+        if arg == "rake more:generate"
+          raise "blerg"
+        end
       end
 
       subject.should_receive(:error).with("Error: RuntimeError: blerg")
@@ -573,22 +563,6 @@ module Kumade
       remove_remote(remote_name)
 
       subject.remote_exists?(remote_name).should be_false
-    end
-  end
-
-  describe Deployer, "#initialize_rake" do
-    let!(:old_application) { Rake.application.clone }
-
-    before { Rake.application = Rake::Application.new }
-    after  { Rake.application = old_application }
-
-    it "finds Rake tasks" do
-      Rake.application.tasks.should be_empty
-      subject.initialize_rake
-      Rake.application.tasks.should_not be_empty
-
-      task_names = Rake.application.tasks.map{|t| t.name}
-      %w(cucumber default spec).each{|expected| task_names.should include expected }
     end
   end
 
