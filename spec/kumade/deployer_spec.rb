@@ -446,31 +446,18 @@ module Kumade
   end
 
   describe Deployer, "#heroku_migrate" do
-    let(:staging_app_name)   { 'staging-sushi' }
-    let(:production_app_name){ 'production-sushi' }
+    let(:environment){ 'staging' }
+    let(:app_name){ 'sushi' }
 
-    before do
-      add_heroku_remote('staging', staging_app_name)
-      add_heroku_remote('production', production_app_name)
-    end
+    before { add_heroku_remote(environment, app_name) }
 
-    after do
-      remove_remote('staging')
-      remove_remote('production')
-    end
+    after { remove_remote(environment) }
 
-    it "runs db:migrate with the correct staging app" do
+    it "runs db:migrate with the correct app" do
       subject.should_receive(:run).
-        with("bundle exec heroku rake db:migrate --app #{staging_app_name}")
+        with("bundle exec heroku rake db:migrate --app #{app_name}")
 
-      subject.heroku_migrate(:staging)
-    end
-
-    it "runs db:migrate with the correct production app" do
-      subject.should_receive(:run).
-        with("bundle exec heroku rake db:migrate --app #{production_app_name}")
-
-      subject.heroku_migrate(:production)
+      subject.heroku_migrate(environment)
     end
   end
 
