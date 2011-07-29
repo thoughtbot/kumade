@@ -210,12 +210,5 @@ module Kumade
         `git remote`.split("\n").include?(remote_name)
       end
     end
-
-    def initialize_rake
-      if Rake.application.tasks.empty?
-        Rake.application.options.rakelib = ['rakelib']
-        Rake.application.load_rakefile
-      end
-    end
   end
 end
