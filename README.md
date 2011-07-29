@@ -39,7 +39,10 @@ The default task is to deploy to staging:
     $ kumade # equivalent to "kumade deploy staging"
 
 ## Compatibility
-Tested on MRI 1.8.7 and 1.9.2.
+Tested against:
+ * MRI 1.8.7
+ * MRI 1.9.2
+ * REE 1.8.7
 
 ## What's with the name?
 Kumade ([pronunciation here](http://translate.google.com/#ja|en|熊手)) means
