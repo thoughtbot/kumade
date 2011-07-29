@@ -94,7 +94,7 @@ module Kumade
 
     def package_with_more
       begin
-        system "rake more:generate"
+        system "bundle exec rake more:generate"
         if git_dirty?
           success("Packaged assets with More")
 
@@ -146,7 +146,7 @@ module Kumade
 
     def rake_succeeded?
       begin
-        system "rake"
+        system "bundle exec rake"
       rescue
         false
       end

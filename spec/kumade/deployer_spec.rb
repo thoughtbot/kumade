@@ -211,13 +211,13 @@ module Kumade
 
   describe Deployer, "#rake_succeeded?" do
     it "returns true if the default task passed" do
-      subject.should_receive(:system).with('rake').and_return(true)
+      subject.should_receive(:system).with("bundle exec rake").and_return(true)
 
       subject.rake_succeeded?.should be_true
     end
 
     it "returns false if the default task failed" do
-      subject.should_receive(:system).with('rake').and_raise("blerg")
+      subject.should_receive(:system).with("bundle exec rake").and_raise("blerg")
       subject.rake_succeeded?.should be_false
     end
   end
@@ -327,13 +327,13 @@ module Kumade
     end
 
     it "calls the more:generate task" do
-      subject.should_receive(:system).with("rake more:generate")
+      subject.should_receive(:system).with("bundle exec rake more:generate")
       subject.package_with_more
     end
 
     context "with changed assets" do
       it "prints a success message" do
-        subject.stub(:system).with("rake more:generate")
+        subject.stub(:system).with("bundle exec rake more:generate")
         subject.stub(:git_dirty? => true)
         subject.should_receive(:success).with("Packaged assets with More")
 
@@ -343,7 +343,7 @@ module Kumade
       it "calls git_add_and_commit_all_assets_in if assets were added" do
         subject.stub(:git_dirty?       => true,
                      :more_assets_path => 'blerg')
-        subject.stub(:system).with("rake more:generate")
+        subject.stub(:system).with("bundle exec rake more:generate")
         subject.should_receive(:git_add_and_commit_all_assets_in).
           with('blerg').
           and_return(true)
@@ -354,7 +354,7 @@ module Kumade
 
     context "with no changed assets" do
       it "prints no message" do
-        subject.stub(:system).with("rake more:generate")
+        subject.stub(:system).with("bundle exec rake more:generate")
         subject.stub(:git_dirty? => false)
         subject.should_not_receive(:say)
 
@@ -362,7 +362,7 @@ module Kumade
       end
 
       it "does not call git_add_and_commit_all_more_assets" do
-        subject.stub(:system).with("rake more:generate")
+        subject.stub(:system).with("bundle exec rake more:generate")
         subject.stub(:git_dirty? => false)
         subject.should_not_receive(:git_add_and_commit_all_assets_in)
 
@@ -372,7 +372,7 @@ module Kumade
 
     it "prints an error if packaging failed" do
       subject.stub(:system) do |arg|
-        if arg == "rake more:generate"
+        if arg == "bundle exec rake more:generate"
           raise "blerg"
         end
       end
