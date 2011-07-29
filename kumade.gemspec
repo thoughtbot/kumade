@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency('heroku')
+  s.add_dependency('thor', '~> 0.14')
 
   s.add_development_dependency('rake', '~> 0.8.7')
   s.add_development_dependency('rspec', '~> 2.6.0')

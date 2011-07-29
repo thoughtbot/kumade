@@ -1,4 +1,5 @@
 require 'kumade/deployer'
+require 'kumade/thor_task'
 
 class Kumade
   def self.load_tasks
