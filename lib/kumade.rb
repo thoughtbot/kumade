@@ -2,14 +2,6 @@ require 'kumade/deployer'
 require 'kumade/thor_task'
 
 class Kumade
-  def self.load_tasks
-    deployer.load_tasks
-  end
-
-  def self.load_namespaced_tasks
-    deployer.load_namespaced_tasks
-  end
-
   def self.deployer
     @deployer ||= Deployer.new
   end

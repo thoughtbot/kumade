@@ -1,14 +1,5 @@
 class Kumade
   class Deployer
-    def load_tasks
-      load_namespaced_tasks
-      load 'kumade/tasks/deploy.rake'
-    end
-
-    def load_namespaced_tasks
-      load 'kumade/tasks/namespaced_deploy.rake'
-    end
-
     def pre_deploy
       ensure_clean_git
       ensure_rake_passes
