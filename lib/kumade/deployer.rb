@@ -148,11 +148,11 @@ module Kumade
     end
 
     def announce(message)
-      say message
+      say "==> #{message}"
     end
 
     def error(message)
-      say(message, :red)
+      say("==> ! #{message}", :red)
     end
 
     def string_present?(maybe_string)
