@@ -281,10 +281,23 @@ module Kumade
       subject.package_with_jammit
     end
 
-    it "prints the correct message if packaging succeeded" do
-      subject.should_receive(:success).with("Packaged assets with Jammit")
+    context "with updated assets" do
+      before { subject.stub(:git_dirty? => true) }
 
-      subject.package_with_jammit
+      it "prints the correct message" do
+        subject.should_receive(:success).with("Packaged assets with Jammit")
+
+        subject.package_with_jammit
+      end
+
+      it "calls git_add_and_commit_all_assets_in" do
+        subject.stub(:absolute_assets_path => 'blerg')
+        subject.should_receive(:git_add_and_commit_all_assets_in).
+          with('blerg').
+          and_return(true)
+
+        subject.package_with_jammit
+      end
     end
 
     it "prints an error if packaging failed" do
@@ -292,16 +305,6 @@ module Kumade
         raise Jammit::MissingConfiguration.new("random Jammit error")
       end
       subject.should_receive(:error).with("Error: Jammit::MissingConfiguration: random Jammit error")
-
-      subject.package_with_jammit
-    end
-
-    it "calls git_add_and_commit_all_assets_in if assets were added" do
-      subject.stub(:git_dirty? => true,
-                   :absolute_assets_path => 'blerg')
-      subject.should_receive(:git_add_and_commit_all_assets_in).
-        with('blerg').
-        and_return(true)
 
       subject.package_with_jammit
     end
