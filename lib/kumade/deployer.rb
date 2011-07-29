@@ -1,4 +1,5 @@
 require 'thor/shell/basic'
+require 'rake'
 
 module Kumade
   class Deployer < Thor::Shell::Basic
