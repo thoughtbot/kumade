@@ -5,12 +5,12 @@ module Kumade
     before { subject.stub(:say) }
 
     it "calls the staging deploy method when called with staging" do
-      Deployer.any_instance.should_receive(:deploy_to_staging)
+      Deployer.any_instance.should_receive(:deploy_to).with(:staging)
       subject.deploy('staging')
     end
 
     it "calls the production deploy method when called with production" do
-      Deployer.any_instance.should_receive(:deploy_to_production)
+      Deployer.any_instance.should_receive(:deploy_to).with(:production)
       subject.deploy('production')
     end
   end

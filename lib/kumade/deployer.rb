@@ -8,18 +8,11 @@ module Kumade
     end
 
     def deploy_to(environment)
-      ensure_heroku_remote_exists_for(environment)
+      string_environment = environment.to_s
+      ensure_heroku_remote_exists_for(string_environment)
       pre_deploy
-      git_force_push(environment)
-      heroku_migrate(environment)
-    end
-
-    def deploy_to_staging
-      deploy_to(:staging)
-    end
-
-    def deploy_to_production
-      deploy_to(:production)
+      git_force_push(string_environment)
+      heroku_migrate(string_environment)
     end
 
     def git_push(remote)

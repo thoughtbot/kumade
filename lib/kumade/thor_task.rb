@@ -13,12 +13,12 @@ module Kumade
       case environment
       when 'staging'
         unless options[:pretend]
-          Kumade.deployer.deploy_to_staging
+          Kumade.deployer.deploy_to(:staging)
         end
         say "==> Deployed to: staging", :green
       when 'production'
         unless options[:pretend]
-          Kumade.deployer.deploy_to_production
+          Kumade.deployer.deploy_to(:production)
         end
         say "==> Deployed to: production", :green
       else
