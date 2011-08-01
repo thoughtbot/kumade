@@ -149,6 +149,7 @@ module Kumade
         (defined?(Less::More) ||
           begin
             require 'less/more'
+            true
           rescue LoadError
             false
           end)
