@@ -138,6 +138,7 @@ module Kumade
         (defined?(Jammit) ||
           begin
             require 'jammit'
+            true
           rescue LoadError
             false
           end)
