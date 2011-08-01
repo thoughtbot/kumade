@@ -434,7 +434,11 @@ module Kumade
 
   describe Deployer, "#jammit_installed?" do
     it "returns true because it's loaded by the Gemfile" do
-      subject.jammit_installed?.should be_true
+      Deployer.new.jammit_installed?.should be_true
+    end
+
+    it "returns false if jammit is not installed" do
+      Deployer.new.jammit_installed?.should be_true
     end
   end
 
@@ -446,7 +450,7 @@ module Kumade
     end
 
     it "returns false if it does not find Less::More" do
-      subject.more_installed?.should be_false
+      Deployer.new.more_installed?.should be_false
     end
 
     it "returns true if it finds Less::More" do
@@ -454,7 +458,7 @@ module Kumade
         class More
         end
       end
-      subject.more_installed?.should be_true
+      Deployer.new.more_installed?.should be_true
     end
   end
 
