@@ -18,8 +18,11 @@ Feature: Kumade executable
       ==> Git repo is clean
       ==> Rake passed
       ==> Packaged assets with Jammit
+               run  git push origin master
       ==> Pushed master -> origin
+               run  git push -f pretend-staging master
       ==> Force pushed master -> pretend-staging
+               run  bundle exec heroku rake db:migrate --app pretend-staging-app
       ==> Migrated pretend-staging-app
       ==> Deployed to: pretend-staging
       """

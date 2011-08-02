@@ -55,7 +55,8 @@ module Kumade
     end
 
     def on_cedar?(app)
-      `heroku stack --app '#{app}'`.split("\n").grep(/^\*/).first.include?('cedar')
+      selected_stack = `heroku stack --app '#{app}'`.split("\n").grep(/^\*/).first
+      selected_stack && selected_stack.include?('cedar')
     end
 
     def ensure_clean_git
@@ -175,7 +176,7 @@ module Kumade
 
     def run_or_error(command, error_message)
       if pretending
-        say_status :run, command
+        say_status(:run, command)
       else
         error(error_message) unless run(command)
       end
