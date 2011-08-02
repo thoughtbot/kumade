@@ -5,7 +5,6 @@ require "kumade/version"
 Gem::Specification.new do |s|
   s.name        = "kumade"
   s.version     = Kumade::VERSION
-  s.platform    = Gem::Platform::RUBY
   s.authors     = ["Gabe Berke-Williams"]
   s.email       = ["gabe@thoughtbot.com"]
   s.homepage    = ""
