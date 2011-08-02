@@ -50,7 +50,7 @@ describe Kumade::Deployer, "#deploy_to" do
       ordered.
       and_return(true)
 
-    subject.should_receive(:git_force_push).
+    subject.should_receive(:sync_heroku).
       ordered.
       and_return(true)
 
@@ -69,7 +69,7 @@ describe Kumade::Deployer, "#deploy_to" do
                  :on_cedar?                       => false,
                  :run                             => true)
 
-    subject.should_receive(:git_force_push).with(remote_name)
+    subject.should_receive(:sync_heroku).with(remote_name)
 
     subject.deploy_to(remote_name)
   end
@@ -113,29 +113,29 @@ describe Kumade::Deployer, "#sync_github" do
   end
 end
 
-describe Kumade::Deployer, "#git_force_push" do
-  let(:remote){ 'origin' }
+describe Kumade::Deployer, "#sync_heroku" do
+  let(:environment) { 'staging' }
   before { subject.stub(:say) }
 
   it "calls `git push -f`" do
     subject.should_receive(:run).
-      with("git push -f #{remote} master").
+      with("git push -f #{environment} deploy:master").
       and_return(true)
-    subject.git_force_push(remote)
+    subject.sync_heroku(environment)
   end
 
-  context "when `git push -f` fails" do
+  context "when syncing to heroku fails" do
     before do
       subject.stub(:run => false)
     end
 
     it "prints an error" do
-      subject.should_receive(:error).with("Failed to force push master -> #{remote}")
-      subject.git_force_push(remote)
+      subject.should_receive(:error)
+      subject.sync_heroku(environment)
     end
   end
 
-  context "when `git push -f` succeeds" do
+  context "when syncing to heroku succeeds" do
     before do
       subject.stub(:run => true)
       subject.stub(:say)
@@ -143,14 +143,14 @@ describe Kumade::Deployer, "#git_force_push" do
 
     it "does not raise an error" do
       subject.should_not_receive(:error)
-      subject.git_force_push(remote)
+      subject.sync_heroku(environment)
     end
 
     it "prints a success message" do
       subject.should_receive(:success).
-        with("Force pushed master -> #{remote}")
+        with("Force pushed master -> #{environment}")
 
-      subject.git_force_push(remote)
+      subject.sync_heroku(environment)
     end
   end
 end

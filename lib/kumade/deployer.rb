@@ -12,7 +12,7 @@ module Kumade
       string_environment = environment.to_s
       ensure_heroku_remote_exists_for(string_environment)
       pre_deploy
-      git_force_push(string_environment)
+      sync_heroku(string_environment)
       heroku_migrate(string_environment)
       post_deploy
     end
@@ -29,10 +29,10 @@ module Kumade
       success("Pushed master -> origin")
     end
 
-    def git_force_push(remote)
-      run_or_error("git push -f #{remote} master",
-                   "Failed to force push master -> #{remote}")
-      success("Force pushed master -> #{remote}")
+    def sync_heroku(environment)
+      run_or_error("git push -f #{environment} #{DEPLOY_BRANCH}:master",
+                   "Failed to force push #{DEPLOY_BRANCH} -> #{environment}/master")
+      success("Force pushed master -> #{environment}")
     end
 
     def heroku_migrate(environment)
