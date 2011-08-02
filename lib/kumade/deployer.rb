@@ -175,7 +175,7 @@ module Kumade
 
     def run_or_error(command, error_message)
       if pretending
-        run(command, :pretend => true)
+        say_status :run, command
       else
         error(error_message) unless run(command)
       end
