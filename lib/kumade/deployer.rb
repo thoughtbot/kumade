@@ -55,7 +55,7 @@ module Kumade
     end
 
     def on_cedar?(app)
-      `heroku stack --app '#{app}'`.grep(/^\*/).first.include?('cedar')
+      `heroku stack --app '#{app}'`.split("\n").grep(/^\*/).first.include?('cedar')
     end
 
     def ensure_clean_git
