@@ -1,6 +1,3 @@
-require 'thor/shell'
-require 'rake'
-
 module Kumade
   class Deployer < Thor::Shell::Color
     DEPLOY_BRANCH = "deploy"
@@ -28,13 +25,13 @@ module Kumade
 
     def git_push(remote)
       run_or_error("git push #{remote} master",
-                  "Failed to push master -> #{remote}")
+                   "Failed to push master -> #{remote}")
       success("Pushed master -> #{remote}")
     end
 
     def git_force_push(remote)
       run_or_error("git push -f #{remote} master",
-                  "Failed to force push master -> #{remote}")
+                   "Failed to force push master -> #{remote}")
       success("Force pushed master -> #{remote}")
     end
 
@@ -177,6 +174,11 @@ module Kumade
       else
         error(error_message) unless run(all_commands)
       end
+    end
+
+    def run(command)
+      say_status :run, command
+      system command
     end
 
     def announce(message)

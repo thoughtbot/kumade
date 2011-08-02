@@ -1,3 +1,5 @@
+require 'thor'
+
 require 'kumade/deployer'
 require 'kumade/thor_task'
 
