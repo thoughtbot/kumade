@@ -123,8 +123,8 @@ Yes.
     ==> Deploying to: origin
     ==> ! Cannot deploy: "origin" remote does not point to Heroku
 
-
 ## Compatibility
+
 Tested against:
 
 * MRI 1.8.7
@@ -132,5 +132,10 @@ Tested against:
 * REE 1.8.7
 
 ## What's with the name?
+
 Kumade ([pronunciation here](http://translate.google.com/#ja|en|熊手)) means
 "bamboo rake" in Japanese.
+
+## License
+
+kumade is Copyright © thoughtbot. It is free software, and may be redistributed under the terms specified in the LICENSE file.
