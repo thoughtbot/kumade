@@ -10,6 +10,7 @@ Feature: Kumade executable
     When I create a Heroku remote for "pretend-staging-app" named "pretend-staging"
     And I create a Heroku remote for "app-two" named "staging"
 
+  @extra-timeout
   Scenario: Pretend mode with a Heroku remote
     When I run `kumade deploy pretend-staging -p`
     Then the output should contain "In Pretend Mode"
