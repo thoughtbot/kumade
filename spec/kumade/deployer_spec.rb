@@ -278,21 +278,6 @@ describe Kumade::Deployer, "#package_with_jammit" do
 
     subject.package_with_jammit
   end
-
-  context "no assets were added" do
-    before { subject.stub(:git_dirty? => false) }
-
-    it "does not call git_add_and_commit_all_jammit_assets" do
-      subject.should_not_receive(:git_add_and_commit_all_assets_in)
-
-      subject.package_with_jammit
-    end
-
-    it "does not print a success message" do
-      subject.should_not_receive(:success)
-      subject.package_with_jammit
-    end
-  end
 end
 
 describe Kumade::Deployer, "#package_with_more" do

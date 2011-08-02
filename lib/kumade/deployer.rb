@@ -84,10 +84,8 @@ module Kumade
         else
           Jammit.package!
 
-          if git_dirty?
-            success(success_message)
-            git_add_and_commit_all_assets_in(jammit_assets_path)
-          end
+          success(success_message)
+          git_add_and_commit_all_assets_in(jammit_assets_path)
         end
       rescue => jammit_error
         error("Error: #{jammit_error.class}: #{jammit_error.message}")
