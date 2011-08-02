@@ -483,28 +483,6 @@ module Kumade
     end
   end
 
-  describe Deployer, "#string_present?" do
-    it "returns false for nil" do
-      subject.string_present?(nil).should be_false
-    end
-
-    it "returns false for false" do
-      subject.string_present?(false).should be_false
-    end
-
-    it "returns false for true" do
-      subject.string_present?(true).should be_false
-    end
-
-    it "returns false for an empty string" do
-      subject.string_present?('').should be_false
-    end
-
-    it "returns true for a non-empty string" do
-      subject.string_present?('abc').should be_true
-    end
-  end
-
   describe Deployer, "#ensure_heroku_remote_exists_for" do
     let(:environment){ 'staging' }
     let(:bad_environment){ 'bad' }

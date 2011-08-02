@@ -19,11 +19,11 @@ describe Kumade, ".app_for" do
     Kumade.app_for(environment).should == app_name
   end
 
-  it "returns an empty string if the app cannot be found" do
-    Kumade.app_for('xyz').should == ""
+  it "is nil if the app cannot be found" do
+    Kumade.app_for('xyz').should be_nil
   end
 
-  it "returns an empty string if the remote is not a Heroku remote" do
-    Kumade.app_for(not_a_heroku_env).should == ""
+  it "is nil if the remote is not a Heroku remote" do
+    Kumade.app_for(not_a_heroku_env).should be_nil
   end
 end

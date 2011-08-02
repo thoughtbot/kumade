@@ -3,12 +3,11 @@ require 'kumade/thor_task'
 
 module Kumade
   def self.app_for(environment)
-    heroku_git_url = `git remote show -n #{environment} | grep 'Push  URL' | cut -d' ' -f6`.strip
-    match = heroku_git_url.match(/^git@heroku\.com:(.+)\.git$/)
-    if match
-      match[1]
+    heroku_git_url = `git config --get remote.#{environment}.url`.strip
+    if heroku_git_url =~ /^git@heroku\.com:(.+)\.git$/
+      $1
     else
-      ""
+      nil
     end
   end
 end

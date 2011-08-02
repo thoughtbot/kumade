@@ -195,19 +195,12 @@ module Kumade
       say("==> #{message}", :green)
     end
 
-    def string_present?(maybe_string)
-      maybe_string.is_a?(String) && maybe_string.size > 0
-    end
-
     def ensure_heroku_remote_exists_for(environment)
       if remote_exists?(environment)
-        if Kumade.app_for(environment)
-          app_name = Kumade.app_for(environment)
-          if string_present?(app_name)
-            success("#{environment} is a Heroku remote")
-          else
-            error(%{Cannot deploy: "#{environment}" remote does not point to Heroku})
-          end
+        if app_name = Kumade.app_for(environment)
+          success("#{environment} is a Heroku remote")
+        else
+          error(%{Cannot deploy: "#{environment}" remote does not point to Heroku})
         end
       else
         error(%{Cannot deploy: "#{environment}" remote does not exist})
@@ -218,7 +211,7 @@ module Kumade
       if pretending
         true
       else
-        `git remote`.split("\n").include?(remote_name)
+        `git remote` =~ /^#{remote_name}$/
       end
     end
   end
