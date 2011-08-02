@@ -7,8 +7,13 @@ Feature: Kumade executable
   Background:
     Given a directory named "executable"
     And I cd to "executable"
-    When I create a Heroku remote for "pretend-staging-app" named "pretend-staging"
+    When I successfully run `git init`
+    And I successfully run `touch .gitkeep`
+    And I successfully run `git add .`
+    And I successfully run `git commit -am First`
+    And I create a Heroku remote for "pretend-staging-app" named "pretend-staging"
     And I create a Heroku remote for "app-two" named "staging"
+    And I create a non-Heroku remote named "bad-remote"
 
   Scenario: Pretend mode with a Heroku remote
     When I run `kumade deploy pretend-staging -p`
@@ -38,5 +43,5 @@ Feature: Kumade executable
     Then the output should match /Cannot deploy: /
 
   Scenario: Deploying to a non-Heroku remote fails
-    When I run `kumade deploy origin`
-    Then the output should match /==> ! Cannot deploy: "origin" remote does not point to Heroku/
+    When I run `kumade deploy bad-remote`
+    Then the output should match /==> ! Cannot deploy: "bad-remote" remote does not point to Heroku/
