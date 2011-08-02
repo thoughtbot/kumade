@@ -7,7 +7,7 @@ module Kumade
 
     def initialize(pretending = false)
       super()
-      @pretending = !!pretending
+      @pretending = pretending
     end
 
     def pre_deploy
