@@ -26,27 +26,21 @@ module Kumade
     end
 
     def git_push(remote)
-      unless pretending
-        run_or_error("git push #{remote} master",
-                    "Failed to push master -> #{remote}")
-      end
+      run_or_error("git push #{remote} master",
+                  "Failed to push master -> #{remote}")
       success("Pushed master -> #{remote}")
     end
 
     def git_force_push(remote)
-      unless pretending
-        run_or_error("git push -f #{remote} master",
-                    "Failed to force push master -> #{remote}")
-      end
+      run_or_error("git push -f #{remote} master",
+                  "Failed to force push master -> #{remote}")
       success("Force pushed master -> #{remote}")
     end
 
     def heroku_migrate(environment)
       app = Kumade.app_for(environment)
 
-      unless pretending
-        heroku("rake db:migrate", app)
-      end
+      heroku("rake db:migrate", app)
       success("Migrated #{app}")
     end
 
@@ -56,7 +50,7 @@ module Kumade
                        else
                          "bundle exec heroku"
                        end
-      run("#{heroku_command} #{command} --app #{app}")
+      run_or_error("#{heroku_command} #{command} --app #{app}")
     end
 
     def on_cedar?(app)
@@ -64,7 +58,7 @@ module Kumade
     end
 
     def ensure_clean_git
-      if git_dirty? && ! pretending
+      if git_dirty?
         error("Cannot deploy: repo is not clean.")
       else
         success("Git repo is clean")
@@ -73,7 +67,7 @@ module Kumade
 
     def ensure_rake_passes
       if default_task_exists?
-        if pretending || rake_succeeded?
+        if rake_succeeded?
           success("Rake passed")
         else
           error("Cannot deploy: tests did not pass")
@@ -106,15 +100,19 @@ module Kumade
     end
 
     def package_with_more
-      begin
-        run "bundle exec rake more:generate"
-        if git_dirty?
-          success("Packaged assets with More")
-
-          git_add_and_commit_all_assets_in(more_assets_path)
+      success_message = "Packaged assets with More"
+      if pretending
+        success(success_message)
+      else
+        begin
+          run "bundle exec rake more:generate"
+          if git_dirty?
+            success(success_message)
+            git_add_and_commit_all_assets_in(more_assets_path)
+          end
+        rescue => more_error
+          error("Error: #{more_error.class}: #{more_error.message}")
         end
-      rescue => more_error
-        error("Error: #{more_error.class}: #{more_error.message}")
       end
     end
 
@@ -160,6 +158,8 @@ module Kumade
     end
 
     def rake_succeeded?
+      return true if pretending
+
       begin
         run "bundle exec rake"
       rescue
@@ -173,10 +173,10 @@ module Kumade
     end
 
     def run_or_error(command, error_message)
-      if ! pretending
-        unless run(command)
-          error(error_message)
-        end
+      if pretending
+        run(command, :pretend => true)
+      else
+        error(error_message) unless run(command)
       end
     end
 
