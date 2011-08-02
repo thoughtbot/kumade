@@ -126,7 +126,7 @@ module Kumade
     end
 
     def git_add_and_commit_all_assets_in(dir)
-      run_or_error "git checkout -b #{DEPLOY_BRANCH}", "git add -f #{dir}", "git commit -m 'Assets'",
+      run_or_error "git checkout -b #{DEPLOY_BRANCH}", "git add -f #{dir}", "git commit -m 'Compiled assets'",
                    "Cannot deploy: couldn't commit assets"
 
       success "Added and committed all assets"

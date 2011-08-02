@@ -398,7 +398,7 @@ describe Kumade::Deployer, "#git_add_and_commit_all_assets_in" do
 
   it "runs the correct commands" do
     subject.should_receive(:run).
-      with("git checkout -b deploy && git add -f blerg && git commit -m 'Assets'")
+      with("git checkout -b deploy && git add -f blerg && git commit -m 'Compiled assets'")
 
     subject.git_add_and_commit_all_assets_in('blerg')
   end
