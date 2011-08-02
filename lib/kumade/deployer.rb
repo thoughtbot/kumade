@@ -20,13 +20,13 @@ module Kumade
     def pre_deploy
       ensure_clean_git
       package_assets
-      git_push('origin')
+      sync_github
     end
 
-    def git_push(remote)
-      run_or_error("git push #{remote} master",
-                   "Failed to push master -> #{remote}")
-      success("Pushed master -> #{remote}")
+    def sync_github
+      run_or_error("git push origin master",
+                   "Failed to push master -> origin")
+      success("Pushed master -> origin")
     end
 
     def git_force_push(remote)

@@ -7,7 +7,7 @@ describe Kumade::Deployer, "#pre_deploy" do
     %w(
       ensure_clean_git
       package_assets
-      git_push
+      sync_github
       ).each do |task|
       subject.should_receive(task).ordered.and_return(true)
     end
@@ -23,7 +23,7 @@ describe Kumade::Deployer, "#pre_deploy" do
       subject.stub(task)
     end
 
-    subject.should_receive(:git_push).with('origin')
+    subject.should_receive(:sync_github)
     subject.pre_deploy
   end
 end
@@ -75,7 +75,7 @@ describe Kumade::Deployer, "#deploy_to" do
   end
 end
 
-describe Kumade::Deployer, "#git_push" do
+describe Kumade::Deployer, "#sync_github" do
   let(:remote){ 'origin' }
 
   before { subject.stub(:say) }
@@ -84,7 +84,7 @@ describe Kumade::Deployer, "#git_push" do
     subject.should_receive(:run).
       with("git push #{remote} master").
       and_return(true)
-    subject.git_push(remote)
+    subject.sync_github
   end
 
   context "when `git push` fails" do
@@ -93,22 +93,22 @@ describe Kumade::Deployer, "#git_push" do
     it "prints an error message" do
       subject.should_receive(:error).with("Failed to push master -> #{remote}")
 
-      subject.git_push(remote)
+      subject.sync_github
     end
   end
 
-  context "when `git push` succeeds" do
+  context "when syncing github succeeds" do
     before { subject.stub(:run => true) }
 
     it "does not raise an error" do
       subject.should_not_receive(:error)
-      subject.git_push(remote)
+      subject.sync_github
     end
 
     it "prints a success message" do
       subject.should_receive(:success).with("Pushed master -> #{remote}")
 
-      subject.git_push(remote)
+      subject.sync_github
     end
   end
 end
