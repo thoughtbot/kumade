@@ -24,6 +24,7 @@ Feature: Kumade executable
       ==> Force pushed master -> pretend-staging
                run  bundle exec heroku rake db:migrate --app pretend-staging-app
       ==> Migrated pretend-staging-app
+               run  git checkout master && git branch -D deploy
       ==> Deployed to: pretend-staging
       """
     But the output should not contain "==> Packaged assets with More"

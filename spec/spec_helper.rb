@@ -2,11 +2,6 @@ require 'rspec'
 require 'kumade'
 require 'rake'
 
-include RSpec::Mocks::Methods
-
-RSpec.configure do |spec|
-end
-
 module GitRemoteHelpers
   def force_add_heroku_remote(remote_name, app_name)
     remove_remote(remote_name)
@@ -18,4 +13,7 @@ module GitRemoteHelpers
   end
 end
 
-include GitRemoteHelpers
+RSpec.configure do |config|
+  config.include RSpec::Mocks::Methods
+  config.include GitRemoteHelpers
+end

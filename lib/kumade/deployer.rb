@@ -3,18 +3,12 @@ require 'rake'
 
 module Kumade
   class Deployer < Thor::Shell::Color
+    DEPLOY_BRANCH = "deploy"
     attr_reader :pretending
 
     def initialize(pretending = false)
       super()
       @pretending = pretending
-    end
-
-    def pre_deploy
-      ensure_clean_git
-      ensure_rake_passes
-      package_assets
-      git_push('origin')
     end
 
     def deploy_to(environment)
@@ -23,6 +17,14 @@ module Kumade
       pre_deploy
       git_force_push(string_environment)
       heroku_migrate(string_environment)
+      post_deploy
+    end
+
+    def pre_deploy
+      ensure_clean_git
+      ensure_rake_passes
+      package_assets
+      git_push('origin')
     end
 
     def git_push(remote)
@@ -42,6 +44,11 @@ module Kumade
 
       heroku("rake db:migrate", app)
       success("Migrated #{app}")
+    end
+
+    def post_deploy
+      run_or_error("git checkout master", "git branch -D #{DEPLOY_BRANCH}",
+                   "Failed to clean up #{DEPLOY_BRANCH} branch")
     end
 
     def heroku(command, app)
@@ -119,10 +126,10 @@ module Kumade
     end
 
     def git_add_and_commit_all_assets_in(dir)
-      run_or_error("git add #{dir} && git commit -m 'Assets'",
-                    "Cannot deploy: couldn't commit assets")
+      run_or_error "git checkout -b #{DEPLOY_BRANCH}", "git add -f #{dir}", "git commit -m 'Assets'",
+                   "Cannot deploy: couldn't commit assets"
 
-      success("Added and committed all assets")
+      success "Added and committed all assets"
     end
 
     def jammit_assets_path
@@ -174,11 +181,12 @@ module Kumade
       dirty = git_changed.size > 0
     end
 
-    def run_or_error(command, error_message)
+    def run_or_error(*commands, error_message)
+      all_commands = commands.join(' && ')
       if pretending
-        say_status(:run, command)
+        say_status(:run, all_commands)
       else
-        error(error_message) unless run(command)
+        error(error_message) unless run(all_commands)
       end
     end
 
