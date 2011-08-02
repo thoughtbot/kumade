@@ -5,8 +5,8 @@ require "kumade/version"
 Gem::Specification.new do |s|
   s.name        = "kumade"
   s.version     = Kumade::VERSION
-  s.authors     = ["Gabe Berke-Williams"]
-  s.email       = ["gabe@thoughtbot.com"]
+  s.authors     = ["Gabe Berke-Williams", "thoughtbot"]
+  s.email       = ["gabe@thoughtbot.com", "support@thoughtbot.com"]
   s.homepage    = ""
   s.summary     = %q{Simple rake tasks for deploying to Heroku}
   s.description = s.summary
