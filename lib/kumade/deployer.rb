@@ -177,8 +177,8 @@ module Kumade
     end
 
     def git_dirty?
-      git_changed = `git status --short 2> /dev/null | tail -n1`
-      dirty = git_changed.size > 0
+      `git diff --exit-code`
+      !$?.success?
     end
 
     def run_or_error(*commands, error_message)
