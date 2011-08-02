@@ -578,7 +578,7 @@ module Kumade
     context "when on Cedar" do
       before { subject.stub(:on_cedar? => true) }
       it "runs commands with `run`" do
-        subject.should_receive(:run).with("bundle exec heroku run rake --app #{app_name}")
+        subject.should_receive(:run_or_error).with("bundle exec heroku run rake --app #{app_name}", //)
         subject.heroku("rake", app_name)
       end
     end
@@ -586,7 +586,7 @@ module Kumade
     context "when not on Cedar" do
       before { subject.stub(:on_cedar? => false) }
       it "runs commands without `run`" do
-        subject.should_receive(:run).with("bundle exec heroku rake --app #{app_name}")
+        subject.should_receive(:run_or_error).with("bundle exec heroku rake --app #{app_name}", //)
         subject.heroku("rake", app_name)
       end
     end

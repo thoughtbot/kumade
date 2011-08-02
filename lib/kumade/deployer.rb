@@ -50,7 +50,8 @@ module Kumade
                        else
                          "bundle exec heroku"
                        end
-      run_or_error("#{heroku_command} #{command} --app #{app}")
+      run_or_error("#{heroku_command} #{command} --app #{app}",
+                   "Failed to run #{command} on Heroku")
     end
 
     def on_cedar?(app)
