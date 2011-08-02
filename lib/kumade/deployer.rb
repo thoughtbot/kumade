@@ -38,7 +38,7 @@ module Kumade
     def heroku_migrate(environment)
       app = Kumade.app_for(environment)
 
-      heroku("rake db:migrate", app)
+      heroku("rake db:migrate", app) unless pretending
       success("Migrated #{app}")
     end
 

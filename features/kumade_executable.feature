@@ -26,7 +26,6 @@ Feature: Kumade executable
       ==> Pushed master -> origin
                run  git push -f pretend-staging deploy:master
       ==> Force pushed master -> pretend-staging
-               run  bundle exec heroku rake db:migrate --app pretend-staging-app
       ==> Migrated pretend-staging-app
                run  git checkout master && git branch -D deploy
       ==> Deployed to: pretend-staging
