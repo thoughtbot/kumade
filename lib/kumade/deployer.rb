@@ -43,7 +43,7 @@ module Kumade
     end
 
     def post_deploy
-      run_or_error("git checkout master", "git branch -D #{DEPLOY_BRANCH}",
+      run_or_error(["git checkout master", "git branch -D #{DEPLOY_BRANCH}"],
                    "Failed to clean up #{DEPLOY_BRANCH} branch")
     end
 
@@ -110,7 +110,7 @@ module Kumade
     end
 
     def git_add_and_commit_all_assets_in(dir)
-      run_or_error "git checkout -b #{DEPLOY_BRANCH}", "git add -f #{dir}", "git commit -m 'Compiled assets'",
+      run_or_error ["git checkout -b #{DEPLOY_BRANCH}", "git add -f #{dir}", "git commit -m 'Compiled assets'"],
                    "Cannot deploy: couldn't commit assets"
 
       success "Added and committed all assets"
@@ -165,8 +165,8 @@ module Kumade
       !$?.success?
     end
 
-    def run_or_error(*commands, error_message)
-      all_commands = commands.join(' && ')
+    def run_or_error(commands, error_message)
+      all_commands = [commands].flatten.join(' && ')
       if pretending
         say_status(:run, all_commands)
       else
