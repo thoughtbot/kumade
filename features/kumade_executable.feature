@@ -16,7 +16,6 @@ Feature: Kumade executable
     And the output should contain:
       """
       ==> Git repo is clean
-      ==> Rake passed
       ==> Packaged assets with Jammit
                run  git push origin master
       ==> Pushed master -> origin

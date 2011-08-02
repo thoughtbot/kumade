@@ -22,7 +22,6 @@ module Kumade
 
     def pre_deploy
       ensure_clean_git
-      ensure_rake_passes
       package_assets
       git_push('origin')
     end
@@ -71,16 +70,6 @@ module Kumade
         error("Cannot deploy: repo is not clean.")
       else
         success("Git repo is clean")
-      end
-    end
-
-    def ensure_rake_passes
-      if default_task_exists?
-        if rake_succeeded?
-          success("Rake passed")
-        else
-          error("Cannot deploy: tests did not pass")
-        end
       end
     end
 

@@ -6,7 +6,6 @@ describe Kumade::Deployer, "#pre_deploy" do
   it "calls the correct methods in order" do
     %w(
       ensure_clean_git
-      ensure_rake_passes
       package_assets
       git_push
       ).each do |task|
@@ -19,7 +18,6 @@ describe Kumade::Deployer, "#pre_deploy" do
   it "pushes to origin" do
     %w(
       ensure_clean_git
-      ensure_rake_passes
       package_assets
     ).each do |task|
       subject.stub(task)
@@ -177,29 +175,6 @@ describe Kumade::Deployer, "#ensure_clean_git" do
       subject.should_receive(:success).with("Git repo is clean")
 
       subject.ensure_clean_git
-    end
-  end
-end
-
-describe Kumade::Deployer, "#ensure_rake_passes" do
-  context "with a default task" do
-    before do
-      subject.stub(:default_task_exists? => true)
-    end
-
-    it "prints a success message if the default task succeeds" do
-      subject.stub(:rake_succeeded? => true)
-      subject.should_not_receive(:error)
-      subject.should_receive(:success).with("Rake passed")
-
-      subject.ensure_rake_passes
-    end
-
-    it "prints an error if the default task failse" do
-      subject.stub(:rake_succeeded? => false)
-      subject.should_receive(:error).with("Cannot deploy: tests did not pass")
-
-      subject.ensure_rake_passes
     end
   end
 end
