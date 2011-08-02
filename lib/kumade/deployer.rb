@@ -59,7 +59,7 @@ module Kumade
     end
 
     def ensure_clean_git
-      if git_dirty?
+      if ! pretending && git_dirty?
         error("Cannot deploy: repo is not clean.")
       else
         success("Git repo is clean")
