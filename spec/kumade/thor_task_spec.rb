@@ -6,8 +6,8 @@ module Kumade
 
     let(:environment){ 'bamboo' }
 
-    it "calls the deploy method with the correct environment" do
-      Deployer.any_instance.should_receive(:deploy_to).with(environment)
+    it "calls the deploy method" do
+      Deployer.any_instance.should_receive(:deploy)
       subject.deploy(environment)
     end
   end

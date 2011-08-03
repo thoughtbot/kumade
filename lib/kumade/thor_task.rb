@@ -10,7 +10,7 @@ module Kumade
       say("==> In Pretend Mode", :red) if options[:pretend]
       say "==> Deploying to: #{environment}"
 
-      Deployer.new(options[:pretend]).deploy_to(environment)
+      Deployer.new(environment, options[:pretend]).deploy
 
       say "==> Deployed to: #{environment}", :green
     end

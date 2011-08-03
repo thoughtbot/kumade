@@ -1,19 +1,19 @@
 module Kumade
   class Deployer < Thor::Shell::Color
     DEPLOY_BRANCH = "deploy"
-    attr_reader :pretending
+    attr_reader :environment, :pretending
 
-    def initialize(pretending = false)
+    def initialize(environment = 'staging', pretending = false)
       super()
-      @pretending = pretending
+      @environment = environment
+      @pretending  = pretending
     end
 
-    def deploy_to(environment)
-      string_environment = environment.to_s
-      ensure_heroku_remote_exists_for(string_environment)
+    def deploy
+      ensure_heroku_remote_exists
       pre_deploy
-      sync_heroku(string_environment)
-      heroku_migrate(string_environment)
+      sync_heroku
+      heroku_migrate
       post_deploy
     end
 
@@ -29,13 +29,13 @@ module Kumade
       success("Pushed master -> origin")
     end
 
-    def sync_heroku(environment)
+    def sync_heroku
       run_or_error("git push -f #{environment} #{DEPLOY_BRANCH}:master",
                    "Failed to force push #{DEPLOY_BRANCH} -> #{environment}/master")
       success("Force pushed master -> #{environment}")
     end
 
-    def heroku_migrate(environment)
+    def heroku_migrate
       app = Kumade.app_for(environment)
 
       heroku("rake db:migrate", app) unless pretending
@@ -192,7 +192,7 @@ module Kumade
       say("==> #{message}", :green)
     end
 
-    def ensure_heroku_remote_exists_for(environment)
+    def ensure_heroku_remote_exists
       if remote_exists?(environment)
         if app_name = Kumade.app_for(environment)
           success("#{environment} is a Heroku remote")

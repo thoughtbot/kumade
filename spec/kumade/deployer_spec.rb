@@ -28,9 +28,10 @@ describe Kumade::Deployer, "#pre_deploy" do
   end
 end
 
-describe Kumade::Deployer, "#deploy_to" do
+describe Kumade::Deployer, "#deploy" do
   let(:remote_name){ 'staging' }
   let(:app_name){ 'kumade-staging' }
+
 
   before do
     subject.stub(:say)
@@ -42,9 +43,8 @@ describe Kumade::Deployer, "#deploy_to" do
   it "calls the correct methods in order" do
     subject.stub(:run => true)
 
-    subject.should_receive(:ensure_heroku_remote_exists_for).
-      ordered.
-      with(remote_name)
+    subject.should_receive(:ensure_heroku_remote_exists).
+      ordered
 
     subject.should_receive(:pre_deploy).
       ordered.
@@ -55,34 +55,20 @@ describe Kumade::Deployer, "#deploy_to" do
       and_return(true)
 
     subject.should_receive(:heroku_migrate).
-      ordered.
-      with(remote_name)
+      ordered
 
     subject.should_receive(:post_deploy)
 
-    subject.deploy_to(remote_name)
-  end
-
-  it "deploys to the correct remote" do
-    subject.stub(:ensure_heroku_remote_exists_for => true,
-                 :pre_deploy                      => true,
-                 :on_cedar?                       => false,
-                 :run                             => true)
-
-    subject.should_receive(:sync_heroku).with(remote_name)
-
-    subject.deploy_to(remote_name)
+    subject.deploy
   end
 end
 
 describe Kumade::Deployer, "#sync_github" do
-  let(:remote){ 'origin' }
-
   before { subject.stub(:say) }
 
   it "calls `git push`" do
     subject.should_receive(:run).
-      with("git push #{remote} master").
+      with("git push origin master").
       and_return(true)
     subject.sync_github
   end
@@ -91,7 +77,7 @@ describe Kumade::Deployer, "#sync_github" do
     before { subject.stub(:run => false) }
 
     it "prints an error message" do
-      subject.should_receive(:error).with("Failed to push master -> #{remote}")
+      subject.should_receive(:error).with("Failed to push master -> origin")
 
       subject.sync_github
     end
@@ -106,7 +92,7 @@ describe Kumade::Deployer, "#sync_github" do
     end
 
     it "prints a success message" do
-      subject.should_receive(:success).with("Pushed master -> #{remote}")
+      subject.should_receive(:success).with("Pushed master -> origin")
 
       subject.sync_github
     end
@@ -114,14 +100,15 @@ describe Kumade::Deployer, "#sync_github" do
 end
 
 describe Kumade::Deployer, "#sync_heroku" do
-  let(:environment) { 'staging' }
+  let(:environment) { 'my-env' }
+  subject { Kumade::Deployer.new(environment) }
   before { subject.stub(:say) }
 
   it "calls `git push -f`" do
     subject.should_receive(:run).
       with("git push -f #{environment} deploy:master").
       and_return(true)
-    subject.sync_heroku(environment)
+    subject.sync_heroku
   end
 
   context "when syncing to heroku fails" do
@@ -131,7 +118,7 @@ describe Kumade::Deployer, "#sync_heroku" do
 
     it "prints an error" do
       subject.should_receive(:error)
-      subject.sync_heroku(environment)
+      subject.sync_heroku
     end
   end
 
@@ -143,14 +130,14 @@ describe Kumade::Deployer, "#sync_heroku" do
 
     it "does not raise an error" do
       subject.should_not_receive(:error)
-      subject.sync_heroku(environment)
+      subject.sync_heroku
     end
 
     it "prints a success message" do
       subject.should_receive(:success).
         with("Force pushed master -> #{environment}")
 
-      subject.sync_heroku(environment)
+      subject.sync_heroku
     end
   end
 end
@@ -439,11 +426,11 @@ describe Kumade::Deployer, "#heroku_migrate" do
       with("rake db:migrate", app_name)
     subject.should_receive(:success).with("Migrated #{app_name}")
 
-    subject.heroku_migrate(environment)
+    subject.heroku_migrate
   end
 end
 
-describe Kumade::Deployer, "#ensure_heroku_remote_exists_for" do
+describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   let(:environment){ 'staging' }
   let(:bad_environment){ 'bad' }
   let(:staging_app_name) { 'staging-sushi' }
@@ -460,35 +447,40 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists_for" do
   end
 
   context "when the remote points to Heroku" do
+    subject { Kumade::Deployer.new(environment) }
+
     it "does not print an error" do
       subject.should_not_receive(:error)
 
-      subject.ensure_heroku_remote_exists_for(environment)
+      subject.ensure_heroku_remote_exists
     end
 
     it "prints a success message" do
       subject.should_receive(:success).with("#{environment} is a Heroku remote")
 
-      subject.ensure_heroku_remote_exists_for(environment)
+      subject.ensure_heroku_remote_exists
     end
   end
 
 
   context "when the remote does not exist" do
+    subject { Kumade::Deployer.new(environment) }
     before { remove_remote(environment) }
 
     it "prints an error" do
       subject.should_receive(:error).with(%{Cannot deploy: "#{environment}" remote does not exist})
 
-      subject.ensure_heroku_remote_exists_for(environment)
+      subject.ensure_heroku_remote_exists
     end
   end
 
   context "when the remote does not point to Heroku" do
+    subject { Kumade::Deployer.new(bad_environment) }
+
     it "prints an error" do
       subject.should_receive(:error).with(%{Cannot deploy: "#{bad_environment}" remote does not point to Heroku})
 
-      subject.ensure_heroku_remote_exists_for(bad_environment)
+      subject.ensure_heroku_remote_exists
     end
   end
 end
