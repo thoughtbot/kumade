@@ -58,7 +58,7 @@ module Kumade
     end
 
     def on_cedar?(app)
-      selected_stack = `heroku stack --app '#{app}'`.split("\n").grep(/^\*/).first
+      selected_stack = run("heroku stack --app '#{app}'", :capture => true).split("\n").grep(/^\*/).first
       selected_stack && selected_stack.include?('cedar')
     end
 
@@ -174,9 +174,9 @@ module Kumade
       end
     end
 
-    def run(command)
+    def run(command, config = {})
       say_status :run, command
-      system command
+      config[:capture] ? `#{command}` : system("#{command}")
     end
 
     def announce(message)
