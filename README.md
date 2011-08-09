@@ -1,4 +1,4 @@
-# Kumade [![Build Status](https://secure.travis-ci.org/thoughtbot/kumade.png)](http://travis-ci.org/gabebw/kumade)
+# Kumade [![Build Status](https://secure.travis-ci.org/thoughtbot/kumade.png)](http://travis-ci.org/thoughtbot/kumade)
 Kumade is a set of basic Rake tasks for deploying to Heroku. It aims to
 provide most of what you want. Unlike other Heroku deploy gems, it is
 well-tested.
