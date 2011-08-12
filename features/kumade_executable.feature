@@ -66,3 +66,22 @@ Feature: Kumade executable
                run  git checkout new_branch && git branch -D deploy
       ==> Deployed to: pretend-staging
       """
+
+  Scenario: Git is clean if there are untracked files
+    Given I write to "new-file" with:
+      """
+      clean
+      """
+    When I run `bundle exec kumade pretend-staging`
+    Then the output from "bundle exec kumade pretend-staging" should not contain "==> ! Cannot deploy: repo is not clean"
+
+  Scenario: Git is not clean if a tracked file is modified
+    Given I write to "new-file" with:
+      """
+      clean
+      """
+    And I successfully run `git add .`
+    And I successfully run `git commit -am 'Add new file'`
+    When I append to "new-file" with "dirty it up"
+    And I run `bundle exec kumade pretend-staging`
+    Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Cannot deploy: repo is not clean"
