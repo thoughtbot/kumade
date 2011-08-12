@@ -44,3 +44,19 @@ Feature: Kumade executable
   Scenario: Deploying to a non-Heroku remote fails
     When I run `kumade bad-remote`
     Then the output should match /==> ! Cannot deploy: "bad-remote" remote does not point to Heroku/
+
+  Scenario: Deploy from another branch
+    When I run `git checkout -b new_branch`
+    When I run `kumade pretend-staging -p`
+    Then the output should contain:
+      """
+      ==> Git repo is clean
+      ==> Packaged assets with Jammit
+               run  git push origin new_branch
+      ==> Pushed new_branch -> origin
+               run  git push -f pretend-staging deploy:master
+      ==> Force pushed new_branch -> pretend-staging
+      ==> Migrated pretend-staging-app
+               run  git checkout new_branch && git branch -D deploy
+      ==> Deployed to: pretend-staging
+      """

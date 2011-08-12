@@ -7,6 +7,7 @@ module Kumade
       super()
       @environment = environment
       @pretending  = pretending
+      @branch      = current_branch
     end
 
     def deploy
@@ -24,15 +25,15 @@ module Kumade
     end
 
     def sync_github
-      run_or_error("git push origin master",
-                   "Failed to push master -> origin")
-      success("Pushed master -> origin")
+      run_or_error("git push origin #{@branch}",
+                   "Failed to push #{@branch} -> origin")
+      success("Pushed #{@branch} -> origin")
     end
 
     def sync_heroku
       run_or_error("git push -f #{environment} #{DEPLOY_BRANCH}:master",
                    "Failed to force push #{DEPLOY_BRANCH} -> #{environment}/master")
-      success("Force pushed master -> #{environment}")
+      success("Force pushed #{@branch} -> #{environment}")
     end
 
     def heroku_migrate
@@ -43,7 +44,7 @@ module Kumade
     end
 
     def post_deploy
-      run_or_error(["git checkout master", "git branch -D #{DEPLOY_BRANCH}"],
+      run_or_error(["git checkout #{@branch}", "git branch -D #{DEPLOY_BRANCH}"],
                    "Failed to clean up #{DEPLOY_BRANCH} branch")
     end
 
@@ -192,6 +193,10 @@ module Kumade
       else
         `git remote` =~ /^#{remote_name}$/
       end
+    end
+
+    def current_branch
+      `git symbolic-ref HEAD`.sub("refs/heads/", "").strip
     end
   end
 end
