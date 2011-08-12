@@ -1,5 +1,5 @@
 When /^I bundle$/ do
-  When %{I run `bundle --gemfile=./Gemfile --local || bundle --gemfile=./Gemfile`}
+  When %{I successfully run `bundle --gemfile=./Gemfile --local || bundle --gemfile=./Gemfile`}
 end
 
 When /^I rebundle$/ do
