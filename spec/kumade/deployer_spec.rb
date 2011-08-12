@@ -38,8 +38,6 @@ describe Kumade::Deployer, "#deploy" do
     force_add_heroku_remote(remote_name, app_name)
   end
 
-  after  { remove_remote(remote_name) }
-
   it "calls the correct methods in order" do
     subject.stub(:run => true)
 
@@ -399,8 +397,6 @@ describe Kumade::Deployer, "#heroku_migrate" do
     force_add_heroku_remote(environment, app_name)
   end
 
-  after { remove_remote(environment) }
-
   it "runs db:migrate with the correct app" do
     subject.stub(:run => true)
     subject.should_receive(:heroku).
@@ -420,11 +416,6 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
     subject.stub(:say)
     force_add_heroku_remote(environment, staging_app_name)
     `git remote add #{bad_environment} blerg@example.com`
-  end
-
-  after do
-    remove_remote(environment)
-    remove_remote(bad_environment)
   end
 
   context "when the remote points to Heroku" do
@@ -470,7 +461,6 @@ describe Kumade::Deployer, "#remote_exists?" do
   let(:remote_name){ 'staging' }
 
   before { force_add_heroku_remote(remote_name, 'i-am-a-heroku-app') }
-  after  { remove_remote(remote_name) }
 
   it "returns true if the remote exists" do
     subject.remote_exists?(remote_name).should be_true
