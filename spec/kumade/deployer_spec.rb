@@ -166,25 +166,6 @@ describe Kumade::Deployer, "#ensure_clean_git" do
   end
 end
 
-describe Kumade::Deployer, "#default_task_exists?" do
-  it "returns true because a default task does exist" do
-    subject.default_task_exists?.should be_true
-  end
-end
-
-describe Kumade::Deployer, "#rake_succeeded?" do
-  it "returns true if the default task passed" do
-    subject.should_receive(:run).with("bundle exec rake").and_return(true)
-
-    subject.rake_succeeded?.should be_true
-  end
-
-  it "returns false if the default task failed" do
-    subject.should_receive(:run).with("bundle exec rake").and_raise("blerg")
-    subject.rake_succeeded?.should be_false
-  end
-end
-
 describe Kumade::Deployer, "#package_assets" do
   context "with Jammit installed" do
     it "calls package_with_jammit" do

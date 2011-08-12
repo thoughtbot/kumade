@@ -146,20 +146,6 @@ module Kumade
           end)
     end
 
-    def default_task_exists?
-      `rake -s -P | grep 'rake default'`.strip.size > 0
-    end
-
-    def rake_succeeded?
-      return true if pretending
-
-      begin
-        run "bundle exec rake"
-      rescue
-        false
-      end
-    end
-
     def git_dirty?
       `git diff --exit-code`
       !$?.success?
