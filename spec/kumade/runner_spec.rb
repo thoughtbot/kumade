@@ -25,4 +25,15 @@ describe Kumade::Runner do
 
     subject.run([environment], out)
   end
+
+  %w(-c --cedar).each do |cedar_arg|
+    it "uses cedar when run with #{cedar_arg}" do
+      deployer = double("deployer").as_null_object
+      Kumade::Deployer.should_receive(:new).
+        with(anything, anything, true).
+        and_return(deployer)
+
+      subject.run([environment, cedar_arg], out)
+    end
+  end
 end

@@ -3,11 +3,12 @@ module Kumade
     DEPLOY_BRANCH = "deploy"
     attr_reader :environment, :pretending
 
-    def initialize(environment = 'staging', pretending = false)
+    def initialize(environment = 'staging', pretending = false, cedar = false)
       super()
       @environment = environment
       @pretending  = pretending
       @branch      = current_branch
+      @cedar       = cedar
     end
 
     def deploy
@@ -49,7 +50,7 @@ module Kumade
     end
 
     def heroku(command, app)
-      heroku_command = if Kumade.cedar?(app)
+      heroku_command = if @cedar
                          "bundle exec heroku run"
                        else
                          "bundle exec heroku"

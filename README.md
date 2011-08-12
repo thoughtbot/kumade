@@ -22,33 +22,34 @@ gem 'kumade'
 ```
 
 ## Usage
-kumade will deploy to any remote in the repo.
+kumade will deploy to any Heroku remote in the repo.
 For example, if you have a remote named "bamboo":
 
-    $ kumade deploy bamboo
+    $ kumade bamboo
 
 which will autodetect the name of the Heroku app that the bamboo remote points
-to, and deploy to it.
+to and deploy to it.
 
-To run in pretend mode, which just prints what would be done:
+To run in pretend mode, which prints what would be done without actually doing
+any of it:
 
-    $ kumade deploy bamboo -p
+    $ kumade bamboo -p
 
-The default task is to deploy to staging:
+The default is to deploy to staging:
 
-    $ kumade # equivalent to "kumade deploy staging"
+    $ kumade # equivalent to "kumade staging"
 
 ## Does it support the Cedar stack?
 
-Yes. To indicate that a particular app is using Cedar, do this:
+Yes. To indicate that a particular app is using Cedar, run with the -c flag:
 
-    Kumade.on_cedar("my-app-name")
+    kumade bamboo -c
 
 ## Sample Output
 
 ### Normal mode
 
-    $ kumade deploy heroku-staging
+    $ kumade heroku-staging
     ==> Deploying to: heroku-staging
     ==> heroku-staging is a Heroku remote
     ==> Git repo is clean
@@ -106,7 +107,7 @@ Yes. To indicate that a particular app is using Cedar, do this:
 
 ### Pretend mode
 
-    $ kumade deploy heroku-staging -p
+    $ kumade heroku-staging -p
     ==> In Pretend Mode
     ==> Deploying to: heroku-staging
     ==> heroku-staging is a Heroku remote
@@ -120,7 +121,7 @@ Yes. To indicate that a particular app is using Cedar, do this:
 
 ### Pretend Mode with a non-Heroku remote
 
-    $ kumade deploy origin -p
+    $ kumade origin -p
     ==> In Pretend Mode
     ==> Deploying to: origin
     ==> ! Cannot deploy: "origin" remote does not point to Heroku
