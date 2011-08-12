@@ -1,6 +1,7 @@
 require 'rspec'
 require 'kumade'
 require 'rake'
+require 'stringio'
 
 module GitRemoteHelpers
   def force_add_heroku_remote(remote_name, app_name)

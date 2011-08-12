@@ -1,7 +1,6 @@
 require 'thor'
-
 require 'kumade/deployer'
-require 'kumade/thor_task'
+require 'kumade/runner'
 
 module Kumade
   def self.app_for(environment)

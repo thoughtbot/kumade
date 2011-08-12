@@ -2,4 +2,4 @@
 
 require 'kumade'
 
-Kumade::ThorTask.start
+Kumade::Runner.run

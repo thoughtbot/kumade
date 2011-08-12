@@ -16,7 +16,7 @@ Feature: Kumade executable
     And I create a non-Heroku remote named "bad-remote"
 
   Scenario: Pretend mode with a Heroku remote
-    When I run `kumade deploy pretend-staging -p`
+    When I run `kumade pretend-staging -p`
     Then the output should contain "In Pretend Mode"
     And the output should contain:
       """
@@ -37,10 +37,10 @@ Feature: Kumade executable
     Then the output should contain "==> Deployed to: staging"
 
   Scenario: Can deploy to arbitrary environment
-    When I run `kumade deploy bamboo`
+    When I run `kumade bamboo`
     Then the output should contain "==> Deploying to: bamboo"
     Then the output should match /Cannot deploy: /
 
   Scenario: Deploying to a non-Heroku remote fails
-    When I run `kumade deploy bad-remote`
+    When I run `kumade bad-remote`
     Then the output should match /==> ! Cannot deploy: "bad-remote" remote does not point to Heroku/
