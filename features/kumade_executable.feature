@@ -1,4 +1,4 @@
-@extra-timeout @creates-remote
+@extra-timeout @creates-remote @disable-bundler
 Feature: Kumade executable
   As a user
   I want to be able to use the kumade executable
@@ -7,6 +7,12 @@ Feature: Kumade executable
   Background:
     Given a directory named "executable"
     And I cd to "executable"
+    And I write to "Gemfile" with:
+    """
+      gem 'kumade', :path => '../../..'
+      gem 'jammit'
+    """
+    And I run `bundle --gemfile=./Gemfile --local || bundle --gemfile=./Gemfile`
     When I successfully run `git init`
     And I successfully run `touch .gitkeep`
     And I successfully run `git add .`
@@ -16,7 +22,7 @@ Feature: Kumade executable
     And I create a non-Heroku remote named "bad-remote"
 
   Scenario: Pretend mode with a Heroku remote
-    When I run `kumade pretend-staging -p`
+    When I run `bundle exec kumade pretend-staging -p`
     Then the output should contain "In Pretend Mode"
     And the output should contain:
       """
@@ -33,21 +39,21 @@ Feature: Kumade executable
     But the output should not contain "==> Packaged assets with More"
 
   Scenario: Default environment is staging
-    When I run `kumade -p`
+    When I run `bundle exec kumade -p`
     Then the output should contain "==> Deployed to: staging"
 
   Scenario: Can deploy to arbitrary environment
-    When I run `kumade bamboo`
+    When I run `bundle exec kumade bamboo`
     Then the output should contain "==> Deploying to: bamboo"
     Then the output should match /Cannot deploy: /
 
   Scenario: Deploying to a non-Heroku remote fails
-    When I run `kumade bad-remote`
+    When I run `bundle exec kumade bad-remote`
     Then the output should match /==> ! Cannot deploy: "bad-remote" remote does not point to Heroku/
 
   Scenario: Deploy from another branch
     When I run `git checkout -b new_branch`
-    When I run `kumade pretend-staging -p`
+    When I run `bundle exec kumade pretend-staging -p`
     Then the output should contain:
       """
       ==> Git repo is clean
