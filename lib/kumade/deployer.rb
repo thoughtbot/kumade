@@ -165,10 +165,6 @@ module Kumade
       config[:capture] ? `#{command}` : system("#{command}")
     end
 
-    def announce(message)
-      say "==> #{message}"
-    end
-
     def error(message)
       say("==> ! #{message}", :red)
       exit 1

@@ -503,12 +503,6 @@ describe Kumade::Deployer, "#heroku" do
   end
 end
 
-describe Kumade::Deployer, "#announce" do
-  it "exists" do
-    subject.should respond_to(:announce)
-  end
-end
-
 describe Kumade::Deployer, "#success" do
   it "exists" do
     subject.should respond_to(:success)
