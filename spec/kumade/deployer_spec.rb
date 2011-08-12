@@ -15,7 +15,7 @@ describe Kumade::Deployer, "#pre_deploy" do
     subject.pre_deploy
   end
 
-  it "pushes to origin" do
+  it "syncs to github" do
     %w(
       ensure_clean_git
       package_assets
@@ -31,7 +31,6 @@ end
 describe Kumade::Deployer, "#deploy" do
   let(:remote_name){ 'staging' }
   let(:app_name){ 'kumade-staging' }
-
 
   before do
     subject.stub(:say)
