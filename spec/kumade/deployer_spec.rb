@@ -476,7 +476,8 @@ describe Kumade::Deployer, "#heroku" do
   let(:app_name){ 'sushi' }
 
   context "when on Cedar" do
-    before { subject.stub(:on_cedar? => true) }
+    before { Kumade.stub(:cedar?).and_return(true) }
+
     it "runs commands with `run`" do
       subject.should_receive(:run_or_error).with("bundle exec heroku run rake --app #{app_name}", //)
       subject.heroku("rake", app_name)
@@ -484,7 +485,8 @@ describe Kumade::Deployer, "#heroku" do
   end
 
   context "when not on Cedar" do
-    before { subject.stub(:on_cedar? => false) }
+    before { Kumade.stub(:cedar?).and_return(false) }
+
     it "runs commands without `run`" do
       subject.should_receive(:run_or_error).with("bundle exec heroku rake --app #{app_name}", //)
       subject.heroku("rake", app_name)

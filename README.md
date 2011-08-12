@@ -40,7 +40,9 @@ The default task is to deploy to staging:
 
 ## Does it support the Cedar stack?
 
-Yes.
+Yes. To indicate that a particular app is using Cedar, do this:
+
+    Kumade.on_cedar("my-app-name")
 
 ## Sample Output
 

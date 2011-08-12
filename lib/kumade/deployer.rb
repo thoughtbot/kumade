@@ -49,18 +49,13 @@ module Kumade
     end
 
     def heroku(command, app)
-      heroku_command = if on_cedar?(app)
+      heroku_command = if Kumade.cedar?(app)
                          "bundle exec heroku run"
                        else
                          "bundle exec heroku"
                        end
       run_or_error("#{heroku_command} #{command} --app #{app}",
                    "Failed to run #{command} on Heroku")
-    end
-
-    def on_cedar?(app)
-      selected_stack = run("heroku stack --app '#{app}'", :capture => true).split("\n").grep(/^\*/).first
-      selected_stack && selected_stack.include?('cedar')
     end
 
     def ensure_clean_git
