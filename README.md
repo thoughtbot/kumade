@@ -25,7 +25,7 @@ gem 'kumade'
 kumade will deploy to any Heroku remote in the repo.
 For example, if you have a remote named "bamboo":
 
-    $ kumade bamboo
+    $ bundle exec kumade bamboo
 
 which will autodetect the name of the Heroku app that the bamboo remote points
 to and deploy to it.
@@ -33,17 +33,17 @@ to and deploy to it.
 To run in pretend mode, which prints what would be done without actually doing
 any of it:
 
-    $ kumade bamboo -p
+    $ bundle exec kumade bamboo -p
 
 The default is to deploy to staging:
 
-    $ kumade # equivalent to "kumade staging"
+    $ bundle exec kumade # equivalent to "bundle exec kumade staging"
 
 ## Does it support the Cedar stack?
 
 Yes. To indicate that a particular app is using Cedar, run with the -c flag:
 
-    kumade bamboo -c
+    bundle exec kumade bamboo -c
 
 ## Sample Output
 
