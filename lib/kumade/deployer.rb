@@ -164,7 +164,7 @@ module Kumade
       say_status :run, command
       config[:capture] ? `#{command}` : system("#{command}")
     end
-    
+
     def branch_exist?(branch)
         branches = `git branch`
         regex = Regexp.new('[\\n\\s\\*]+' + Regexp.escape(branch.to_s) + '\\n')
