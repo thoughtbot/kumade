@@ -100,12 +100,28 @@ describe Kumade::Deployer, "#sync_heroku" do
   let(:environment) { 'my-env' }
   subject { Kumade::Deployer.new(environment) }
   before { subject.stub(:say) }
+  
+  context "when deploy branch exists" do
+    it "should calls `git push -f`" do
+      subject.stub(:branch_exist?).with("deploy").and_return(true)
+      subject.should_receive(:run).
+        with("git push -f #{environment} deploy:master").
+        and_return(true)
+      subject.sync_heroku
+    end
+  end
 
-  it "calls `git push -f`" do
-    subject.should_receive(:run).
-      with("git push -f #{environment} deploy:master").
-      and_return(true)
-    subject.sync_heroku
+  context "when deploy branch doesn't exists" do
+    it "should calls `git branch deploy` and `git push -f`" do
+      subject.stub(:branch_exist?).with("deploy").and_return(false)
+      subject.should_receive(:run).
+        with("git branch deploy").
+        and_return(true)
+      subject.should_receive(:run).
+        with("git push -f #{environment} deploy:master").
+        and_return(true)
+      subject.sync_heroku
+    end
   end
 
   context "when syncing to heroku fails" do
@@ -114,7 +130,7 @@ describe Kumade::Deployer, "#sync_heroku" do
     end
 
     it "prints an error" do
-      subject.should_receive(:error)
+      subject.should_receive(:error).twice
       subject.sync_heroku
     end
   end
