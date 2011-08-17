@@ -24,6 +24,7 @@ Feature: Kumade executable
       ==> Packaged assets with Jammit
                run  git push origin master
       ==> Pushed master -> origin
+               run  git branch deploy
                run  git push -f pretend-staging deploy:master
       ==> Force pushed master -> pretend-staging
       ==> Migrated pretend-staging-app
@@ -54,6 +55,7 @@ Feature: Kumade executable
       ==> Packaged assets with Jammit
                run  git push origin new_branch
       ==> Pushed new_branch -> origin
+               run  git branch deploy
                run  git push -f pretend-staging deploy:master
       ==> Force pushed new_branch -> pretend-staging
       ==> Migrated pretend-staging-app
