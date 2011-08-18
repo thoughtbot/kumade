@@ -27,3 +27,23 @@ describe Kumade, ".app_for" do
     Kumade.app_for(not_a_heroku_env).should be_nil
   end
 end
+
+describe Kumade, ".environments" do
+  let(:environment){ 'staging' }
+  let(:app_name){ 'staging_test' }
+  let(:not_a_heroku_env){ 'fake_heroku' }
+  let(:not_a_heroku_url){ 'git@github.com:gabebw/kumade.git' }
+
+  before do
+    force_add_heroku_remote(environment, app_name)
+    `git remote add #{not_a_heroku_env} #{not_a_heroku_url}`
+  end
+  after do
+    remove_remote(environment)
+    remove_remote(not_a_heroku_env)
+  end
+
+  it "should return all environments" do
+    Kumade.environments.should == ["staging"]
+  end
+end

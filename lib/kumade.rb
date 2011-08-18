@@ -1,6 +1,7 @@
 require 'thor'
 require 'kumade/deployer'
 require 'kumade/runner'
+require 'kumade/railtie'
 
 module Kumade
   def self.app_for(environment)
@@ -10,6 +11,9 @@ module Kumade
     else
       nil
     end
+  end
+  def self.environments
+    url_remotes = `git remote`.strip.split("\n").map{|remote| [remote, `git config --get remote.#{remote}.url`.strip] }.select{|remote| remote.last =~ /^git@heroku\.com:(.+)\.git$/}.map{|remote| remote.first}
   end
 
   def self.on_cedar!(app)
