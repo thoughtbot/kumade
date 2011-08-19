@@ -72,8 +72,8 @@ module Kumade
 
     def package_assets
       package_with_jammit if jammit_installed?
-      package_with_more if more_installed?
-      invoke_custom_task if custom_task?
+      package_with_more   if more_installed?
+      invoke_custom_task  if custom_task?
     end
 
     def package_with_jammit
@@ -111,8 +111,8 @@ module Kumade
     end
 
     def invoke_custom_task
-      success "Running deploy:assets task"
-      Rake::Task["deploy:assets"].invoke unless pretending
+      success "Running kumade:before_asset_compilation task"
+      Rake::Task["kumade:before_asset_compilation"].invoke unless pretending
     end
 
     def git_add_and_commit_all_assets_in(dir)
@@ -154,7 +154,7 @@ module Kumade
 
     def custom_task?
       load("Rakefile") if File.exist?("Rakefile")
-      Rake::Task.task_defined?("deploy:assets")
+      Rake::Task.task_defined?("kumade:before_asset_compilation")
     end
 
     def git_dirty?

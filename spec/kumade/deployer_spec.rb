@@ -297,7 +297,7 @@ describe Kumade::Deployer, "#invoke_custom_task" do
   let(:task) { stub('task', :invoke => nil) }
 
   it "calls deploy task" do
-    Rake::Task.should_receive(:[]).with("deploy:assets")
+    Rake::Task.should_receive(:[]).with("kumade:before_asset_compilation")
     task.should_receive(:invoke)
     subject.invoke_custom_task
   end
@@ -451,8 +451,8 @@ describe Kumade::Deployer, "#custom_task?" do
   end
 
   it "returns true if it task found" do
-    namespace :deploy do
-      task :assets do
+    namespace :kumade do
+      task :before_asset_compilation do
 
       end
     end

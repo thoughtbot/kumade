@@ -140,8 +140,8 @@ Tested against:
 Want to run a task before bundling your assets on deploy? In your rails app's rake tasks, drop in:
 
 ``` ruby
-namespace :deploy do
-  task :assets do
+namespace :kumade do
+  task :before_asset_compilation do
     puts "This runs before assets are committed and pushed to the remote"
   end
 end

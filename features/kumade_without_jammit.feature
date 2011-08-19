@@ -16,25 +16,25 @@ Feature: Kumade without jammit
   Scenario: Run custom task if it exists
     Given I write to "Rakefile" with:
       """
-      namespace :deploy do
-        task :assets do
+      namespace :kumade do
+        task :before_asset_compilation do
           puts 'Hi!'
         end
       end
       """
     When I run kumade with "pretend-staging"
-    Then the output should contain "Running deploy:assets task"
+    Then the output should contain "Running kumade:before_asset_compilation task"
     And the output should contain "Hi!"
 
   Scenario: Don't run rake task in pretend mode
     Given I write to "Rakefile" with:
       """
-      namespace :deploy do
-        task :assets do
+      namespace :kumade do
+        task :before_asset_compilation do
           puts 'Hi!'
         end
       end
       """
     When I run kumade with "pretend-staging -p"
-    Then the output should contain "Running deploy:assets task"
+    Then the output should contain "Running kumade:before_asset_compilation task"
     And the output should not contain "Hi!"
