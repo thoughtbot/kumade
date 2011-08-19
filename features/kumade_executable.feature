@@ -84,10 +84,3 @@ Feature: Kumade executable
   Scenario: Jammit packager runs if Jammit is installed
     When I run kumade with "pretend-staging"
     Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Error: Jammit::MissingConfiguration"
-
-  Scenario: Jammit packager does not run if Jammit is not installed
-    Given an empty Gemfile
-    And I set up the Gemfile with kumade
-    And I rebundle
-    When I run kumade with "pretend-staging"
-    Then the output from "bundle exec kumade pretend-staging" should not contain "==> ! Error: Jammit::MissingConfiguration"

@@ -218,6 +218,34 @@ describe Kumade::Deployer, "#package_assets" do
       subject.package_assets
     end
   end
+
+  context "with custom rake task installed" do
+    before do
+      subject.stub(:jammit_installed?  => false,
+                   :more_installed?    => false,
+                   :invoke_custom_task => nil,
+                   :custom_task?       => true)
+    end
+
+    it "invokes custom task" do
+      subject.should_receive(:invoke_custom_task)
+      subject.package_assets
+    end
+  end
+
+  context "with custom rake task not installed" do
+    before do
+      subject.stub(:jammit_installed?  => false,
+                   :more_installed?    => false,
+                   :invoke_custom_task => nil,
+                   :custom_task?       => false)
+    end
+
+    it "does not invoke custom task" do
+      subject.should_not_receive(:invoke_custom_task)
+      subject.package_assets
+    end
+  end
 end
 
 describe Kumade::Deployer, "#package_with_jammit" do
@@ -258,6 +286,20 @@ describe Kumade::Deployer, "#package_with_jammit" do
     subject.should_receive(:error).with("Error: Jammit::MissingConfiguration: random Jammit error")
 
     subject.package_with_jammit
+  end
+end
+
+describe Kumade::Deployer, "#invoke_custom_task" do
+  before do
+    Rake::Task.stub(:[] => task)
+  end
+
+  let(:task) { stub('task', :invoke => nil) }
+
+  it "calls deploy task" do
+    Rake::Task.should_receive(:[]).with("deploy:assets")
+    task.should_receive(:invoke)
+    subject.invoke_custom_task
   end
 end
 
@@ -400,6 +442,25 @@ describe Kumade::Deployer, "#more_installed?" do
       end
     end
     Kumade::Deployer.new.more_installed?.should be_true
+  end
+end
+
+describe Kumade::Deployer, "#custom_task?" do
+  before do
+    Rake::Task.clear
+  end
+
+  it "returns true if it task found" do
+    namespace :deploy do
+      task :assets do
+
+      end
+    end
+    Kumade::Deployer.new.custom_task?.should be_true
+  end
+
+  it "returns false if task not found" do
+    Kumade::Deployer.new.custom_task?.should be_false
   end
 end
 

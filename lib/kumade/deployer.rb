@@ -73,6 +73,7 @@ module Kumade
     def package_assets
       package_with_jammit if jammit_installed?
       package_with_more if more_installed?
+      invoke_custom_task if custom_task?
     end
 
     def package_with_jammit
@@ -107,6 +108,11 @@ module Kumade
           error("Error: #{more_error.class}: #{more_error.message}")
         end
       end
+    end
+
+    def invoke_custom_task
+      success "Running deploy:assets task"
+      Rake::Task["deploy:assets"].invoke unless pretending
     end
 
     def git_add_and_commit_all_assets_in(dir)
@@ -144,6 +150,11 @@ module Kumade
           rescue LoadError
             false
           end)
+    end
+
+    def custom_task?
+      load("Rakefile") if File.exist?("Rakefile")
+      Rake::Task.task_defined?("deploy:assets")
     end
 
     def git_dirty?

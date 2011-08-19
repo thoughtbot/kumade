@@ -22,6 +22,7 @@ gem 'kumade'
 ```
 
 ## Usage
+
 kumade will deploy to any Heroku remote in the repo.
 For example, if you have a remote named "bamboo":
 
@@ -133,6 +134,20 @@ Tested against:
 * MRI 1.8.7
 * MRI 1.9.2
 * REE 1.8.7
+
+## Misc Features
+
+Want to run a task before bundling your assets on deploy? In your rails app's rake tasks, drop in:
+
+``` ruby
+namespace :deploy do
+  task :assets do
+    puts "This runs before assets are committed and pushed to the remote"
+  end
+end
+```
+
+You can hook in any custom code you want to run there before deploying!
 
 ## What's with the name?
 
