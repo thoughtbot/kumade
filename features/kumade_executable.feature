@@ -84,3 +84,15 @@ Feature: Kumade executable
   Scenario: Jammit packager runs if Jammit is installed
     When I run kumade with "pretend-staging"
     Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Error: Jammit::MissingConfiguration"
+
+  Scenario: Run custom task before jammit
+    Given I write to "Rakefile" with:
+      """
+      namespace :kumade do
+        task :before_asset_compilation do
+          puts 'Hi!'
+        end
+      end
+      """
+    When I run kumade with "pretend-staging -p"
+    Then the output should match /kumade:before_asset_compilation.*Packaged assets with Jammit/

@@ -71,9 +71,9 @@ module Kumade
     end
 
     def package_assets
+      invoke_custom_task  if custom_task?
       package_with_jammit if jammit_installed?
       package_with_more   if more_installed?
-      invoke_custom_task  if custom_task?
     end
 
     def package_with_jammit
