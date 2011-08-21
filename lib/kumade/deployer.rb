@@ -27,12 +27,14 @@ module Kumade
     end
 
     def sync_github
+      invoke_task("kumade:before_github_sync")
       run_or_error("git push origin #{@branch}",
                    "Failed to push #{@branch} -> origin")
       success("Pushed #{@branch} -> origin")
     end
 
     def sync_heroku
+      invoke_task("kumade:before_heroku_deploy")
       unless branch_exist?(DEPLOY_BRANCH)
         run_or_error("git branch deploy", "Failed to create #{DEPLOY_BRANCH}")
       end

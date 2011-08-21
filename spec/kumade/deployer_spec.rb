@@ -75,6 +75,12 @@ end
 
 describe Kumade::Deployer, "#sync_github" do
   before { subject.stub(:say) }
+  
+  it "should invoke kumade:before_github_sync task" do
+    subject.stub(:run => true)
+    subject.should_receive(:invoke_task).with("kumade:before_github_sync")
+    subject.sync_github
+  end
 
   it "calls `git push`" do
     subject.should_receive(:run).
@@ -113,6 +119,13 @@ describe Kumade::Deployer, "#sync_heroku" do
   let(:environment) { 'my-env' }
   subject { Kumade::Deployer.new(environment) }
   before { subject.stub(:say) }
+  
+  it "should invoke kumade:before_heroku_deploy task" do
+    subject.stub(:branch_exist?).with("deploy").and_return(true)
+    subject.stub(:run => true)
+    subject.should_receive(:invoke_task).with("kumade:before_heroku_deploy")
+    subject.sync_heroku
+  end
   
   context "when deploy branch exists" do
     it "should calls `git push -f`" do

@@ -136,3 +136,25 @@ Feature: Kumade executable
       """
     When I run kumade with "pretend-staging -p"
     Then the output should match /kumade:before_asset_compilation.*Packaged assets with Jammit/
+  Scenario: Run custom task before github sync
+    Given I write to "Rakefile" with:
+      """
+      namespace :kumade do
+        task :before_github_sync do
+          puts 'Hi!'
+        end
+      end
+      """
+    When I run kumade
+    Then the output should contains "Running kumade:before_github_sync task"
+  Scenario: Run custom task before heroku deploy
+    Given I write to "Rakefile" with:
+      """
+      namespace :kumade do
+        task :before_heroku_deploy do
+          puts 'Hi!'
+        end
+      end
+      """
+    When I run kumade
+    Then the output should contains "Running kumade:before_heroku_deploy task"
