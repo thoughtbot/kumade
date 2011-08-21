@@ -27,10 +27,12 @@ module Kumade
     end
 
     def sync_github
+      invoke_task("kumade:before_github_sync")
       git.push(@branch)
     end
-
+    
     def sync_heroku
+      invoke_task("kumade:before_heroku_deploy")
       git.create(DEPLOY_BRANCH)
       git.push("#{DEPLOY_BRANCH}:master", environment, true)
     end
@@ -59,7 +61,7 @@ module Kumade
     end
 
     def package_assets
-      invoke_task("kumade:before_asset_compilation")  if task_exist?("kumade:before_asset_compilation")
+      invoke_task("kumade:before_asset_compilation")
       package_with_jammit if jammit_installed?
       package_with_more   if more_installed?
     end
@@ -99,8 +101,10 @@ module Kumade
     end
 
     def invoke_task(task)
-      success "Running #{task} task"
-      Rake::Task[task].invoke unless pretending
+      if task_exist?(task)
+        success "Running #{task} task"
+        Rake::Task[task].invoke unless pretending
+      end
     end
 
     def git_add_and_commit_all_assets_in(dir)
