@@ -283,6 +283,7 @@ end
 
 describe Kumade::Deployer, "#invoke_task" do
   before do
+    subject.stub(:say)
     Rake::Task.stub(:[] => task)
   end
 
