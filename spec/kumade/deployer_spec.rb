@@ -223,12 +223,12 @@ describe Kumade::Deployer, "#package_assets" do
     before do
       subject.stub(:jammit_installed?  => false,
                    :more_installed?    => false,
-                   :invoke_custom_task => nil,
-                   :custom_task?       => true)
+                   :invoke_task => nil,
+                   :task_exist?       => true)
     end
 
     it "invokes custom task" do
-      subject.should_receive(:invoke_custom_task)
+      subject.should_receive(:invoke_task)
       subject.package_assets
     end
   end
@@ -237,12 +237,12 @@ describe Kumade::Deployer, "#package_assets" do
     before do
       subject.stub(:jammit_installed?  => false,
                    :more_installed?    => false,
-                   :invoke_custom_task => nil,
-                   :custom_task?       => false)
+                   :invoke_task => nil,
+                   :task_exist?       => false)
     end
 
     it "does not invoke custom task" do
-      subject.should_not_receive(:invoke_custom_task)
+      subject.should_not_receive(:invoke_task)
       subject.package_assets
     end
   end
@@ -289,7 +289,7 @@ describe Kumade::Deployer, "#package_with_jammit" do
   end
 end
 
-describe Kumade::Deployer, "#invoke_custom_task" do
+describe Kumade::Deployer, "#invoke_task" do
   before do
     subject.stub(:say)
     Rake::Task.stub(:[] => task)
@@ -300,7 +300,7 @@ describe Kumade::Deployer, "#invoke_custom_task" do
   it "calls deploy task" do
     Rake::Task.should_receive(:[]).with("kumade:before_asset_compilation")
     task.should_receive(:invoke)
-    subject.invoke_custom_task
+    subject.invoke_task("kumade:before_asset_compilation")
   end
 end
 
@@ -446,7 +446,7 @@ describe Kumade::Deployer, "#more_installed?" do
   end
 end
 
-describe Kumade::Deployer, "#custom_task?" do
+describe Kumade::Deployer, "#task_exist?" do
   before do
     Rake::Task.clear
   end
@@ -457,11 +457,11 @@ describe Kumade::Deployer, "#custom_task?" do
 
       end
     end
-    Kumade::Deployer.new.custom_task?.should be_true
+    Kumade::Deployer.new.task_exist?("kumade:before_asset_compilation").should be_true
   end
 
   it "returns false if task not found" do
-    Kumade::Deployer.new.custom_task?.should be_false
+    Kumade::Deployer.new.task_exist?("kumade:before_asset_compilation").should be_false
   end
 end
 
