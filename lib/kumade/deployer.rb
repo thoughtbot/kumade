@@ -21,6 +21,7 @@ module Kumade
 
     def pre_deploy
       ensure_clean_git
+      run_tests
       package_assets
       sync_github
     end
@@ -71,9 +72,17 @@ module Kumade
     end
 
     def package_assets
-      invoke_task("kumade:before_asset_compilation")  if task_exist?("kumade:before_asset_compilation")
+      invoke_task("kumade:before_asset_compilation")
       package_with_jammit if jammit_installed?
       package_with_more   if more_installed?
+    end
+    
+    def run_tests
+      %w(spec
+        test
+        features
+        cucumber
+      ).each {|task| invoke_task(task)}
     end
 
     def package_with_jammit
@@ -111,8 +120,10 @@ module Kumade
     end
 
     def invoke_task(task)
-      success "Running #{task} task"
-      Rake::Task[task].invoke unless pretending
+      if task_exist?(task)
+        success "Running #{task} task"
+        Rake::Task[task].invoke unless pretending
+      end
     end
 
     def git_add_and_commit_all_assets_in(dir)
