@@ -1,19 +1,25 @@
 require 'spec_helper'
 
 describe Kumade::Deployer, "#pre_deploy" do
-  before { subject.stub(:say) }
+    #before { subject.stub(:say) }
 
-  it "calls the correct methods in order" do
-    %w(
-      ensure_clean_git
-      run_tests
-      package_assets
-      sync_github
-      ).each do |task|
-      subject.should_receive(task).ordered.and_return(true)
+  context "running tests first" do
+    subject { Kumade::Deployer.new(:tests => true) }
+    it "calls the correct methods in order" do
+      %w(
+        ensure_clean_git
+        run_tests
+        package_assets
+        sync_github
+        ).each do |task|
+        subject.should_receive(task).ordered.and_return(true)
+      end
+
+      subject.pre_deploy
     end
+  end
 
-    subject.pre_deploy
+  context "without running tests first" do
   end
 
   it "syncs to github" do
@@ -111,7 +117,7 @@ end
 
 describe Kumade::Deployer, "#sync_heroku" do
   let(:environment) { 'my-env' }
-  subject { Kumade::Deployer.new(environment) }
+  subject { Kumade::Deployer.new(:environment => environment) }
   before { subject.stub(:say) }
   
   context "when deploy branch exists" do
@@ -498,8 +504,7 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 
   context "when the remote points to Heroku" do
-    subject { Kumade::Deployer.new(environment) }
-
+    subject { Kumade::Deployer.new(:environment => environment) } 
     it "does not print an error" do
       subject.should_not_receive(:error)
 
@@ -515,7 +520,7 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
 
 
   context "when the remote does not exist" do
-    subject { Kumade::Deployer.new(environment) }
+    subject { Kumade::Deployer.new(:environment => environment) }
     before { remove_remote(environment) }
 
     it "prints an error" do
@@ -526,7 +531,7 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 
   context "when the remote does not point to Heroku" do
-    subject { Kumade::Deployer.new(bad_environment) }
+    subject { Kumade::Deployer.new(:environment => bad_environment) }
 
     it "prints an error" do
       subject.should_receive(:error).with(%{Cannot deploy: "#{bad_environment}" remote does not point to Heroku})
@@ -556,7 +561,7 @@ describe Kumade::Deployer, "#heroku" do
   let(:app_name){ 'sushi' }
 
   context "when on Cedar" do
-    subject { Kumade::Deployer.new('staging', false, cedar = true) }
+    subject { Kumade::Deployer.new(:cedar => true) }
 
     it "runs commands with `run`" do
       subject.should_receive(:run_or_error).with("bundle exec heroku run rake --app #{app_name}", //)
@@ -565,7 +570,7 @@ describe Kumade::Deployer, "#heroku" do
   end
 
   context "when not on Cedar" do
-    subject { Kumade::Deployer.new('staging', false, cedar = false) }
+    subject { Kumade::Deployer.new(:cedar => false) }
 
     it "runs commands without `run`" do
       subject.should_receive(:run_or_error).with("bundle exec heroku rake --app #{app_name}", //)

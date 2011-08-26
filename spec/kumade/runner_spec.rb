@@ -30,7 +30,7 @@ describe Kumade::Runner do
     it "uses cedar when run with #{cedar_arg}" do
       deployer = double("deployer").as_null_object
       Kumade::Deployer.should_receive(:new).
-        with(anything, anything, true).
+        with(hash_including(:cedar => true)).
         and_return(deployer)
 
       subject.run([environment, cedar_arg], out)

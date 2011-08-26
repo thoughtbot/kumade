@@ -19,11 +19,11 @@ module Kumade
         @out.puts "==> In Pretend Mode"
       end
       @out.puts "==> Deploying to: #{environment}"
-      Deployer.new(environment, pretending?, @options[:cedar]).deploy
+      Deployer.new(:environment => environment, :pretending => pretending?, :cedar => @options[:cedar], :tests => @options[:tests]).deploy
       @out.puts "==> Deployed to: #{environment}"
     end
 
-    def self.parse_arguments!(args)
+   def self.parse_arguments!(args)
       options = {}
       OptionParser.new do |opts|
         opts.banner = "Usage: kumade <environment> [options]"
@@ -34,6 +34,10 @@ module Kumade
 
         opts.on("-c", "--cedar", "Use this if your app is on cedar") do |cedar|
           options[:cedar] = cedar
+        end
+
+        opts.on("-t", "--tests", "Use this to run tests before deploy") do |tests|
+          options[:tests] = tests
         end
 
         opts.on_tail('-v', '--version', 'Show version') do
@@ -53,5 +57,6 @@ module Kumade
     def self.pretending?
       @options[:pretend]
     end
+
   end
 end

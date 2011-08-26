@@ -3,12 +3,20 @@ module Kumade
     DEPLOY_BRANCH = "deploy"
     attr_reader :environment, :pretending
 
-    def initialize(environment = 'staging', pretending = false, cedar = false)
+    def initialize(options = { })
       super()
-      @environment = environment
-      @pretending  = pretending
+      default = {
+        :environment => 'staging',
+        :pretending => false,
+        :cedar => false,
+        :tests => false
+      }
+      options = default.merge(options)
+      @environment = options[:environment]
+      @pretending  = options[:pretending]
       @branch      = current_branch
-      @cedar       = cedar
+      @cedar       = options[:cedar]
+      @tests       = options[:tests]
     end
 
     def deploy
@@ -21,7 +29,9 @@ module Kumade
 
     def pre_deploy
       ensure_clean_git
-      run_tests
+      if @tests
+        run_tests
+      end
       package_assets
       sync_github
     end
