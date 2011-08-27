@@ -19,7 +19,7 @@ module Kumade
         @out.puts "==> In Pretend Mode"
       end
       @out.puts "==> Deploying to: #{environment}"
-      Deployer.new(environment, pretending?, @options[:cedar]).deploy
+      Deployer.new(environment, pretending?, cedar?).deploy
       @out.puts "==> Deployed to: #{environment}"
     end
 
@@ -30,10 +30,6 @@ module Kumade
 
         opts.on("-p", "--pretend", "Pretend mode: print what kumade would do") do |p|
           options[:pretend] = p
-        end
-
-        opts.on("-c", "--cedar", "Use this if your app is on cedar") do |cedar|
-          options[:cedar] = cedar
         end
 
         opts.on_tail('-v', '--version', 'Show version') do
@@ -52,6 +48,10 @@ module Kumade
 
     def self.pretending?
       @options[:pretend]
+    end
+
+    def self.cedar?
+      `git config --get #{environment}.stack`.include?("cedar")
     end
   end
 end

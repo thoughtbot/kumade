@@ -42,9 +42,9 @@ The default is to deploy to staging:
 
 ## Does it support the Cedar stack?
 
-Yes. To indicate that a particular app is using Cedar, run with the -c flag:
+Yes. To indicate that a particular environment is using Cedar, configure environment stack on your git. Example:
 
-    bundle exec kumade bamboo -c
+    git config --add my-environment.stack "cedar"
 
 ## Sample Output
 
