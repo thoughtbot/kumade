@@ -36,7 +36,7 @@ describe Kumade::Runner do
     `git config --unset my-environment.stack "cedar"`
   end
   
-  it "should not cedar if git config environment stack is defined" do
+  it "should not cedar if git config environment stack isn't defined" do
     `git config --unset my-environment.stack "cedar"`
     deployer = double("deployer").as_null_object
     Kumade::Deployer.should_receive(:new).
