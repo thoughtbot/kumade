@@ -31,9 +31,7 @@ module Kumade
     end
 
     def sync_heroku
-      unless branch_exist?(DEPLOY_BRANCH)
-        run_or_error("git branch deploy", "Failed to create #{DEPLOY_BRANCH}")
-      end
+      @git.create(DEPLOY_BRANCH)
       @git.push("#{DEPLOY_BRANCH}:master", environment, true)
     end
 
@@ -171,13 +169,6 @@ module Kumade
     def run(command, config = {})
       say_status :run, command
       config[:capture] ? `#{command}` : system("#{command}")
-    end
-
-    def branch_exist?(branch)
-        branches = `git branch`
-        regex = Regexp.new('[\\n\\s\\*]+' + Regexp.escape(branch.to_s) + '\\n')
-        result = ((branches =~ regex) ? true : false)
-        return result
     end
 
     def error(message)

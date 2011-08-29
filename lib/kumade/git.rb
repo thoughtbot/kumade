@@ -16,6 +16,12 @@ module Kumade
       success("Pushed #{branch} -> #{remote}")
     end
     
+    def create(branch)
+      unless branch_exist?(branch)
+        run_or_error("git branch #{branch}", "Failed to create #{branch}")
+      end
+    end
+
     def run_or_error(commands, error_message)
       all_commands = [commands].flatten.join(' && ')
       if @pretending
@@ -37,6 +43,13 @@ module Kumade
     
     def success(message)
       say("==> #{message}", :green)
+    end
+    
+    def branch_exist?(branch)
+        branches = `git branch`
+        regex = Regexp.new('[\\n\\s\\*]+' + Regexp.escape(branch.to_s) + '\\n')
+        result = ((branches =~ regex) ? true : false)
+        return result
     end
   end
 end
