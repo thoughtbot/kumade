@@ -61,121 +61,29 @@ describe Kumade::Deployer, "#deploy" do
 end
 
 describe Kumade::Deployer, "#sync_github" do
-  before { subject.stub(:say) }
-
-  it "calls `git push`" do
-    subject.should_receive(:run).
-      with("git push origin master").
-      and_return(true)
+before { subject.stub(:git).and_return(@git_mock = mock()) }  
+  it "should call @git.push" do
+    @git_mock.should_receive(:push).with("master")
     subject.sync_github
-  end
-
-  context "when `git push` fails" do
-    before { subject.stub(:run => false) }
-
-    it "prints an error message" do
-      subject.should_receive(:error).with("Failed to push master -> origin")
-
-      subject.sync_github
-    end
-  end
-
-  context "when syncing github succeeds" do
-    before { subject.stub(:run => true) }
-
-    it "does not raise an error" do
-      subject.should_not_receive(:error)
-      subject.sync_github
-    end
-
-    it "prints a success message" do
-      subject.should_receive(:success).with("Pushed master -> origin")
-
-      subject.sync_github
-    end
   end
 end
 
 describe Kumade::Deployer, "#sync_heroku" do
   let(:environment) { 'my-env' }
   subject { Kumade::Deployer.new(environment) }
-  before { subject.stub(:say) }
-  
-  context "when deploy branch exists" do
-    it "should calls `git push -f`" do
-      subject.stub(:branch_exist?).with("deploy").and_return(true)
-      subject.should_receive(:run).
-        with("git push -f #{environment} deploy:master").
-        and_return(true)
-      subject.sync_heroku
-    end
-  end
-
-  context "when deploy branch doesn't exists" do
-    it "should calls `git branch deploy` and `git push -f`" do
-      subject.stub(:branch_exist?).with("deploy").and_return(false)
-      subject.should_receive(:run).
-        with("git branch deploy").
-        and_return(true)
-      subject.should_receive(:run).
-        with("git push -f #{environment} deploy:master").
-        and_return(true)
-      subject.sync_heroku
-    end
-  end
-
-  context "when syncing to heroku fails" do
-    before do
-      subject.stub(:run => false)
-    end
-
-    it "prints an error" do
-      subject.should_receive(:error).twice
-      subject.sync_heroku
-    end
-  end
-
-  context "when syncing to heroku succeeds" do
-    before do
-      subject.stub(:run => true)
-      subject.stub(:say)
-    end
-
-    it "does not raise an error" do
-      subject.should_not_receive(:error)
-      subject.sync_heroku
-    end
-
-    it "prints a success message" do
-      subject.should_receive(:success).
-        with("Pushed master -> #{environment}")
-
-      subject.sync_heroku
-    end
+before { subject.stub(:git).and_return(@git_mock = mock()) }  
+  it "should call git.create and git.push" do
+    @git_mock.should_receive(:create).with("deploy")
+    @git_mock.should_receive(:push).with("deploy:master", environment, true)
+    subject.sync_heroku
   end
 end
 
 describe Kumade::Deployer, "#ensure_clean_git" do
-  before { subject.stub(:say) }
-
-  context "when git is dirty" do
-    before { subject.stub(:git_dirty? => true) }
-
-    it "prints an error" do
-      subject.should_receive(:error).with("Cannot deploy: repo is not clean.")
-      subject.ensure_clean_git
-    end
-  end
-
-  context "when git is clean" do
-    before { subject.stub(:git_dirty? => false) }
-
-    it "prints a success message" do
-      subject.should_not_receive(:error)
-      subject.should_receive(:success).with("Git repo is clean")
-
-      subject.ensure_clean_git
-    end
+before { subject.stub(:git).and_return(@git_mock = mock()) }  
+  it "should call git.ensure_clean_git" do
+    @git_mock.should_receive(:ensure_clean_git)
+    subject.ensure_clean_git
   end
 end
 
@@ -261,7 +169,7 @@ describe Kumade::Deployer, "#package_with_jammit" do
   end
 
   context "with updated assets" do
-    before { subject.stub(:git_dirty? => true) }
+    before { subject.stub(:git => mock(:git_dirty? => true)) }
 
     it "prints the correct message" do
       subject.should_receive(:success).with("Packaged assets with Jammit")
@@ -319,14 +227,14 @@ describe Kumade::Deployer, "#package_with_more" do
   context "with changed assets" do
     it "prints a success message" do
       subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git_dirty? => true)
+      subject.stub(:git => mock(:git_dirty? => true))
       subject.should_receive(:success).with("Packaged assets with More")
 
       subject.package_with_more
     end
 
     it "calls git_add_and_commit_all_assets_in if assets were added" do
-      subject.stub(:git_dirty?       => true,
+      subject.stub(:git => mock(:git_dirty? => true),
                    :more_assets_path => 'blerg')
       subject.stub(:run).with("bundle exec rake more:generate")
       subject.should_receive(:git_add_and_commit_all_assets_in).
@@ -340,7 +248,7 @@ describe Kumade::Deployer, "#package_with_more" do
   context "with no changed assets" do
     it "prints no message" do
       subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git_dirty? => false)
+      subject.stub(:git => mock(:git_dirty? => false))
       subject.should_not_receive(:say)
 
       subject.package_with_more
@@ -348,7 +256,7 @@ describe Kumade::Deployer, "#package_with_more" do
 
     it "does not call git_add_and_commit_all_more_assets" do
       subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git_dirty? => false)
+      subject.stub(:git => mock(:git_dirty? => false))
       subject.should_not_receive(:git_add_and_commit_all_assets_in)
 
       subject.package_with_more
@@ -369,29 +277,11 @@ describe Kumade::Deployer, "#package_with_more" do
 end
 
 describe Kumade::Deployer, "#git_add_and_commit_all_assets_in" do
-  before do
-    subject.stub(:run => true)
-    subject.stub(:say)
-  end
-
-  it "prints a success message" do
-    subject.should_receive(:success).with("Added and committed all assets")
-
-    subject.git_add_and_commit_all_assets_in('blerg')
-  end
-
-  it "runs the correct commands" do
-    subject.should_receive(:run).
-      with("git checkout -b deploy && git add -f blerg && git commit -m 'Compiled assets'")
-
-    subject.git_add_and_commit_all_assets_in('blerg')
-  end
-
-  it "prints an error if it could not add and commit assets" do
-    subject.stub(:run => false)
-    subject.should_receive(:error).with("Cannot deploy: couldn't commit assets")
-
-    subject.git_add_and_commit_all_assets_in('blerg')
+  before {subject.stub(:git => @git_mock = mock())}
+  
+  it "should call git.add_and_commit_all_in" do
+    @git_mock.should_receive(:add_and_commit_all_in).with("dir", 'deploy', 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
+    subject.git_add_and_commit_all_assets_in("dir")
   end
 end
 
@@ -534,22 +424,6 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 end
 
-describe Kumade::Deployer, "#remote_exists?" do
-  let(:remote_name){ 'staging' }
-
-  before { force_add_heroku_remote(remote_name, 'i-am-a-heroku-app') }
-
-  it "returns true if the remote exists" do
-    subject.remote_exists?(remote_name).should be_true
-  end
-
-  it "returns false if the remote does not exist" do
-    remove_remote(remote_name)
-
-    subject.remote_exists?(remote_name).should be_false
-  end
-end
-
 describe Kumade::Deployer, "#heroku" do
   let(:app_name){ 'sushi' }
 
@@ -585,10 +459,10 @@ describe Kumade::Deployer, "#error" do
 end
 
 describe Kumade::Deployer, "#post_deploy" do
-  before { subject.stub(:run => true, :say => true) }
-
-  it "cleans up the deploy branch" do
-    subject.should_receive(:run).with('git checkout master && git branch -D deploy')
+  before { subject.stub(:git => @git_mock = mock()) }
+  
+  it "should call git.delete" do
+    @git_mock.should_receive(:delete).with('deploy', 'master')
     subject.post_deploy
   end
 end

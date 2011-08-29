@@ -1,7 +1,7 @@
 module Kumade
   class Deployer < Thor::Shell::Color
     DEPLOY_BRANCH = "deploy"
-    attr_reader :environment, :pretending
+    attr_reader :environment, :pretending, :git
 
     def initialize(environment = 'staging', pretending = false, cedar = false)
       super()
@@ -27,12 +27,12 @@ module Kumade
     end
 
     def sync_github
-      @git.push(@branch)
+      git.push(@branch)
     end
 
     def sync_heroku
-      @git.create(DEPLOY_BRANCH)
-      @git.push("#{DEPLOY_BRANCH}:master", environment, true)
+      git.create(DEPLOY_BRANCH)
+      git.push("#{DEPLOY_BRANCH}:master", environment, true)
     end
 
     def heroku_migrate
@@ -43,7 +43,7 @@ module Kumade
     end
 
     def post_deploy
-      @git.delete(DEPLOY_BRANCH, @branch)
+      git.delete(DEPLOY_BRANCH, @branch)
     end
 
     def heroku(command, app)
@@ -57,7 +57,7 @@ module Kumade
     end
 
     def ensure_clean_git
-      @git.ensure_clean_git
+      git.ensure_clean_git
     end
 
     def package_assets
@@ -90,7 +90,7 @@ module Kumade
       else
         begin
           run "bundle exec rake more:generate"
-          if @git.git_dirty?
+          if git.git_dirty?
             success(success_message)
             git_add_and_commit_all_assets_in(more_assets_path)
           end
@@ -106,7 +106,7 @@ module Kumade
     end
 
     def git_add_and_commit_all_assets_in(dir)
-      @git.add_and_commit_all_in(dir, DEPLOY_BRANCH, 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
+      git.add_and_commit_all_in(dir, DEPLOY_BRANCH, 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
     end
 
     def jammit_assets_path
@@ -168,7 +168,7 @@ module Kumade
     end
 
     def ensure_heroku_remote_exists
-      if @git.remote_exists?(environment)
+      if git.remote_exists?(environment)
         if app_name = Kumade.app_for(environment)
           success("#{environment} is a Heroku remote")
         else
