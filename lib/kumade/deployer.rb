@@ -1,5 +1,5 @@
 module Kumade
-  class Deployer < Thor::Shell::Color
+  class Deployer < Base
     DEPLOY_BRANCH = "deploy"
     attr_reader :environment, :pretending, :git
 
@@ -142,29 +142,6 @@ module Kumade
     def custom_task?
       load("Rakefile") if File.exist?("Rakefile")
       Rake::Task.task_defined?("kumade:before_asset_compilation")
-    end
-
-    def run_or_error(commands, error_message)
-      all_commands = [commands].flatten.join(' && ')
-      if pretending
-        say_status(:run, all_commands)
-      else
-        error(error_message) unless run(all_commands)
-      end
-    end
-
-    def run(command, config = {})
-      say_status :run, command
-      config[:capture] ? `#{command}` : system("#{command}")
-    end
-
-    def error(message)
-      say("==> ! #{message}", :red)
-      exit 1
-    end
-
-    def success(message)
-      say("==> #{message}", :green)
     end
 
     def ensure_heroku_remote_exists

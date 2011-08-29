@@ -1,5 +1,5 @@
 module Kumade
-  class Git < Thor::Shell::Color
+  class Git < Base
     def initialize(pretending, environment)
       super()
       @pretending = pretending
@@ -58,29 +58,6 @@ module Kumade
       end
     end
 
-    def run_or_error(commands, error_message)
-      all_commands = [commands].flatten.join(' && ')
-      if @pretending
-        say_status(:run, all_commands)
-      else
-        error(error_message) unless run(all_commands)
-      end
-    end
-    
-    def run(command, config = {})
-      say_status :run, command
-      config[:capture] ? `#{command}` : system("#{command}")
-    end
-    
-    def error(message)
-      say("==> ! #{message}", :red)
-      exit 1
-    end
-    
-    def success(message)
-      say("==> #{message}", :green)
-    end
-    
     def branch_exist?(branch)
         branches = `git branch`
         regex = Regexp.new('[\\n\\s\\*]+' + Regexp.escape(branch.to_s) + '\\n')

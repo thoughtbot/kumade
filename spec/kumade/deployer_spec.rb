@@ -446,18 +446,6 @@ describe Kumade::Deployer, "#heroku" do
   end
 end
 
-describe Kumade::Deployer, "#success" do
-  it "exists" do
-    subject.should respond_to(:success)
-  end
-end
-
-describe Kumade::Deployer, "#error" do
-  it "exists" do
-    subject.should respond_to(:error)
-  end
-end
-
 describe Kumade::Deployer, "#post_deploy" do
   before { subject.stub(:git => @git_mock = mock()) }
   
