@@ -168,7 +168,7 @@ module Kumade
     end
 
     def ensure_heroku_remote_exists
-      if remote_exists?(environment)
+      if @git.remote_exists?(environment)
         if app_name = Kumade.app_for(environment)
           success("#{environment} is a Heroku remote")
         else
@@ -176,14 +176,6 @@ module Kumade
         end
       else
         error(%{Cannot deploy: "#{environment}" remote does not exist})
-      end
-    end
-
-    def remote_exists?(remote_name)
-      if pretending
-        true
-      else
-        `git remote` =~ /^#{remote_name}$/
       end
     end
   end

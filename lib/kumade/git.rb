@@ -37,6 +37,14 @@ module Kumade
       `git symbolic-ref HEAD`.sub("refs/heads/", "").strip
     end
     
+    def remote_exists?(remote_name)
+      if @pretending
+        true
+      else
+        `git remote` =~ /^#{remote_name}$/
+      end
+    end
+    
     def git_dirty?
       `git diff --exit-code`
       !$?.success?
