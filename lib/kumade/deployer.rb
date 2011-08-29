@@ -36,7 +36,7 @@ module Kumade
     end
 
     def heroku_migrate
-      app = Kumade.app_for(environment)
+      app = Kumade::Git.app_for(environment)
 
       heroku("rake db:migrate", app) unless pretending
       success("Migrated #{app}")
@@ -146,7 +146,7 @@ module Kumade
 
     def ensure_heroku_remote_exists
       if git.remote_exists?(environment)
-        if app_name = Kumade.app_for(environment)
+        if app_name = Kumade::Git.app_for(environment)
           success("#{environment} is a Heroku remote")
         else
           error(%{Cannot deploy: "#{environment}" remote does not point to Heroku})

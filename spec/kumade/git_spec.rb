@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe Kumade, ".app_for" do
+describe Kumade::Git, ".app_for" do
   let(:environment){ 'staging' }
   let(:app_name){ 'staging_test' }
   let(:not_a_heroku_env){ 'fake_heroku' }
-  let(:not_a_heroku_url){ 'git@github.com:gabebw/kumade.git' }
+  let(:not_a_heroku_url){ 'git@github.com:gabebw/Kumade::Git.git' }
 
   before do
     force_add_heroku_remote(environment, app_name)
@@ -16,23 +16,23 @@ describe Kumade, ".app_for" do
   end
 
   it "autodetects the Heroku app name" do
-    Kumade.app_for(environment).should == app_name
+    Kumade::Git.app_for(environment).should == app_name
   end
 
   it "is nil if the app cannot be found" do
-    Kumade.app_for('xyz').should be_nil
+    Kumade::Git.app_for('xyz').should be_nil
   end
 
   it "is nil if the remote is not a Heroku remote" do
-    Kumade.app_for(not_a_heroku_env).should be_nil
+    Kumade::Git.app_for(not_a_heroku_env).should be_nil
   end
 end
 
-describe Kumade, ".environments" do
+describe Kumade::Git, ".environments" do
   let(:environment){ 'staging' }
   let(:app_name){ 'staging_test' }
   let(:not_a_heroku_env){ 'fake_heroku' }
-  let(:not_a_heroku_url){ 'git@github.com:gabebw/kumade.git' }
+  let(:not_a_heroku_url){ 'git@github.com:gabebw/Kumade::Git.git' }
 
   before do
     force_add_heroku_remote(environment, app_name)
@@ -44,6 +44,6 @@ describe Kumade, ".environments" do
   end
 
   it "should return all environments" do
-    Kumade.environments.should == ["staging"]
+    Kumade::Git.environments.should == ["staging"]
   end
 end
