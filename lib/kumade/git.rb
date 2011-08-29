@@ -27,6 +27,12 @@ module Kumade
                    "Failed to clean up #{branch_to_delete} branch")
     end
     
+    def add_and_commit_all_in(dir, branch, commit_message, success_output, error_output)
+      run_or_error ["git checkout -b #{branch}", "git add -f #{dir}", "git commit -m '#{commit_message}'"],
+                   "Cannot deploy: #{error_output}"
+      success success_output
+    end
+    
     def git_dirty?
       `git diff --exit-code`
       !$?.success?
