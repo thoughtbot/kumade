@@ -26,6 +26,19 @@ module Kumade
       run_or_error(["git checkout #{branch_to_checkout}", "git branch -D #{branch_to_delete}"],
                    "Failed to clean up #{branch_to_delete} branch")
     end
+    
+    def git_dirty?
+      `git diff --exit-code`
+      !$?.success?
+    end
+    
+    def ensure_clean_git
+      if ! @pretending && git_dirty?
+        error("Cannot deploy: repo is not clean.")
+      else
+        success("Git repo is clean")
+      end
+    end
 
     def run_or_error(commands, error_message)
       all_commands = [commands].flatten.join(' && ')

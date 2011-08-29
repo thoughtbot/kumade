@@ -57,11 +57,7 @@ module Kumade
     end
 
     def ensure_clean_git
-      if ! pretending && git_dirty?
-        error("Cannot deploy: repo is not clean.")
-      else
-        success("Git repo is clean")
-      end
+      @git.ensure_clean_git
     end
 
     def package_assets
@@ -94,7 +90,7 @@ module Kumade
       else
         begin
           run "bundle exec rake more:generate"
-          if git_dirty?
+          if @git.git_dirty?
             success(success_message)
             git_add_and_commit_all_assets_in(more_assets_path)
           end
@@ -149,11 +145,6 @@ module Kumade
     def custom_task?
       load("Rakefile") if File.exist?("Rakefile")
       Rake::Task.task_defined?("kumade:before_asset_compilation")
-    end
-
-    def git_dirty?
-      `git diff --exit-code`
-      !$?.success?
     end
 
     def run_or_error(commands, error_message)
