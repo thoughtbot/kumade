@@ -7,9 +7,9 @@ module Kumade
       super()
       @environment = environment
       @pretending  = pretending
-      @branch      = current_branch
       @cedar       = cedar
       @git         = Git.new(pretending, environment)
+      @branch      = @git.current_branch
     end
 
     def deploy
@@ -185,10 +185,6 @@ module Kumade
       else
         `git remote` =~ /^#{remote_name}$/
       end
-    end
-
-    def current_branch
-      `git symbolic-ref HEAD`.sub("refs/heads/", "").strip
     end
   end
 end

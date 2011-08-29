@@ -33,6 +33,10 @@ module Kumade
       success success_output
     end
     
+    def current_branch
+      `git symbolic-ref HEAD`.sub("refs/heads/", "").strip
+    end
+    
     def git_dirty?
       `git diff --exit-code`
       !$?.success?
