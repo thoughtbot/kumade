@@ -9,6 +9,7 @@ module Kumade
       @pretending  = pretending
       @branch      = current_branch
       @cedar       = cedar
+      @git         = Git.new(pretending, environment)
     end
 
     def deploy
@@ -26,18 +27,14 @@ module Kumade
     end
 
     def sync_github
-      run_or_error("git push origin #{@branch}",
-                   "Failed to push #{@branch} -> origin")
-      success("Pushed #{@branch} -> origin")
+      @git.push(@branch)
     end
 
     def sync_heroku
       unless branch_exist?(DEPLOY_BRANCH)
         run_or_error("git branch deploy", "Failed to create #{DEPLOY_BRANCH}")
       end
-      run_or_error("git push -f #{environment} #{DEPLOY_BRANCH}:master",
-                   "Failed to force push #{DEPLOY_BRANCH} -> #{environment}/master")
-      success("Force pushed #{@branch} -> #{environment}")
+      @git.push("#{DEPLOY_BRANCH}:master", environment, true)
     end
 
     def heroku_migrate

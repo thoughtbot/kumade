@@ -148,7 +148,7 @@ describe Kumade::Deployer, "#sync_heroku" do
 
     it "prints a success message" do
       subject.should_receive(:success).
-        with("Force pushed master -> #{environment}")
+        with("Pushed master -> #{environment}")
 
       subject.sync_heroku
     end

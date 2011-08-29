@@ -99,7 +99,7 @@ Yes. To indicate that a particular app is using Cedar, run with the -c flag:
     To git@heroku.com:staging-sushi.git
       a465afd..bc8932b  master -> master
     ==> - true
-    ==> Force pushed master -> heroku-staging
+    ==> Pushed master -> heroku-staging
     ==> + bundle exec heroku rake db:migrate --app staging-sushi
     ... Postgres output removed ...
     ==> - false
@@ -116,7 +116,7 @@ Yes. To indicate that a particular app is using Cedar, run with the -c flag:
     ==> Rake passed
     ==> Packaged assets with Jammit
     ==> Pushed master -> origin
-    ==> Force pushed master -> heroku-staging
+    ==> Pushed master -> heroku-staging
     ==> Migrated staging-sushi
     ==> Deployed to: heroku-staging
 
