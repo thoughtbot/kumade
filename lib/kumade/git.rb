@@ -21,6 +21,11 @@ module Kumade
         run_or_error("git branch #{branch}", "Failed to create #{branch}")
       end
     end
+    
+    def delete(branch_to_delete, branch_to_checkout)
+      run_or_error(["git checkout #{branch_to_checkout}", "git branch -D #{branch_to_delete}"],
+                   "Failed to clean up #{branch_to_delete} branch")
+    end
 
     def run_or_error(commands, error_message)
       all_commands = [commands].flatten.join(' && ')

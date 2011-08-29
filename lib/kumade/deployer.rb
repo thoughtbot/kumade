@@ -43,8 +43,7 @@ module Kumade
     end
 
     def post_deploy
-      run_or_error(["git checkout #{@branch}", "git branch -D #{DEPLOY_BRANCH}"],
-                   "Failed to clean up #{DEPLOY_BRANCH} branch")
+      @git.delete(DEPLOY_BRANCH, @branch)
     end
 
     def heroku(command, app)
