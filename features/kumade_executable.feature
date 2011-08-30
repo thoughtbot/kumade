@@ -32,6 +32,11 @@ Feature: Kumade executable
       ==> Deployed to: pretend-staging
       """
     But the output should not contain "==> Packaged assets with More"
+    And the output should not contain "==> Cache Cleared"
+
+  Scenario: Clears the Rails cache if requested
+    When I run kumade with "-p --clear_cache"
+    Then the output should contain "==> Cache Cleared"
 
   Scenario: Default environment is staging
     When I run kumade with "-p"

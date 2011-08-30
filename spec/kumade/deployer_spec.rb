@@ -100,7 +100,7 @@ describe Kumade::Deployer, "#sync_heroku" do
   let(:environment) { 'my-env' }
   subject { Kumade::Deployer.new(environment) }
   before { subject.stub(:say) }
-  
+
   context "when deploy branch exists" do
     it "should calls `git push -f`" do
       subject.stub(:branch_exist?).with("deploy").and_return(true)
@@ -481,6 +481,25 @@ describe Kumade::Deployer, "#heroku_migrate" do
     subject.should_receive(:success).with("Migrated #{app_name}")
 
     subject.heroku_migrate
+  end
+end
+
+describe Kumade::Deployer, "#heroku_clear_cache" do
+  let(:environment){ 'staging' }
+  let(:app_name){ 'sushi' }
+
+  before do
+    subject { Kumade::Deployer.new('staging', false, false, true) }
+    force_add_heroku_remote(environment, app_name)
+  end
+
+  it "runs 'console \"Rails.cache.clear\"'" do
+    subject.stub(:run => true)
+    subject.should_receive(:heroku_command).
+      with('console "Rails.cache.clear"')
+    subject.should_receive(:success).with("Cache Cleared")
+
+    subject.heroku_clear_cache
   end
 end
 
