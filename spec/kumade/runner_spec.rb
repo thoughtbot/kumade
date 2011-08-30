@@ -14,6 +14,13 @@ describe Kumade::Runner do
     end
   end
 
+  it "clears the Rails cache when run with --clear_cache" do
+    subject.stub(:deploy)
+
+    subject.run([environment, "--clear_cache"], out)
+    subject.clearing_cache?.should be_true
+  end
+
   it "defaults to staging" do
     subject.stub(:deploy)
     subject.run([], out)
@@ -30,7 +37,7 @@ describe Kumade::Runner do
     it "uses cedar when run with #{cedar_arg}" do
       deployer = double("deployer").as_null_object
       Kumade::Deployer.should_receive(:new).
-        with(anything, anything, true).
+        with(anything, anything, true, anything).
         and_return(deployer)
 
       subject.run([environment, cedar_arg], out)

@@ -1,14 +1,15 @@
 module Kumade
   class Deployer < Thor::Shell::Color
     DEPLOY_BRANCH = "deploy"
-    attr_reader :environment, :pretending
+    attr_reader :environment, :pretending, :clearing_cache
 
-    def initialize(environment = 'staging', pretending = false, cedar = false)
+    def initialize(environment = 'staging', pretending = false, cedar = false, clearing_cache = false)
       super()
       @environment = environment
       @pretending  = pretending
       @branch      = current_branch
       @cedar       = cedar
+      @clearing_cache = clearing_cache
     end
 
     def deploy
@@ -16,6 +17,7 @@ module Kumade
       pre_deploy
       sync_heroku
       heroku_migrate
+      heroku_clear_cache if clearing_cache
       post_deploy
     end
 
@@ -45,6 +47,12 @@ module Kumade
 
       heroku("rake db:migrate", app) unless pretending
       success("Migrated #{app}")
+    end
+
+    def heroku_clear_cache
+      app = Kumade.app_for(environment)
+      heroku_command('console "Rails.cache.clear"') unless pretending
+      success("Cache Cleared")
     end
 
     def post_deploy

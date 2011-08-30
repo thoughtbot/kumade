@@ -19,7 +19,7 @@ module Kumade
         @out.puts "==> In Pretend Mode"
       end
       @out.puts "==> Deploying to: #{environment}"
-      Deployer.new(environment, pretending?, @options[:cedar]).deploy
+      Deployer.new(environment, pretending?, @options[:cedar], clearing_cache?).deploy
       @out.puts "==> Deployed to: #{environment}"
     end
 
@@ -34,6 +34,10 @@ module Kumade
 
         opts.on("-c", "--cedar", "Use this if your app is on cedar") do |cedar|
           options[:cedar] = cedar
+        end
+
+        opts.on("", "--clear_cache", "Clear the Rails cache after deployment") do |clear_cache|
+          options[:clear_cache] = clear_cache
         end
 
         opts.on_tail('-v', '--version', 'Show version') do
@@ -52,6 +56,10 @@ module Kumade
 
     def self.pretending?
       @options[:pretend]
+    end
+
+    def self.clearing_cache?
+      @options[:clear_cache]
     end
   end
 end
