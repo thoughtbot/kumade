@@ -4,7 +4,7 @@ describe Kumade::Git, ".app_for" do
   let(:environment){ 'staging' }
   let(:app_name){ 'staging_test' }
   let(:not_a_heroku_env){ 'fake_heroku' }
-  let(:not_a_heroku_url){ 'git@github.com:gabebw/Kumade::Git.git' }
+  let(:not_a_heroku_url){ 'git@github.com:gabebw/kumade.git' }
 
   before do
     force_add_heroku_remote(environment, app_name)
@@ -32,7 +32,7 @@ describe Kumade::Git, ".environments" do
   let(:environment){ 'staging' }
   let(:app_name){ 'staging_test' }
   let(:not_a_heroku_env){ 'fake_heroku' }
-  let(:not_a_heroku_url){ 'git@github.com:gabebw/Kumade::Git.git' }
+  let(:not_a_heroku_url){ 'git@github.com:gabebw/kumade.git' }
 
   before do
     force_add_heroku_remote(environment, app_name)
