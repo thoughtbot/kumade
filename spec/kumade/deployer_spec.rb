@@ -61,9 +61,10 @@ describe Kumade::Deployer, "#deploy" do
 end
 
 describe Kumade::Deployer, "#sync_github" do
-before { subject.stub(:git).and_return(@git_mock = mock()) }  
+  let(:git_mock) { mock() }
+  before { subject.stub(:git => git_mock) }
   it "should call @git.push" do
-    @git_mock.should_receive(:push).with("master")
+    git_mock.should_receive(:push).with("master")
     subject.sync_github
   end
 end
@@ -71,18 +72,20 @@ end
 describe Kumade::Deployer, "#sync_heroku" do
   let(:environment) { 'my-env' }
   subject { Kumade::Deployer.new(environment) }
-before { subject.stub(:git).and_return(@git_mock = mock()) }  
+  let(:git_mock) { mock() }
+  before { subject.stub(:git => git_mock) }
   it "should call git.create and git.push" do
-    @git_mock.should_receive(:create).with("deploy")
-    @git_mock.should_receive(:push).with("deploy:master", environment, true)
+    git_mock.should_receive(:create).with("deploy")
+    git_mock.should_receive(:push).with("deploy:master", environment, true)
     subject.sync_heroku
   end
 end
 
 describe Kumade::Deployer, "#ensure_clean_git" do
-before { subject.stub(:git).and_return(@git_mock = mock()) }  
+  let(:git_mock) { mock() }
+  before { subject.stub(:git => git_mock) }
   it "should call git.ensure_clean_git" do
-    @git_mock.should_receive(:ensure_clean_git)
+    git_mock.should_receive(:ensure_clean_git)
     subject.ensure_clean_git
   end
 end
@@ -277,10 +280,11 @@ describe Kumade::Deployer, "#package_with_more" do
 end
 
 describe Kumade::Deployer, "#git_add_and_commit_all_assets_in" do
-  before {subject.stub(:git => @git_mock = mock())}
+  let(:git_mock) { mock() }
+  before { subject.stub(:git => git_mock) }
   
   it "should call git.add_and_commit_all_in" do
-    @git_mock.should_receive(:add_and_commit_all_in).with("dir", 'deploy', 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
+    git_mock.should_receive(:add_and_commit_all_in).with("dir", 'deploy', 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
     subject.git_add_and_commit_all_assets_in("dir")
   end
 end
@@ -447,10 +451,11 @@ describe Kumade::Deployer, "#heroku" do
 end
 
 describe Kumade::Deployer, "#post_deploy" do
-  before { subject.stub(:git => @git_mock = mock()) }
+  let(:git_mock) { mock() }
+  before { subject.stub(:git => git_mock) }
   
   it "should call git.delete" do
-    @git_mock.should_receive(:delete).with('deploy', 'master')
+    git_mock.should_receive(:delete).with('deploy', 'master')
     subject.post_deploy
   end
 end
