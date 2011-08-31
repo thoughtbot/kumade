@@ -81,6 +81,46 @@ Feature: Kumade executable
     And I run kumade with "pretend-staging"
     Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Cannot deploy: repo is not clean"
 
+	Scenario: Using rspec
+		Given I write to "Rakefile" with:
+      """
+        task :spec do
+          puts 'Hi!'
+        end
+      """
+    When I run kumade with "pretend-staging -p"
+    Then the output should contain "Running spec task"
+
+	Scenario: Using test unit
+		Given I write to "Rakefile" with:
+      """
+        task :test do
+          puts 'Hi!'
+        end
+      """
+    When I run kumade with "pretend-staging -p"
+    Then the output should contain "Running test task"
+
+	Scenario: Using cucumber
+		Given I write to "Rakefile" with:
+      """
+        task :cucumber do
+          puts 'Hi!'
+        end
+      """
+    When I run kumade with "pretend-staging -p"
+    Then the output should contain "Running cucumber task"
+
+	Scenario: Using capybara
+		Given I write to "Rakefile" with:
+      """
+        task :features do
+          puts 'Hi!'
+        end
+      """
+    When I run kumade with "pretend-staging -p"
+    Then the output should contain "Running features task"
+
   Scenario: Jammit packager runs if Jammit is installed
     When I run kumade with "pretend-staging"
     Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Error: Jammit::MissingConfiguration"
@@ -96,3 +136,25 @@ Feature: Kumade executable
       """
     When I run kumade with "pretend-staging -p"
     Then the output should match /kumade:before_asset_compilation.*Packaged assets with Jammit/
+  Scenario: Run custom task before github sync
+    Given I write to "Rakefile" with:
+      """
+      namespace :kumade do
+        task :before_github_sync do
+          puts 'Hi!'
+        end
+      end
+      """
+    When I run kumade
+    Then the output should contains "Running kumade:before_github_sync task"
+  Scenario: Run custom task before heroku deploy
+    Given I write to "Rakefile" with:
+      """
+      namespace :kumade do
+        task :before_heroku_deploy do
+          puts 'Hi!'
+        end
+      end
+      """
+    When I run kumade
+    Then the output should contains "Running kumade:before_heroku_deploy task"

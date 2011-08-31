@@ -6,6 +6,7 @@ describe Kumade::Deployer, "#pre_deploy" do
   it "calls the correct methods in order" do
     %w(
       ensure_clean_git
+      run_tests
       package_assets
       sync_github
       ).each do |task|
@@ -18,6 +19,7 @@ describe Kumade::Deployer, "#pre_deploy" do
   it "syncs to github" do
     %w(
       ensure_clean_git
+      run_tests
       package_assets
     ).each do |task|
       subject.stub(task)
@@ -60,8 +62,25 @@ describe Kumade::Deployer, "#deploy" do
   end
 end
 
+describe Kumade::Deployer, "#run_tests" do
+  before { subject.stub(:say) }
+  it "should call spec, cucumber, test and features tasks" do
+    subject.should_receive(:invoke_task).with("spec")
+    subject.should_receive(:invoke_task).with("cucumber")
+    subject.should_receive(:invoke_task).with("test")
+    subject.should_receive(:invoke_task).with("features")
+    subject.run_tests
+  end
+end
+
 describe Kumade::Deployer, "#sync_github" do
   before { subject.stub(:say) }
+  
+  it "should invoke kumade:before_github_sync task" do
+    subject.stub(:run => true)
+    subject.should_receive(:invoke_task).with("kumade:before_github_sync")
+    subject.sync_github
+  end
 
   it "calls `git push`" do
     subject.should_receive(:run).
@@ -100,6 +119,13 @@ describe Kumade::Deployer, "#sync_heroku" do
   let(:environment) { 'my-env' }
   subject { Kumade::Deployer.new(environment) }
   before { subject.stub(:say) }
+  
+  it "should invoke kumade:before_heroku_deploy task" do
+    subject.stub(:branch_exist?).with("deploy").and_return(true)
+    subject.stub(:run => true)
+    subject.should_receive(:invoke_task).with("kumade:before_heroku_deploy")
+    subject.sync_heroku
+  end
   
   context "when deploy branch exists" do
     it "should calls `git push -f`" do
@@ -180,6 +206,13 @@ describe Kumade::Deployer, "#ensure_clean_git" do
 end
 
 describe Kumade::Deployer, "#package_assets" do
+  it "should call 'kumade:before_asset_compilation'" do
+    subject.stub(:jammit_installed?  => false,
+                 :more_installed?    => false)
+    subject.should_receive(:invoke_task).with("kumade:before_asset_compilation")
+    subject.package_assets
+  end
+  
   context "with Jammit installed" do
     it "calls package_with_jammit" do
       subject.should_receive(:package_with_jammit)
@@ -215,34 +248,6 @@ describe Kumade::Deployer, "#package_assets" do
 
     it "does not call package_with_more" do
       subject.should_not_receive(:package_with_more)
-      subject.package_assets
-    end
-  end
-
-  context "with custom rake task installed" do
-    before do
-      subject.stub(:jammit_installed?  => false,
-                   :more_installed?    => false,
-                   :invoke_custom_task => nil,
-                   :custom_task?       => true)
-    end
-
-    it "invokes custom task" do
-      subject.should_receive(:invoke_custom_task)
-      subject.package_assets
-    end
-  end
-
-  context "with custom rake task not installed" do
-    before do
-      subject.stub(:jammit_installed?  => false,
-                   :more_installed?    => false,
-                   :invoke_custom_task => nil,
-                   :custom_task?       => false)
-    end
-
-    it "does not invoke custom task" do
-      subject.should_not_receive(:invoke_custom_task)
       subject.package_assets
     end
   end
@@ -289,18 +294,28 @@ describe Kumade::Deployer, "#package_with_jammit" do
   end
 end
 
-describe Kumade::Deployer, "#invoke_custom_task" do
+describe Kumade::Deployer, "#invoke_task" do
   before do
     subject.stub(:say)
     Rake::Task.stub(:[] => task)
   end
 
   let(:task) { stub('task', :invoke => nil) }
-
-  it "calls deploy task" do
-    Rake::Task.should_receive(:[]).with("kumade:before_asset_compilation")
-    task.should_receive(:invoke)
-    subject.invoke_custom_task
+  
+  context "with task" do
+    it "calls given task" do
+      subject.should_receive(:task_exist?).with("kumade:before_asset_compilation").and_return(true)
+      Rake::Task.should_receive(:[]).with("kumade:before_asset_compilation")
+      task.should_receive(:invoke)
+      subject.invoke_task("kumade:before_asset_compilation")
+    end
+  end
+  context "without task" do
+    it "calls given task" do
+      Rake::Task.should_not_receive(:[]).with("kumade:before_asset_compilation")
+      task.should_not_receive(:invoke)
+      subject.invoke_task("kumade:before_asset_compilation")
+    end
   end
 end
 
@@ -446,7 +461,7 @@ describe Kumade::Deployer, "#more_installed?" do
   end
 end
 
-describe Kumade::Deployer, "#custom_task?" do
+describe Kumade::Deployer, "#task_exist?" do
   before do
     Rake::Task.clear
   end
@@ -457,11 +472,11 @@ describe Kumade::Deployer, "#custom_task?" do
 
       end
     end
-    Kumade::Deployer.new.custom_task?.should be_true
+    Kumade::Deployer.new.task_exist?("kumade:before_asset_compilation").should be_true
   end
 
   it "returns false if task not found" do
-    Kumade::Deployer.new.custom_task?.should be_false
+    Kumade::Deployer.new.task_exist?("kumade:before_asset_compilation").should be_false
   end
 end
 

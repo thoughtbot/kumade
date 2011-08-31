@@ -127,15 +127,7 @@ Yes. To indicate that a particular app is using Cedar, run with the -c flag:
     ==> Deploying to: origin
     ==> ! Cannot deploy: "origin" remote does not point to Heroku
 
-## Compatibility
-
-Tested against:
-
-* MRI 1.8.7
-* MRI 1.9.2
-* REE 1.8.7
-
-## Misc Features
+## Callbacks
 
 Want to run a task before bundling your assets on deploy? In your rails app's rake tasks, drop in:
 
@@ -147,7 +139,33 @@ namespace :kumade do
 end
 ```
 
-You can hook in any custom code you want to run there before deploying!
+Want to run a task before github sync? In your rails app's rake tasks, drop in:
+
+``` ruby
+namespace :kumade do
+  task :before_github_sync do
+    puts "This runs before your code are pushed to gihub"
+  end
+end
+```
+
+Want to run a task before deploy to Heroku? In your rails app's rake tasks, drop in:
+
+``` ruby
+namespace :kumade do
+  task :before_heroku_deploy do
+    puts "This runs before your code are pushed to heroku"
+  end
+end
+```
+
+## Compatibility
+
+Tested against:
+
+* MRI 1.8.7
+* MRI 1.9.2
+* REE 1.8.7
 
 ## What's with the name?
 

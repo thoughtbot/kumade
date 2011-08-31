@@ -21,17 +21,20 @@ module Kumade
 
     def pre_deploy
       ensure_clean_git
+      run_tests
       package_assets
       sync_github
     end
 
     def sync_github
+      invoke_task("kumade:before_github_sync")
       run_or_error("git push origin #{@branch}",
                    "Failed to push #{@branch} -> origin")
       success("Pushed #{@branch} -> origin")
     end
 
     def sync_heroku
+      invoke_task("kumade:before_heroku_deploy")
       unless branch_exist?(DEPLOY_BRANCH)
         run_or_error("git branch deploy", "Failed to create #{DEPLOY_BRANCH}")
       end
@@ -71,9 +74,17 @@ module Kumade
     end
 
     def package_assets
-      invoke_custom_task  if custom_task?
+      invoke_task("kumade:before_asset_compilation")
       package_with_jammit if jammit_installed?
       package_with_more   if more_installed?
+    end
+    
+    def run_tests
+      %w(spec
+        test
+        features
+        cucumber
+      ).each {|task| invoke_task(task)}
     end
 
     def package_with_jammit
@@ -110,9 +121,11 @@ module Kumade
       end
     end
 
-    def invoke_custom_task
-      success "Running kumade:before_asset_compilation task"
-      Rake::Task["kumade:before_asset_compilation"].invoke unless pretending
+    def invoke_task(task)
+      if task_exist?(task)
+        success "Running #{task} task"
+        Rake::Task[task].invoke unless pretending
+      end
     end
 
     def git_add_and_commit_all_assets_in(dir)
@@ -152,9 +165,9 @@ module Kumade
           end)
     end
 
-    def custom_task?
+    def task_exist?(task)
       load("Rakefile") if File.exist?("Rakefile")
-      Rake::Task.task_defined?("kumade:before_asset_compilation")
+      Rake::Task.task_defined?(task)
     end
 
     def git_dirty?
