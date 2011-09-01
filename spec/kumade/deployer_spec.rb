@@ -57,6 +57,17 @@ describe Kumade::Deployer, "#deploy" do
 
     subject.deploy
   end
+  
+  it "should call post_deploy if deploy fails" do
+    subject.stub(:run => true)
+
+    subject.should_receive(:ensure_heroku_remote_exists).and_raise(RuntimeError)
+
+    subject.should_receive(:post_deploy)
+
+    subject.deploy
+  end
+  
 end
 
 describe Kumade::Deployer, "#sync_github" do

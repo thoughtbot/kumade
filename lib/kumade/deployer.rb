@@ -14,11 +14,15 @@ module Kumade
     end
 
     def deploy
-      ensure_heroku_remote_exists
-      pre_deploy
-      sync_heroku
-      heroku_migrate
-      post_deploy
+      begin
+        ensure_heroku_remote_exists
+        pre_deploy
+        sync_heroku
+        heroku_migrate
+        post_deploy
+      rescue
+        post_deploy
+      end
     end
 
     def pre_deploy
