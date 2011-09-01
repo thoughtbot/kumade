@@ -1,18 +1,14 @@
 module Kumade
   class Git < Base
+    attr_reader :environment
     def initialize(pretending, environment)
       super()
       @pretending = pretending
       @environment = environment
     end
     
-    def self.app_for(environment)
-      heroku_git_url = `git config --get remote.#{environment}.url`.strip
-      if heroku_git_url =~ /^git@heroku\.com:(.+)\.git$/
-        $1
-      else
-        nil
-      end
+    def heroku_remote?
+      `git config --get remote.#{environment}.url`.strip =~ /^git@heroku\.com:(.+)\.git$/
     end
 
     def self.environments

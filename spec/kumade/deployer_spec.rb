@@ -30,11 +30,10 @@ end
 
 describe Kumade::Deployer, "#deploy" do
   let(:remote_name){ 'staging' }
-  let(:app_name){ 'kumade-staging' }
 
   before do
     subject.stub(:say)
-    force_add_heroku_remote(remote_name, app_name)
+    force_add_heroku_remote(remote_name)
   end
 
   it "calls the correct methods in order" do
@@ -361,18 +360,17 @@ end
 
 describe Kumade::Deployer, "#heroku_migrate" do
   let(:environment){ 'staging' }
-  let(:app_name){ 'sushi' }
 
   before do
     subject.stub(:say)
-    force_add_heroku_remote(environment, app_name)
+    force_add_heroku_remote(environment)
   end
 
   it "runs db:migrate with the correct app" do
     subject.stub(:run => true)
     subject.should_receive(:heroku).
-      with("rake db:migrate", app_name)
-    subject.should_receive(:success).with("Migrated #{app_name}")
+      with("rake db:migrate")
+    subject.should_receive(:success).with("Migrated staging")
 
     subject.heroku_migrate
   end
@@ -381,11 +379,10 @@ end
 describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   let(:environment){ 'staging' }
   let(:bad_environment){ 'bad' }
-  let(:staging_app_name) { 'staging-sushi' }
 
   before do
     subject.stub(:say)
-    force_add_heroku_remote(environment, staging_app_name)
+    force_add_heroku_remote(environment)
     `git remote add #{bad_environment} blerg@example.com`
   end
 
@@ -429,14 +426,12 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
 end
 
 describe Kumade::Deployer, "#heroku" do
-  let(:app_name){ 'sushi' }
-
   context "when on Cedar" do
     subject { Kumade::Deployer.new('staging', false, cedar = true) }
 
     it "runs commands with `run`" do
-      subject.should_receive(:run_or_error).with("bundle exec heroku run rake --app #{app_name}", //)
-      subject.heroku("rake", app_name)
+      subject.should_receive(:run_or_error).with("bundle exec heroku run rake --remote staging", //)
+      subject.heroku("rake")
     end
   end
 
@@ -444,8 +439,8 @@ describe Kumade::Deployer, "#heroku" do
     subject { Kumade::Deployer.new('staging', false, cedar = false) }
 
     it "runs commands without `run`" do
-      subject.should_receive(:run_or_error).with("bundle exec heroku rake --app #{app_name}", //)
-      subject.heroku("rake", app_name)
+      subject.should_receive(:run_or_error).with("bundle exec heroku rake --remote staging", //)
+      subject.heroku("rake")
     end
   end
 end

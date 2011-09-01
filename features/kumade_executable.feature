@@ -27,7 +27,7 @@ Feature: Kumade executable
                run  git branch deploy
                run  git push -f pretend-staging deploy:master
       ==> Pushed deploy:master -> pretend-staging
-      ==> Migrated pretend-staging-app
+      ==> Migrated pretend-staging
                run  git checkout master && git branch -D deploy
       ==> Deployed to: pretend-staging
       """
@@ -58,7 +58,7 @@ Feature: Kumade executable
                run  git branch deploy
                run  git push -f pretend-staging deploy:master
       ==> Pushed deploy:master -> pretend-staging
-      ==> Migrated pretend-staging-app
+      ==> Migrated pretend-staging
                run  git checkout new_branch && git branch -D deploy
       ==> Deployed to: pretend-staging
       """

@@ -36,23 +36,21 @@ module Kumade
     end
 
     def heroku_migrate
-      app = Kumade::Git.app_for(environment)
-
-      heroku("rake db:migrate", app) unless pretending
-      success("Migrated #{app}")
+      heroku("rake db:migrate") unless pretending
+      success("Migrated #{environment}")
     end
 
     def post_deploy
       git.delete(DEPLOY_BRANCH, @branch)
     end
 
-    def heroku(command, app)
+    def heroku(command)
       heroku_command = if @cedar
                          "bundle exec heroku run"
                        else
                          "bundle exec heroku"
                        end
-      run_or_error("#{heroku_command} #{command} --app #{app}",
+      run_or_error("#{heroku_command} #{command} --remote #{environment}",
                    "Failed to run #{command} on Heroku")
     end
 
@@ -146,7 +144,7 @@ module Kumade
 
     def ensure_heroku_remote_exists
       if git.remote_exists?(environment)
-        if app_name = Kumade::Git.app_for(environment)
+        if git.heroku_remote?
           success("#{environment} is a Heroku remote")
         else
           error(%{Cannot deploy: "#{environment}" remote does not point to Heroku})

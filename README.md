@@ -100,7 +100,7 @@ Yes. To indicate that a particular app is using Cedar, run with the -c flag:
       a465afd..bc8932b  master -> master
     ==> - true
     ==> Pushed master -> heroku-staging
-    ==> + bundle exec heroku rake db:migrate --app staging-sushi
+    ==> + bundle exec heroku rake db:migrate --remote staging-sushi
     ... Postgres output removed ...
     ==> - false
     ==> Migrated staging-sushi
