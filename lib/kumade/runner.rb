@@ -6,21 +6,23 @@ module Kumade
       attr_reader :environment
     end
 
-    def self.run(args=ARGV, out=$stdout)
+    def self.run(args=ARGV, out=StringIO.new)
       @out         = out
       @options     = parse_arguments!(args)
       @environment = args.shift || 'staging'
 
-      deploy
+      swapping_stdout_for(@out) do
+        deploy
+      end
     end
 
     def self.deploy
       if pretending?
-        @out.puts "==> In Pretend Mode"
+        puts "==> In Pretend Mode"
       end
-      @out.puts "==> Deploying to: #{environment}"
+      puts "==> Deploying to: #{environment}"
       Deployer.new(environment, pretending?, @options[:cedar]).deploy
-      @out.puts "==> Deployed to: #{environment}"
+      puts "==> Deployed to: #{environment}"
     end
 
     def self.parse_arguments!(args)
@@ -37,17 +39,32 @@ module Kumade
         end
 
         opts.on_tail('-v', '--version', 'Show version') do
-          @out.puts "kumade #{Kumade::VERSION}"
+          puts "kumade #{Kumade::VERSION}"
           exit
         end
 
         opts.on_tail('-h', '--help', 'Show this message') do
-          @out.puts opts
+          puts opts
           exit
         end
       end.parse!(args)
 
       options
+    end
+
+    def self.swapping_stdout_for(io)
+      begin
+        $real_stdout = $stdout
+        $stdout = io unless pretending?
+        yield
+      rescue Kumade::DeploymentError
+        unless pretending?
+          io.rewind
+          $real_stdout.print(io.read)
+        end
+      ensure
+        $stdout = $real_stdout
+      end
     end
 
     def self.pretending?
