@@ -5,9 +5,9 @@ require 'stringio'
 require 'aruba/api'
 
 module GitRemoteHelpers
-  def force_add_heroku_remote(remote_name, app_name)
+  def force_add_heroku_remote(remote_name)
     remove_remote(remote_name)
-    `git remote add #{remote_name} git@heroku.com:#{app_name}.git`
+    `git remote add #{remote_name} git@heroku.com:#{remote_name}.git`
   end
 
   def remove_remote(remote_name)
