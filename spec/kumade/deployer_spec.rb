@@ -453,4 +453,9 @@ describe Kumade::Deployer, "#post_deploy" do
     git_mock.should_receive(:delete).with('deploy', 'master')
     subject.post_deploy
   end
+
+  it "prints its message and raises its message" do
+    subject.should_receive(:say).with("==> ! I'm an error!", :red)
+    lambda{ subject.error("I'm an error!") }.should raise_error(Kumade::DeploymentError)
+  end
 end
