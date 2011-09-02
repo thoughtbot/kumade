@@ -20,7 +20,7 @@ module Kumade
     
     def error(message)
       say("==> ! #{message}", :red)
-      exit 1
+      raise Kumade::DeploymentError.new(message)
     end
     
     def success(message)
