@@ -4,7 +4,7 @@ provide most of what you want. Unlike other Heroku deploy gems, it is
 well-tested.
 
 ## What does Kumade do?
-Before deploying, Kumade ensures the git repo is clean and that all tests pass.
+Before deploying, Kumade ensures the git repo is clean and that all tests pass(test unit, rspec, cucumber and capybara tests).
 After that, it packages assets using
 [Jammit](http://documentcloud.github.com/jammit/) and/or
 [More](https://github.com/cloudhead/more), commits them, and pushes to origin.
