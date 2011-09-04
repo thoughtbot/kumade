@@ -37,3 +37,40 @@ describe Kumade::Runner do
     end
   end
 end
+
+describe Kumade::Runner do
+  it 'does not let anything get printed' do
+    stdout = $stdout
+    stdout.should_not_receive(:print)
+    output = StringIO.new
+
+    Kumade::Runner.swapping_stdout_for(output) do
+      $stdout.puts "Hello, you can't see me."
+    end
+
+    output.rewind
+    output.read.should == "Hello, you can't see me.\n"
+  end
+
+  it 'dumps the output stash to real stdout when an error happens' do
+    stdout = $stdout
+    stdout.should_receive(:print)
+    output = StringIO.new
+
+    Kumade::Runner.swapping_stdout_for(output) do
+      $stdout.puts "Hello, you can see me!"
+      raise Kumade::DeploymentError.new("error")
+    end
+  end
+
+  it 'prints everything in pretend mode' do
+    stdout = $stdout
+    stdout.should_receive(:puts)
+    output = StringIO.new
+    Kumade::Runner.should_receive(:pretending?).and_return(true)
+
+    Kumade::Runner.swapping_stdout_for(output) do
+      $stdout.puts "Hello, you can see me!"
+    end
+  end
+end

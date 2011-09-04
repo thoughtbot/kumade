@@ -1,7 +1,7 @@
 module Kumade
-  class Deployer < Thor::Shell::Color
+  class Deployer < Base
     DEPLOY_BRANCH = "deploy"
-    attr_reader :environment, :pretending
+    attr_reader :environment, :pretending, :git
 
     def initialize(options = { })
       super()
@@ -11,10 +11,12 @@ module Kumade
         :cedar => false,
         :tests => false
       }
+      @git         = Git.new(pretending, environment)
       options = default.merge(options)
       @environment = options[:environment]
       @pretending  = options[:pretending]
-      @branch      = current_branch
+      @git         = Git.new(pretending, environment)
+      @branch      = @git.current_branch
       @cedar       = options[:cedar]
       @tests       = options[:tests]
     end
@@ -37,48 +39,35 @@ module Kumade
     end
 
     def sync_github
-      run_or_error("git push origin #{@branch}",
-                   "Failed to push #{@branch} -> origin")
-      success("Pushed #{@branch} -> origin")
+      git.push(@branch)
     end
 
     def sync_heroku
-      unless branch_exist?(DEPLOY_BRANCH)
-        run_or_error("git branch deploy", "Failed to create #{DEPLOY_BRANCH}")
-      end
-      run_or_error("git push -f #{environment} #{DEPLOY_BRANCH}:master",
-                   "Failed to force push #{DEPLOY_BRANCH} -> #{environment}/master")
-      success("Force pushed #{@branch} -> #{environment}")
+      git.create(DEPLOY_BRANCH)
+      git.push("#{DEPLOY_BRANCH}:master", environment, true)
     end
 
     def heroku_migrate
-      app = Kumade.app_for(environment)
-
-      heroku("rake db:migrate", app) unless pretending
-      success("Migrated #{app}")
+      heroku("rake db:migrate") unless pretending
+      success("Migrated #{environment}")
     end
 
     def post_deploy
-      run_or_error(["git checkout #{@branch}", "git branch -D #{DEPLOY_BRANCH}"],
-                   "Failed to clean up #{DEPLOY_BRANCH} branch")
+      git.delete(DEPLOY_BRANCH, @branch)
     end
 
-    def heroku(command, app)
+    def heroku(command)
       heroku_command = if @cedar
                          "bundle exec heroku run"
                        else
                          "bundle exec heroku"
                        end
-      run_or_error("#{heroku_command} #{command} --app #{app}",
+      run_or_error("#{heroku_command} #{command} --remote #{environment}",
                    "Failed to run #{command} on Heroku")
     end
 
     def ensure_clean_git
-      if ! pretending && git_dirty?
-        error("Cannot deploy: repo is not clean.")
-      else
-        success("Git repo is clean")
-      end
+      git.ensure_clean_git
     end
 
     def package_assets
@@ -119,7 +108,7 @@ module Kumade
       else
         begin
           run "bundle exec rake more:generate"
-          if git_dirty?
+          if git.git_dirty?
             success(success_message)
             git_add_and_commit_all_assets_in(more_assets_path)
           end
@@ -137,10 +126,7 @@ module Kumade
     end
 
     def git_add_and_commit_all_assets_in(dir)
-      run_or_error ["git checkout -b #{DEPLOY_BRANCH}", "git add -f #{dir}", "git commit -m 'Compiled assets'"],
-                   "Cannot deploy: couldn't commit assets"
-
-      success "Added and committed all assets"
+      git.add_and_commit_all_in(dir, DEPLOY_BRANCH, 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
     end
 
     def jammit_assets_path
@@ -178,44 +164,9 @@ module Kumade
       Rake::Task.task_defined?(task)
     end
 
-    def git_dirty?
-      `git diff --exit-code`
-      !$?.success?
-    end
-
-    def run_or_error(commands, error_message)
-      all_commands = [commands].flatten.join(' && ')
-      if pretending
-        say_status(:run, all_commands)
-      else
-        error(error_message) unless run(all_commands)
-      end
-    end
-
-    def run(command, config = {})
-      say_status :run, command
-      config[:capture] ? `#{command}` : system("#{command}")
-    end
-
-    def branch_exist?(branch)
-        branches = `git branch`
-        regex = Regexp.new('[\\n\\s\\*]+' + Regexp.escape(branch.to_s) + '\\n')
-        result = ((branches =~ regex) ? true : false)
-        return result
-    end
-
-    def error(message)
-      say("==> ! #{message}", :red)
-      exit 1
-    end
-
-    def success(message)
-      say("==> #{message}", :green)
-    end
-
     def ensure_heroku_remote_exists
-      if remote_exists?(environment)
-        if app_name = Kumade.app_for(environment)
+      if git.remote_exists?(environment)
+        if git.heroku_remote?
           success("#{environment} is a Heroku remote")
         else
           error(%{Cannot deploy: "#{environment}" remote does not point to Heroku})
@@ -223,18 +174,6 @@ module Kumade
       else
         error(%{Cannot deploy: "#{environment}" remote does not exist})
       end
-    end
-
-    def remote_exists?(remote_name)
-      if pretending
-        true
-      else
-        `git remote` =~ /^#{remote_name}$/
-      end
-    end
-
-    def current_branch
-      `git symbolic-ref HEAD`.sub("refs/heads/", "").strip
     end
   end
 end
