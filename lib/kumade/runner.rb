@@ -21,7 +21,7 @@ module Kumade
         puts "==> In Pretend Mode"
       end
       puts "==> Deploying to: #{environment}"
-      Deployer.new(:environment => environment, :pretending => pretending?, :cedar => @options[:cedar], :tests => @options[:tests]).deploy
+      Deployer.new(:environment => environment, :pretending => pretending?, :cedar => @options[:cedar], :tests => tests?).deploy
       puts "==> Deployed to: #{environment}"
     end
 
@@ -36,10 +36,6 @@ module Kumade
 
         opts.on("-c", "--cedar", "Use this if your app is on cedar") do |cedar|
           options[:cedar] = cedar
-        end
-
-        opts.on("-t", "--tests", "Use this to run tests before deploy") do |tests|
-          options[:tests] = tests
         end
 
         opts.on_tail('-v', '--version', 'Show version') do
@@ -73,6 +69,10 @@ module Kumade
 
     def self.pretending?
       @options[:pretend]
+    end
+    
+    def self.tests?
+      !`git config --get #{environment}.tests`.include?("false")
     end
 
   end
