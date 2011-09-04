@@ -18,9 +18,9 @@ Gem::Specification.new do |s|
 
   s.add_dependency('heroku', '~> 2.0')
   s.add_dependency('thor', '~> 0.14')
-  s.add_dependency('rake', '> 0.8.7')
+  s.add_dependency('rake', '>= 0.8.7')
 
-  s.add_development_dependency('rake', '> 0.8.7')
+  s.add_development_dependency('rake', '>= 0.8.7')
   s.add_development_dependency('rspec', '~> 2.6.0')
   s.add_development_dependency('cucumber', '~> 1.0.2')
   s.add_development_dependency('aruba', '~> 0.4.3')
