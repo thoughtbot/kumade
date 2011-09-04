@@ -20,6 +20,7 @@ describe Kumade::Git, "#heroku_remote?" do
 
   it "should return true when environment remote is a heroku repository" do
     Kumade::Git.new(false, environment).heroku_remote?.should be_true
+    Kumade::Git.new(false, another_heroku_environment).heroku_remote?.should be_true
   end
 
   it "should return false when environment remote isn't a heroku repository" do
