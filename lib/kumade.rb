@@ -4,6 +4,7 @@ require 'stringio'
 
 require 'kumade/base'
 require 'kumade/git'
+require 'kumade/packager'
 require 'kumade/deployer'
 require 'kumade/runner'
 require 'kumade/railtie'

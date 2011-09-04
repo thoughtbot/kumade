@@ -1,5 +1,6 @@
 module Kumade
   class Base < Thor::Shell::Color
+    DEPLOY_BRANCH = "deploy"
     attr_reader :environment, :pretending
     def initialize
       super()
