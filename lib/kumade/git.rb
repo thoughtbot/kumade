@@ -1,6 +1,5 @@
 module Kumade
   class Git < Base
-    attr_reader :environment
     def initialize(pretending, environment)
       super()
       @pretending = pretending
@@ -47,7 +46,7 @@ module Kumade
     end
     
     def remote_exists?(remote_name)
-      if @pretending
+      if pretending
         true
       else
         `git remote` =~ /^#{remote_name}$/
@@ -60,7 +59,7 @@ module Kumade
     end
     
     def ensure_clean_git
-      if ! @pretending && git_dirty?
+      if ! pretending && git_dirty?
         error("Cannot deploy: repo is not clean.")
       else
         success("Git repo is clean")

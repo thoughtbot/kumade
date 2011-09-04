@@ -1,8 +1,7 @@
 module Kumade
   class Deployer < Base
     DEPLOY_BRANCH = "deploy"
-    attr_reader :environment, :pretending, :git
-
+    attr_reader :git
     def initialize(environment = 'staging', pretending = false, cedar = false)
       super()
       @environment = environment

@@ -1,5 +1,6 @@
 module Kumade
   class Base < Thor::Shell::Color
+    attr_reader :environment, :pretending
     def initialize
       super()
     end
