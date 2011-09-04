@@ -21,11 +21,11 @@ module Kumade
         puts "==> In Pretend Mode"
       end
       puts "==> Deploying to: #{environment}"
-      Deployer.new(environment, pretending?, @options[:cedar]).deploy
+      Deployer.new(:environment => environment, :pretending => pretending?, :cedar => @options[:cedar], :tests => tests?).deploy
       puts "==> Deployed to: #{environment}"
     end
 
-    def self.parse_arguments!(args)
+   def self.parse_arguments!(args)
       options = {}
       OptionParser.new do |opts|
         opts.banner = "Usage: kumade <environment> [options]"
@@ -70,5 +70,10 @@ module Kumade
     def self.pretending?
       @options[:pretend]
     end
+    
+    def self.tests?
+      !`git config --get #{environment}.tests`.include?("false")
+    end
+
   end
 end

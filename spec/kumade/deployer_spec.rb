@@ -1,23 +1,30 @@
 require 'spec_helper'
 
 describe Kumade::Deployer, "#pre_deploy" do
-  before { subject.stub(:say) }
 
-  it "calls the correct methods in order" do
-    %w(
-      ensure_clean_git
-      package_assets
-      sync_github
-      ).each do |task|
-      subject.should_receive(task).ordered.and_return(true)
+  context "running tests first" do
+    subject { Kumade::Deployer.new(:tests => true) }
+    it "calls the correct methods in order" do
+      %w(
+        ensure_clean_git
+        run_tests
+        package_assets
+        sync_github
+        ).each do |task|
+        subject.should_receive(task).ordered.and_return(true)
+      end
+
+      subject.pre_deploy
     end
+  end
 
-    subject.pre_deploy
+  context "without running tests first" do
   end
 
   it "syncs to github" do
     %w(
       ensure_clean_git
+      run_tests
       package_assets
     ).each do |task|
       subject.stub(task)
@@ -59,6 +66,17 @@ describe Kumade::Deployer, "#deploy" do
   end
 end
 
+describe Kumade::Deployer, "#run_tests" do
+  before { subject.stub(:say) }
+  it "should call spec, cucumber, test and features tasks" do
+    subject.should_receive(:invoke_task).with("spec")
+    subject.should_receive(:invoke_task).with("cucumber")
+    subject.should_receive(:invoke_task).with("test")
+    subject.should_receive(:invoke_task).with("features")
+    subject.run_tests
+  end
+end
+
 describe Kumade::Deployer, "#sync_github" do
   let(:git_mock) { mock() }
   before { subject.stub(:git => git_mock) }
@@ -70,7 +88,7 @@ end
 
 describe Kumade::Deployer, "#sync_heroku" do
   let(:environment) { 'my-env' }
-  subject { Kumade::Deployer.new(environment) }
+  subject { Kumade::Deployer.new(:environment => environment) }
   let(:git_mock) { mock() }
   before { subject.stub(:git => git_mock) }
   it "should call git.create and git.push" do
@@ -90,6 +108,13 @@ describe Kumade::Deployer, "#ensure_clean_git" do
 end
 
 describe Kumade::Deployer, "#package_assets" do
+  it "should call 'kumade:before_asset_compilation'" do
+    subject.stub(:jammit_installed?  => false,
+                 :more_installed?    => false)
+    subject.should_receive(:invoke_task).with("kumade:before_asset_compilation")
+    subject.package_assets
+  end
+  
   context "with Jammit installed" do
     it "calls package_with_jammit" do
       subject.should_receive(:package_with_jammit)
@@ -125,34 +150,6 @@ describe Kumade::Deployer, "#package_assets" do
 
     it "does not call package_with_more" do
       subject.should_not_receive(:package_with_more)
-      subject.package_assets
-    end
-  end
-
-  context "with custom rake task installed" do
-    before do
-      subject.stub(:jammit_installed?  => false,
-                   :more_installed?    => false,
-                   :invoke_custom_task => nil,
-                   :custom_task?       => true)
-    end
-
-    it "invokes custom task" do
-      subject.should_receive(:invoke_custom_task)
-      subject.package_assets
-    end
-  end
-
-  context "with custom rake task not installed" do
-    before do
-      subject.stub(:jammit_installed?  => false,
-                   :more_installed?    => false,
-                   :invoke_custom_task => nil,
-                   :custom_task?       => false)
-    end
-
-    it "does not invoke custom task" do
-      subject.should_not_receive(:invoke_custom_task)
       subject.package_assets
     end
   end
@@ -199,18 +196,28 @@ describe Kumade::Deployer, "#package_with_jammit" do
   end
 end
 
-describe Kumade::Deployer, "#invoke_custom_task" do
+describe Kumade::Deployer, "#invoke_task" do
   before do
     subject.stub(:say)
     Rake::Task.stub(:[] => task)
   end
 
   let(:task) { stub('task', :invoke => nil) }
-
-  it "calls deploy task" do
-    Rake::Task.should_receive(:[]).with("kumade:before_asset_compilation")
-    task.should_receive(:invoke)
-    subject.invoke_custom_task
+  
+  context "with task" do
+    it "calls given task" do
+      subject.should_receive(:task_exist?).with("kumade:before_asset_compilation").and_return(true)
+      Rake::Task.should_receive(:[]).with("kumade:before_asset_compilation")
+      task.should_receive(:invoke)
+      subject.invoke_task("kumade:before_asset_compilation")
+    end
+  end
+  context "without task" do
+    it "calls given task" do
+      Rake::Task.should_not_receive(:[]).with("kumade:before_asset_compilation")
+      task.should_not_receive(:invoke)
+      subject.invoke_task("kumade:before_asset_compilation")
+    end
   end
 end
 
@@ -339,7 +346,7 @@ describe Kumade::Deployer, "#more_installed?" do
   end
 end
 
-describe Kumade::Deployer, "#custom_task?" do
+describe Kumade::Deployer, "#task_exist?" do
   before do
     Rake::Task.clear
   end
@@ -350,11 +357,11 @@ describe Kumade::Deployer, "#custom_task?" do
 
       end
     end
-    Kumade::Deployer.new.custom_task?.should be_true
+    Kumade::Deployer.new.task_exist?("kumade:before_asset_compilation").should be_true
   end
 
   it "returns false if task not found" do
-    Kumade::Deployer.new.custom_task?.should be_false
+    Kumade::Deployer.new.task_exist?("kumade:before_asset_compilation").should be_false
   end
 end
 
@@ -379,47 +386,53 @@ end
 describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   let(:environment){ 'staging' }
   let(:bad_environment){ 'bad' }
+  let(:git_mock) { mock() }
 
   before do
+    subject.stub(:git).and_return(git_mock)
     subject.stub(:say)
-    force_add_heroku_remote(environment)
-    `git remote add #{bad_environment} blerg@example.com`
   end
 
   context "when the remote points to Heroku" do
-    subject { Kumade::Deployer.new(environment) }
+    before do
+      git_mock.should_receive(:remote_exists?).with(environment).and_return(true)
+      git_mock.should_receive(:heroku_remote?).and_return(true)
+    end
+    subject { Kumade::Deployer.new(:environment => environment) } 
 
     it "does not print an error" do
       subject.should_not_receive(:error)
-
       subject.ensure_heroku_remote_exists
     end
 
     it "prints a success message" do
       subject.should_receive(:success).with("#{environment} is a Heroku remote")
-
       subject.ensure_heroku_remote_exists
     end
   end
 
 
   context "when the remote does not exist" do
-    subject { Kumade::Deployer.new(environment) }
-    before { remove_remote(environment) }
+    before do
+      git_mock.should_receive(:remote_exists?).with(environment).and_return(false)
+    end
+    subject { Kumade::Deployer.new(:environment => environment) }
 
     it "prints an error" do
       subject.should_receive(:error).with(%{Cannot deploy: "#{environment}" remote does not exist})
-
       subject.ensure_heroku_remote_exists
     end
   end
 
   context "when the remote does not point to Heroku" do
-    subject { Kumade::Deployer.new(bad_environment) }
+    before do
+      git_mock.should_receive(:remote_exists?).with(bad_environment).and_return(true)
+      git_mock.should_receive(:heroku_remote?).and_return(false)
+    end
+    subject { Kumade::Deployer.new(:environment => bad_environment) }
 
     it "prints an error" do
       subject.should_receive(:error).with(%{Cannot deploy: "#{bad_environment}" remote does not point to Heroku})
-
       subject.ensure_heroku_remote_exists
     end
   end
@@ -427,7 +440,7 @@ end
 
 describe Kumade::Deployer, "#heroku" do
   context "when on Cedar" do
-    subject { Kumade::Deployer.new('staging', false, cedar = true) }
+    subject { Kumade::Deployer.new(:cedar => true) }
 
     it "runs commands with `run`" do
       subject.should_receive(:run_or_error).with("bundle exec heroku run rake --remote staging", //)
@@ -436,7 +449,7 @@ describe Kumade::Deployer, "#heroku" do
   end
 
   context "when not on Cedar" do
-    subject { Kumade::Deployer.new('staging', false, cedar = false) }
+    subject { Kumade::Deployer.new(:cedar => false) }
 
     it "runs commands without `run`" do
       subject.should_receive(:run_or_error).with("bundle exec heroku rake --remote staging", //)

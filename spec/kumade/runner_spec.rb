@@ -30,7 +30,7 @@ describe Kumade::Runner do
     it "uses cedar when run with #{cedar_arg}" do
       deployer = double("deployer").as_null_object
       Kumade::Deployer.should_receive(:new).
-        with(anything, anything, true).
+        with(hash_including(:cedar => true)).
         and_return(deployer)
 
       subject.run([environment, cedar_arg], out)
@@ -39,6 +39,10 @@ describe Kumade::Runner do
 end
 
 describe Kumade::Runner do
+  subject { Kumade::Runner }
+  let(:out){ StringIO.new }
+  let(:environment){ 'my-environment' }
+    
   it 'does not let anything get printed' do
     stdout = $stdout
     stdout.should_not_receive(:print)
@@ -72,5 +76,24 @@ describe Kumade::Runner do
     Kumade::Runner.swapping_stdout_for(output) do
       $stdout.puts "Hello, you can see me!"
     end
+  end
+  
+  it "should not run tests if git config environment tests is false" do
+    `git config --add my-environment.tests "false"`
+    deployer = double("deployer").as_null_object
+    Kumade::Deployer.should_receive(:new).
+      with({:environment=>environment, :pretending=>nil, :cedar=>nil, :tests=>false}).
+      and_return(deployer)
+    subject.run([environment], out)
+    `git config --unset my-environment.stack "cedar"`
+  end
+
+  it "should run tests if git config environment tests is not defined - DEFAULT" do
+    `git config --unset my-environment.tests`
+    deployer = double("deployer").as_null_object
+    Kumade::Deployer.should_receive(:new).
+      with({:environment=>environment, :pretending=>nil, :cedar=>nil, :tests=>true}).
+      and_return(deployer)
+    subject.run([environment], out)
   end
 end

@@ -81,6 +81,56 @@ Feature: Kumade executable
     And I run kumade with "pretend-staging"
     Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Cannot deploy: repo is not clean"
 
+  Scenario: No tests run if no -t flag
+    Given I write to "Rakefile" with:
+      """
+        task :spec do
+          puts 'Hi!'
+        end
+      """
+    When I run kumade with "pretend-staging -p"
+    Then the output should not contain "Running spec task"
+
+  Scenario: Using rspec
+    Given I write to "Rakefile" with:
+      """
+        task :spec do
+          puts 'Hi!'
+        end
+      """
+    When I run kumade with "pretend-staging -p -t"
+    Then the output should contain "Running spec task"
+
+  Scenario: Using test unit
+    Given I write to "Rakefile" with:
+      """
+        task :test do
+          puts 'Hi!'
+        end
+      """
+    When I run kumade with "pretend-staging -p -t"
+    Then the output should contain "Running test task"
+
+  Scenario: Using cucumber
+    Given I write to "Rakefile" with:
+      """
+        task :cucumber do
+          puts 'Hi!'
+        end
+      """
+    When I run kumade with "pretend-staging -p -t"
+    Then the output should contain "Running cucumber task"
+
+  Scenario: Using capybara
+    Given I write to "Rakefile" with:
+      """
+        task :features do
+          puts 'Hi!'
+        end
+      """
+    When I run kumade with "pretend-staging -p -t"
+    Then the output should contain "Running features task"
+
   Scenario: Jammit packager runs if Jammit is installed
     When I run kumade with "pretend-staging"
     Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Error: Jammit::MissingConfiguration"

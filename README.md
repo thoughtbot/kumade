@@ -149,6 +149,12 @@ end
 
 You can hook in any custom code you want to run there before deploying!
 
+Want to skip tests before your deploy?
+
+``` bash
+	git config --add my-environment.tests "false"
+```
+
 ## What's with the name?
 
 Kumade ([pronunciation here](http://translate.google.com/#ja|en|熊手)) means
