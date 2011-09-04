@@ -99,8 +99,8 @@ Yes. To indicate that a particular environment is using Cedar, configure environ
     To git@heroku.com:staging-sushi.git
       a465afd..bc8932b  master -> master
     ==> - true
-    ==> Force pushed master -> heroku-staging
-    ==> + bundle exec heroku rake db:migrate --app staging-sushi
+    ==> Pushed master -> heroku-staging
+    ==> + bundle exec heroku rake db:migrate --remote staging-sushi
     ... Postgres output removed ...
     ==> - false
     ==> Migrated staging-sushi
@@ -116,7 +116,7 @@ Yes. To indicate that a particular environment is using Cedar, configure environ
     ==> Rake passed
     ==> Packaged assets with Jammit
     ==> Pushed master -> origin
-    ==> Force pushed master -> heroku-staging
+    ==> Pushed master -> heroku-staging
     ==> Migrated staging-sushi
     ==> Deployed to: heroku-staging
 
