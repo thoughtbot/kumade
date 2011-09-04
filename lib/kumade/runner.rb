@@ -38,6 +38,10 @@ module Kumade
           options[:cedar] = cedar
         end
 
+        opts.on_tail("-vv", "--verbose", "Print what kumade is doing") do
+          options[:verbose] = true
+        end
+
         opts.on_tail('-v', '--version', 'Show version') do
           puts "kumade #{Kumade::VERSION}"
           exit
@@ -55,10 +59,10 @@ module Kumade
     def self.swapping_stdout_for(io)
       begin
         $real_stdout = $stdout
-        $stdout = io unless pretending?
+        $stdout = io unless print_output?
         yield
       rescue Kumade::DeploymentError
-        unless pretending?
+        unless print_output?
           io.rewind
           $real_stdout.print(io.read)
         end
@@ -69,6 +73,14 @@ module Kumade
 
     def self.pretending?
       @options[:pretend]
+    end
+    
+    def self.verbose?
+      @options[:verbose]
+    end
+    
+    def self.print_output?
+      pretending? || verbose?
     end
   end
 end

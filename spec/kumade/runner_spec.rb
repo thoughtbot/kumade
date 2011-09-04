@@ -73,4 +73,15 @@ describe Kumade::Runner do
       $stdout.puts "Hello, you can see me!"
     end
   end
+  it 'prints everything when verbose is true' do
+    stdout = $stdout
+    stdout.should_receive(:puts)
+    output = StringIO.new
+    Kumade::Runner.should_receive(:pretending?).and_return(false)
+    Kumade::Runner.should_receive(:verbose?).and_return(true)
+
+    Kumade::Runner.swapping_stdout_for(output) do
+      $stdout.puts "Hello, you can see me!"
+    end
+  end
 end
