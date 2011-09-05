@@ -50,7 +50,7 @@ Yes. To indicate that a particular app is using Cedar, run with the -c flag:
 
 ### Normal mode
 
-    $ kumade heroku-staging
+    $ bundle exec kumade heroku-staging
     ==> Deploying to: heroku-staging
     ==> heroku-staging is a Heroku remote
     ==> Git repo is clean
@@ -122,7 +122,7 @@ Yes. To indicate that a particular app is using Cedar, run with the -c flag:
 
 ### Pretend Mode with a non-Heroku remote
 
-    $ kumade origin -p
+    $ bundle exec kumade origin -p
     ==> In Pretend Mode
     ==> Deploying to: origin
     ==> ! Cannot deploy: "origin" remote does not point to Heroku
