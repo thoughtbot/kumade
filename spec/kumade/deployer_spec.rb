@@ -29,7 +29,7 @@ describe Kumade::Deployer, "#pre_deploy" do
 end
 
 describe Kumade::Deployer, "#deploy" do
-  let(:remote_name){ 'staging' }
+  let(:remote_name) { 'staging' }
 
   before do
     subject.stub(:say)
@@ -61,8 +61,10 @@ end
 
 describe Kumade::Deployer, "#sync_github" do
   let(:git_mock) { mock() }
+
   before { subject.stub(:git => git_mock) }
-  it "should call @git.push" do
+
+  it "calls git.push" do
     git_mock.should_receive(:push).with("master")
     subject.sync_github
   end
@@ -70,10 +72,13 @@ end
 
 describe Kumade::Deployer, "#sync_heroku" do
   let(:environment) { 'my-env' }
+  let(:git_mock)    { mock() }
+
   subject { Kumade::Deployer.new(environment) }
-  let(:git_mock) { mock() }
+
   before { subject.stub(:git => git_mock) }
-  it "should call git.create and git.push" do
+
+  it "calls git.create and git.push" do
     git_mock.should_receive(:create).with("deploy")
     git_mock.should_receive(:push).with("deploy:master", environment, true)
     subject.sync_heroku
@@ -82,8 +87,10 @@ end
 
 describe Kumade::Deployer, "#ensure_clean_git" do
   let(:git_mock) { mock() }
+
   before { subject.stub(:git => git_mock) }
-  it "should call git.ensure_clean_git" do
+
+  it "calls git.ensure_clean_git" do
     git_mock.should_receive(:ensure_clean_git)
     subject.ensure_clean_git
   end
@@ -200,12 +207,12 @@ describe Kumade::Deployer, "#package_with_jammit" do
 end
 
 describe Kumade::Deployer, "#invoke_custom_task" do
+  let(:task) { stub('task', :invoke => nil) }
+
   before do
     subject.stub(:say)
     Rake::Task.stub(:[] => task)
   end
-
-  let(:task) { stub('task', :invoke => nil) }
 
   it "calls deploy task" do
     Rake::Task.should_receive(:[]).with("kumade:before_asset_compilation")
@@ -280,9 +287,10 @@ end
 
 describe Kumade::Deployer, "#git_add_and_commit_all_assets_in" do
   let(:git_mock) { mock() }
+
   before { subject.stub(:git => git_mock) }
-  
-  it "should call git.add_and_commit_all_in" do
+
+  it "calls git.add_and_commit_all_in" do
     git_mock.should_receive(:add_and_commit_all_in).with("dir", 'deploy', 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
     subject.git_add_and_commit_all_assets_in("dir")
   end
@@ -359,7 +367,7 @@ describe Kumade::Deployer, "#custom_task?" do
 end
 
 describe Kumade::Deployer, "#heroku_migrate" do
-  let(:environment){ 'staging' }
+  let(:environment) { 'staging' }
 
   before do
     subject.stub(:say)
@@ -377,8 +385,8 @@ describe Kumade::Deployer, "#heroku_migrate" do
 end
 
 describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
-  let(:environment){ 'staging' }
-  let(:bad_environment){ 'bad' }
+  let(:environment)     { 'staging' }
+  let(:bad_environment) { 'bad' }
 
   before do
     subject.stub(:say)
@@ -447,15 +455,16 @@ end
 
 describe Kumade::Deployer, "#post_deploy" do
   let(:git_mock) { mock() }
+
   before { subject.stub(:git => git_mock) }
-  
-  it "should call git.delete" do
+
+  it "calls git.delete" do
     git_mock.should_receive(:delete).with('deploy', 'master')
     subject.post_deploy
   end
 
   it "prints its message and raises its message" do
     subject.should_receive(:say).with("==> ! I'm an error!", :red)
-    lambda{ subject.error("I'm an error!") }.should raise_error(Kumade::DeploymentError)
+    lambda { subject.error("I'm an error!") }.should raise_error(Kumade::DeploymentError)
   end
 end
