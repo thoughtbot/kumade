@@ -54,13 +54,12 @@ module Kumade
       end
     end
 
-    def git_dirty?
-      `git diff --exit-code`
-      !$?.success?
+    def dirty?
+      ! system("git diff --exit-code")
     end
 
     def ensure_clean_git
-      if ! @pretending && git_dirty?
+      if ! @pretending && dirty?
         error("Cannot deploy: repo is not clean.")
       else
         success("Git repo is clean")
