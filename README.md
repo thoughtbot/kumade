@@ -28,6 +28,10 @@ For example, if you have a remote named "bamboo":
 
     $ bundle exec kumade bamboo
 
+or
+
+    $ rake deploy:bamboo
+
 which will autodetect the name of the Heroku app that the bamboo remote points
 to and deploy to it.
 
@@ -39,6 +43,7 @@ any of it:
 The default is to deploy to staging:
 
     $ bundle exec kumade # equivalent to "bundle exec kumade staging"
+
 
 ## Does it support the Cedar stack?
 
