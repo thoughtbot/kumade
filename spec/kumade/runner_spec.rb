@@ -14,6 +14,15 @@ describe Kumade::Runner do
     end
   end
 
+  %w(-v --verbose).each do |verbose_arg|
+    it "sets verbose mode when run with #{verbose_arg}" do
+      subject.stub(:deploy)
+
+      subject.run([environment, verbose_arg], out)
+      subject.verbose?.should be_true
+    end
+  end
+
   it "defaults to staging" do
     subject.stub(:deploy)
     subject.run([], out)
@@ -84,5 +93,25 @@ describe Kumade::Runner do
     Kumade::Runner.swapping_stdout_for(output) do
       $stdout.puts "Hello, you can see me!"
     end
+  end
+end
+
+describe Kumade::Runner, ".print_output?" do
+
+  it "should return true when pretending" do
+    Kumade::Runner.should_receive(:pretending?).and_return(true)
+    Kumade::Runner.print_output?.should be_true
+  end
+
+  it "should return true when verbose" do
+    Kumade::Runner.should_receive(:pretending?).and_return(false)
+    Kumade::Runner.should_receive(:verbose?).and_return(true)
+    Kumade::Runner.print_output?.should be_true
+  end
+
+  it "should return false when not verbose and not pretending" do
+    Kumade::Runner.should_receive(:verbose?).and_return(false)
+    Kumade::Runner.should_receive(:pretending?).and_return(false)
+    Kumade::Runner.print_output?.should be_false
   end
 end
