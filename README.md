@@ -3,6 +3,11 @@ Kumade is a set of basic Rake tasks for deploying to Heroku. It aims to
 provide most of what you want. Unlike other Heroku deploy gems, it is
 well-tested.
 
+## Development
+Development is happening very fast, and the internals are in constant flux. The
+public API is constant (e.g. `kumade production` will work), but you may have to
+rebase against master a couple times before your pull request can be merged.
+
 ## What does Kumade do?
 Before deploying, Kumade ensures the git repo is clean and that all tests pass.
 After that, it packages assets using
