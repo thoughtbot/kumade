@@ -28,6 +28,14 @@ For example, if you have a remote named "bamboo":
 
     $ bundle exec kumade bamboo
 
+or
+
+    # in your Rakefile:
+    require 'kumade'
+
+    # kumade auto-generates a deploy:ENV task for every Heroku environment
+    $ rake deploy:bamboo
+
 which will autodetect the name of the Heroku app that the bamboo remote points
 to and deploy to it.
 
@@ -40,6 +48,7 @@ The default is to deploy to staging:
 
     $ bundle exec kumade # equivalent to "bundle exec kumade staging"
 
+
 ## Does it support the Cedar stack?
 
 Yes. To indicate that a particular app is using Cedar, run with the -c flag:
@@ -50,7 +59,7 @@ Yes. To indicate that a particular app is using Cedar, run with the -c flag:
 
 ### Normal mode
 
-    $ kumade heroku-staging
+    $ bundle exec kumade heroku-staging
     ==> Deploying to: heroku-staging
     ==> heroku-staging is a Heroku remote
     ==> Git repo is clean
@@ -122,7 +131,7 @@ Yes. To indicate that a particular app is using Cedar, run with the -c flag:
 
 ### Pretend Mode with a non-Heroku remote
 
-    $ kumade origin -p
+    $ bundle exec kumade origin -p
     ==> In Pretend Mode
     ==> Deploying to: origin
     ==> ! Cannot deploy: "origin" remote does not point to Heroku
@@ -137,7 +146,7 @@ Tested against:
 
 ## Misc Features
 
-Want to run a task before bundling your assets on deploy? In your rails app's rake tasks, drop in:
+Want to run a task before bundling your assets on deploy? In your Rails app's rake tasks, drop in:
 
 ``` ruby
 namespace :kumade do
