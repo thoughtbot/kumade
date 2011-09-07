@@ -38,11 +38,11 @@ module Kumade
           options[:cedar] = cedar
         end
 
-        opts.on_tail("-vv", "--verbose", "Print what kumade is doing") do
+        opts.on_tail("-v", "--verbose", "Print what kumade is doing") do
           options[:verbose] = true
         end
 
-        opts.on_tail('-v', '--version', 'Show version') do
+        opts.on_tail('--version', 'Show version') do
           puts "kumade #{Kumade::VERSION}"
           exit
         end
