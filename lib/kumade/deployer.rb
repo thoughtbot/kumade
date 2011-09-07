@@ -55,7 +55,7 @@ module Kumade
 
     def cedar?
       return @cedar unless @cedar.nil?
-      heroku("stack").split("\n").grep(/\*/).any? do |line|
+      @cedar = heroku("stack").split("\n").grep(/\*/).any? do |line|
         line.include?("cedar")
       end
     end
