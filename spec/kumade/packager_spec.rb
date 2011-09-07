@@ -124,7 +124,7 @@ describe Kumade::Packager, "#package_with_jammit" do
   end
 
   context "with updated assets" do
-    before { subject.stub(:git => mock(:git_dirty? => true)) }
+    before { subject.stub(:git => mock(:dirty? => true)) }
 
     it "prints the correct message" do
       subject.should_receive(:success).with("Packaged assets with Jammit")
@@ -162,7 +162,7 @@ describe Kumade::Packager, "#package_with_more" do
   end
 
   it "calls the more:generate task" do
-    git_mock.should_receive(:git_dirty?).and_return(true)
+    git_mock.should_receive(:dirty?).and_return(true)
     subject.should_receive(:run).with("bundle exec rake more:generate")
     subject.package_with_more
   end
@@ -170,14 +170,14 @@ describe Kumade::Packager, "#package_with_more" do
   context "with changed assets" do
     it "prints a success message" do
       subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git => mock(:git_dirty? => true))
+      subject.stub(:git => mock(:dirty? => true))
       subject.should_receive(:success).with("Packaged assets with More")
 
       subject.package_with_more
     end
 
     it "calls git_add_and_commit_all_assets_in if assets were added" do
-      subject.stub(:git => mock(:git_dirty? => true),
+      subject.stub(:git => mock(:dirty? => true),
                    :more_assets_path => 'blerg')
       subject.stub(:run).with("bundle exec rake more:generate")
       subject.should_receive(:git_add_and_commit_all_assets_in).
@@ -191,7 +191,7 @@ describe Kumade::Packager, "#package_with_more" do
   context "with no changed assets" do
     it "prints no message" do
       subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git => mock(:git_dirty? => false))
+      subject.stub(:git => mock(:dirty? => false))
       subject.should_not_receive(:say)
 
       subject.package_with_more
@@ -199,7 +199,7 @@ describe Kumade::Packager, "#package_with_more" do
 
     it "does not call git_add_and_commit_all_more_assets" do
       subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git => mock(:git_dirty? => false))
+      subject.stub(:git => mock(:dirty? => false))
       subject.should_not_receive(:git_add_and_commit_all_assets_in)
 
       subject.package_with_more
