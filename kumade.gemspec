@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
   s.version     = Kumade::VERSION
   s.authors     = ["Gabe Berke-Williams", "thoughtbot"]
   s.email       = ["gabe@thoughtbot.com", "support@thoughtbot.com"]
-  s.homepage    = ""
-  s.summary     = %q{Simple rake tasks for deploying to Heroku}
+  s.homepage    = "http://thoughtbot.com/community/"
+  s.summary     = %q{A well-tested script for easy deploying to Heroku}
   s.description = s.summary
 
   s.files         = `git ls-files`.split("\n")
@@ -18,9 +18,9 @@ Gem::Specification.new do |s|
 
   s.add_dependency('heroku', '~> 2.0')
   s.add_dependency('thor', '~> 0.14')
-  s.add_dependency('rake', '~> 0.8.7')
+  s.add_dependency('rake', '>= 0.8.7')
 
-  s.add_development_dependency('rake', '~> 0.8.7')
+  s.add_development_dependency('rake', '>= 0.8.7')
   s.add_development_dependency('rspec', '~> 2.6.0')
   s.add_development_dependency('cucumber', '~> 1.0.2')
   s.add_development_dependency('aruba', '~> 0.4.3')
