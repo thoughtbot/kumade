@@ -88,7 +88,7 @@ module Kumade
       else
         begin
           run "bundle exec rake more:generate"
-          if git.git_dirty?
+          if git.dirty?
             success(success_message)
             git_add_and_commit_all_assets_in(more_assets_path)
           end
