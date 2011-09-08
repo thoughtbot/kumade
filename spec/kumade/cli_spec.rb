@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe Kumade::Runner do
-  subject { Kumade::Runner }
+describe Kumade::CLI do
+  subject { Kumade::CLI }
   let(:out){ StringIO.new }
   let(:environment){ 'my-environment' }
 
@@ -28,13 +28,13 @@ describe Kumade::Runner do
 
 end
 
-describe Kumade::Runner do
+describe Kumade::CLI do
   it 'does not let anything get printed' do
     stdout = $stdout
     stdout.should_not_receive(:print)
     output = StringIO.new
 
-    Kumade::Runner.swapping_stdout_for(output) do
+    Kumade::CLI.swapping_stdout_for(output) do
       $stdout.puts "Hello, you can't see me."
     end
 
@@ -47,7 +47,7 @@ describe Kumade::Runner do
     stdout.should_receive(:print)
     output = StringIO.new
 
-    Kumade::Runner.swapping_stdout_for(output) do
+    Kumade::CLI.swapping_stdout_for(output) do
       $stdout.puts "Hello, you can see me!"
       raise Kumade::DeploymentError.new("error")
     end
@@ -57,9 +57,9 @@ describe Kumade::Runner do
     stdout = $stdout
     stdout.should_receive(:puts)
     output = StringIO.new
-    Kumade::Runner.should_receive(:pretending?).and_return(true)
+    Kumade::CLI.should_receive(:pretending?).and_return(true)
 
-    Kumade::Runner.swapping_stdout_for(output) do
+    Kumade::CLI.swapping_stdout_for(output) do
       $stdout.puts "Hello, you can see me!"
     end
   end
