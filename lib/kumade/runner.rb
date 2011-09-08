@@ -1,4 +1,5 @@
 require 'optparse'
+require 'stringio'
 
 module Kumade
   class Runner
