@@ -1,6 +1,7 @@
 module Kumade
   class Deployer < Base
-    attr_reader :git, :packager
+    attr_reader :git, :packager, :environment, :pretending
+    
     def initialize(environment = 'staging', pretending = false, cedar = false)
       super()
       @environment = environment

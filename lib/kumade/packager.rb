@@ -1,6 +1,7 @@
 module Kumade
   class Packager < Base
-    attr_reader :git
+    attr_reader :git, :environment, :pretending
+    
     
     def initialize(pretending, environment, git)
       super()

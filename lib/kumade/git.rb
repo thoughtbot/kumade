@@ -1,5 +1,6 @@
 module Kumade
   class Git < Base
+    attr_reader :environment, :pretending
     def initialize(pretending, environment)
       super()
       @pretending = pretending
