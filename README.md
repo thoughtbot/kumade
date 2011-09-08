@@ -56,7 +56,7 @@ The default is to deploy to staging:
 
 ## Does it support the Cedar stack?
 
-Yes.
+Yes. kumade will automatically detect if your app is running on Cedar.
 
 ## Compatibility
 
