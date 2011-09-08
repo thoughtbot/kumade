@@ -175,10 +175,24 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 end
 
+describe Kumade::Deployer, "#cedar?" do
+  context "when on Cedar" do
+    subject { Kumade::Deployer.new('staging', false) }
+    before  { subject.stub(:heroku).and_return("  bamboo\n* cedar\n") }
+    its(:cedar?) { should be_true }
+  end
+
+  context "when not on Cedar" do
+    subject { Kumade::Deployer.new('staging', false) }
+    before  { subject.stub(:heroku).and_return("* bamboo\n  cedar\n") }
+    its(:cedar?) { should be_false }
+  end
+end
+
 describe Kumade::Deployer, "#heroku" do
   context "when on Cedar" do
-    subject { Kumade::Deployer.new('staging', false, cedar = true) }
-
+    subject { Kumade::Deployer.new('staging', false) }
+    before  { subject.stub(:cedar?).and_return(true) }
     it "runs commands with `run`" do
       subject.should_receive(:run_or_error).with("bundle exec heroku run rake --remote staging", //)
       subject.heroku("rake")
@@ -186,8 +200,8 @@ describe Kumade::Deployer, "#heroku" do
   end
 
   context "when not on Cedar" do
-    subject { Kumade::Deployer.new('staging', false, cedar = false) }
-
+    subject { Kumade::Deployer.new('staging', false) }
+    before  { subject.stub(:cedar?).and_return(false) }
     it "runs commands without `run`" do
       subject.should_receive(:run_or_error).with("bundle exec heroku rake --remote staging", //)
       subject.heroku("rake")
