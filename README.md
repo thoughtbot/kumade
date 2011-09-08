@@ -56,9 +56,7 @@ The default is to deploy to staging:
 
 ## Does it support the Cedar stack?
 
-Yes. To indicate that a particular app is using Cedar, run with the -c flag:
-
-    bundle exec kumade bamboo -c
+Yes.
 
 ## Compatibility
 
