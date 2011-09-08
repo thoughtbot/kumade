@@ -1,3 +1,5 @@
+require "rake"
+
 module Kumade
   class Deployer < Base
     DEPLOY_BRANCH = "deploy"

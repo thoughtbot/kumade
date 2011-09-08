@@ -1,3 +1,5 @@
+require "thor"
+
 module Kumade
   class Base < Thor::Shell::Color
     def initialize
