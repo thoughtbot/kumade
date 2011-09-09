@@ -438,14 +438,25 @@ end
 describe Kumade::Deployer, "#cedar?" do
   context "when on Cedar" do
     subject { Kumade::Deployer.new('staging', false) }
-    before  { subject.stub(:heroku).and_return("  bamboo\n* cedar\n") }
+    before  { subject.should_receive(:heroku).once.and_return("  bamboo\n* cedar\n") }
     its(:cedar?) { should be_true }
+
+    it "should cache result" do
+      subject.cedar?.should be_true
+      subject.cedar?.should be_true
+    end
   end
 
   context "when not on Cedar" do
     subject { Kumade::Deployer.new('staging', false) }
-    before  { subject.stub(:heroku).and_return("* bamboo\n  cedar\n") }
+    before  { subject.should_receive(:heroku).once.and_return("* bamboo\n  cedar\n") }
     its(:cedar?) { should be_false }
+    
+    it "should cache result" do
+      subject.cedar?.should be_false
+      subject.cedar?.should be_false
+    end
+    
   end
 end
 
