@@ -1,9 +1,10 @@
 require 'spec_helper'
 
 describe Kumade::CLI do
+  let(:out)         { StringIO.new }
+  let(:environment) { 'my-environment' }
+
   subject { Kumade::CLI }
-  let(:out){ StringIO.new }
-  let(:environment){ 'my-environment' }
 
   %w(-p --pretend).each do |pretend_arg|
     it "sets pretend mode when run with #{pretend_arg}" do
@@ -23,16 +24,16 @@ describe Kumade::CLI do
   it "deploys" do
     Kumade::Deployer.any_instance.should_receive(:deploy)
 
-    subject.run([environment], out)
+    subject.run
   end
-
 end
 
-describe Kumade::CLI do
+describe Kumade::CLI, ".swapping_stdout_for" do
+  let(:stdout) { $stdout }
+  let(:output) { StringIO.new }
+
   it 'does not let anything get printed' do
-    stdout = $stdout
     stdout.should_not_receive(:print)
-    output = StringIO.new
 
     Kumade::CLI.swapping_stdout_for(output) do
       $stdout.puts "Hello, you can't see me."
@@ -43,9 +44,7 @@ describe Kumade::CLI do
   end
 
   it 'dumps the output stash to real stdout when an error happens' do
-    stdout = $stdout
     stdout.should_receive(:print)
-    output = StringIO.new
 
     Kumade::CLI.swapping_stdout_for(output) do
       $stdout.puts "Hello, you can see me!"
@@ -53,14 +52,17 @@ describe Kumade::CLI do
     end
   end
 
-  it 'prints everything in pretend mode' do
-    stdout = $stdout
-    stdout.should_receive(:puts)
-    output = StringIO.new
-    Kumade::CLI.should_receive(:pretending?).and_return(true)
+  context "in pretend mode" do
+    before do
+      Kumade::CLI.should_receive(:pretending?).and_return(true)
+    end
 
-    Kumade::CLI.swapping_stdout_for(output) do
-      $stdout.puts "Hello, you can see me!"
+    it 'prints everything' do
+      stdout.should_receive(:puts)
+
+      Kumade::CLI.swapping_stdout_for(output) do
+        $stdout.puts "Hello, you can see me!"
+      end
     end
   end
 end

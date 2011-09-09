@@ -7,7 +7,7 @@ module Kumade
       attr_reader :environment
     end
 
-    def self.run(args=ARGV, out=StringIO.new)
+    def self.run(args = ARGV, out = StringIO.new)
       @out         = out
       @options     = parse_arguments!(args)
       @environment = args.shift || 'staging'

@@ -346,12 +346,12 @@ describe Kumade::Deployer, "#custom_task?" do
     Rake::Task.clear
   end
 
-  it "returns true if it task found" do
+  it "returns true if the task exists" do
     namespace :kumade do
       task :before_asset_compilation do
-
       end
     end
+
     Kumade::Deployer.new.custom_task?.should be_true
   end
 
@@ -403,7 +403,6 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
       subject.ensure_heroku_remote_exists
     end
   end
-
 
   context "when the remote does not exist" do
     subject { Kumade::Deployer.new(environment) }
