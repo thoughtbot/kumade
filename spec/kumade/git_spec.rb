@@ -49,3 +49,41 @@ describe Kumade::Git, ".environments" do
     Kumade::Git.environments.should == ["staging"]
   end
 end
+
+describe Kumade::Git, "#branch_exist?" do
+  let(:comand_line_mock) { mock("Cocaine::CommandLine") }
+  let(:branch) { "branch" }
+  let(:environment) { "staging" }
+  
+  subject { Kumade::Git.new(false, environment) }
+
+  before(:each) do
+    Cocaine::CommandLine.should_receive(:new).with("git show-ref #{branch}").and_return(comand_line_mock)
+  end
+  
+  it "should return true when branch exist" do
+    comand_line_mock.should_receive(:run)
+    subject.branch_exist?("branch").should be_true
+  end
+  
+  it "should return false if branch doesn't exist" do
+    comand_line_mock.should_receive(:run).and_raise(Cocaine::ExitStatusError)
+    subject.branch_exist?("branch").should be_false
+  end
+end
+
+describe Kumade::Git, "#dirty?" do
+  let(:environment) { "staging" }
+  
+  subject { Kumade::Git.new(false, environment) }
+
+  it "should return true when dirty" do
+    subject.should_receive(:run).with("git diff --exit-code").and_return(false)
+    subject.dirty?.should be_true
+  end
+  
+  it "should return false when not dirty" do
+    subject.should_receive(:run).with("git diff --exit-code").and_return(true)
+    subject.dirty?.should be_false
+  end
+end
