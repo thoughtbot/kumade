@@ -50,17 +50,19 @@ module Kumade
     end
 
     def self.swapping_stdout_for(io)
-      begin
-        $real_stdout = $stdout
-        $stdout = io unless pretending?
+      if pretending?
         yield
-      rescue Kumade::DeploymentError
-        unless pretending?
+      else
+        begin
+          real_stdout = $stdout
+          $stdout     = io
+          yield
+        rescue Kumade::DeploymentError
           io.rewind
-          $real_stdout.print(io.read)
+          real_stdout.print(io.read)
+        ensure
+          $stdout = real_stdout
         end
-      ensure
-        $stdout = $real_stdout
       end
     end
 
