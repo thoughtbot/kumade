@@ -3,6 +3,8 @@ require 'aruba/api'
 
 require 'kumade'
 
+require 'rake'
+
 module GitRemoteHelpers
   def force_add_heroku_remote(remote_name)
     remove_remote(remote_name)
@@ -17,6 +19,8 @@ end
 RSpec.configure do |config|
   config.mock_with :rspec
   config.color_enabled = true
+
+  config.include Rake::DSL if defined?(Rake::DSL)
 
   config.include GitRemoteHelpers
   config.include Aruba::Api

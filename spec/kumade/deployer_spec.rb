@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-include Rake::DSL if defined?(Rake::DSL)
-
 describe Kumade::Deployer, "#pre_deploy" do
   before { subject.stub(:say) }
 
