@@ -3,6 +3,7 @@ require 'kumade'
 require 'rake'
 require 'stringio'
 require 'aruba/api'
+require 'cocaine'
 
 module GitRemoteHelpers
   def force_add_heroku_remote(remote_name)

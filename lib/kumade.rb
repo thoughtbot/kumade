@@ -1,13 +1,8 @@
-require 'rake'
-require 'thor'
-require 'stringio'
-
-require 'kumade/base'
-require 'kumade/git'
-require 'kumade/deployer'
-require 'kumade/runner'
-require 'kumade/railtie'
-require 'kumade/deployment_error'
-
 module Kumade
+  autoload :Base,            "kumade/base"
+  autoload :Git,             "kumade/git"
+  autoload :Deployer,        "kumade/deployer"
+  autoload :CLI,             "kumade/cli"
+  autoload :Railtie,         "kumade/railtie"
+  autoload :DeploymentError, "kumade/deployment_error"
 end

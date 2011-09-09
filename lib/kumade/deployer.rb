@@ -1,13 +1,14 @@
+require "rake"
+
 module Kumade
   class Deployer < Base
     DEPLOY_BRANCH = "deploy"
     attr_reader :environment, :pretending, :git
 
-    def initialize(environment = 'staging', pretending = false, cedar = false)
+    def initialize(environment = 'staging', pretending = false)
       super()
       @environment = environment
       @pretending  = pretending
-      @cedar       = cedar
       @git         = Git.new(pretending, environment)
       @branch      = @git.current_branch
     end
@@ -45,13 +46,19 @@ module Kumade
     end
 
     def heroku(command)
-      heroku_command = if @cedar
+      heroku_command = if cedar?
                          "bundle exec heroku run"
                        else
                          "bundle exec heroku"
                        end
       run_or_error("#{heroku_command} #{command} --remote #{environment}",
                    "Failed to run #{command} on Heroku")
+    end
+
+    def cedar?
+      @cedar ||= heroku("stack").split("\n").grep(/\*/).any? do |line|
+        line.include?("cedar")
+      end
     end
 
     def ensure_clean_git

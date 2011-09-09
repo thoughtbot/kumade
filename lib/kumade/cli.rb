@@ -1,7 +1,8 @@
 require 'optparse'
+require 'stringio'
 
 module Kumade
-  class Runner
+  class CLI
     class << self
       attr_reader :environment
     end
@@ -21,7 +22,7 @@ module Kumade
         puts "==> In Pretend Mode"
       end
       puts "==> Deploying to: #{environment}"
-      Deployer.new(environment, pretending?, @options[:cedar]).deploy
+      Deployer.new(environment, pretending?).deploy
       puts "==> Deployed to: #{environment}"
     end
 
@@ -32,10 +33,6 @@ module Kumade
 
         opts.on("-p", "--pretend", "Pretend mode: print what kumade would do") do |p|
           options[:pretend] = p
-        end
-
-        opts.on("-c", "--cedar", "Use this if your app is on cedar") do |cedar|
-          options[:cedar] = cedar
         end
 
         opts.on_tail("-v", "--verbose", "Print what kumade is doing") do
