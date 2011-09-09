@@ -291,10 +291,12 @@ describe Kumade::Deployer, "#git_add_and_commit_all_assets_in" do
 end
 
 describe Kumade::Deployer, "#jammit_assets_path" do
-  let(:current_dir) { File.expand_path(Dir.pwd) }
+  before do
+    Jammit.stub(:package_path => 'blerg')
+  end
 
   it "returns the correct asset path" do
-    Jammit.stub(:package_path => 'blerg')
+    current_dir = File.expand_path(Dir.pwd)
     subject.jammit_assets_path.should == File.join(current_dir, 'public', 'blerg')
   end
 end
