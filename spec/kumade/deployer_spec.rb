@@ -197,9 +197,7 @@ describe Kumade::Deployer, "#package_with_jammit" do
   end
 
   it "prints an error if packaging failed" do
-    Jammit.stub(:package!) do
-      raise Jammit::MissingConfiguration.new("random Jammit error")
-    end
+    Jammit.stub(:package!).and_raise(Jammit::MissingConfiguration.new("random Jammit error"))
     subject.should_receive(:error).with("Error: Jammit::MissingConfiguration: random Jammit error")
 
     subject.package_with_jammit
@@ -255,17 +253,17 @@ describe Kumade::Deployer, "#package_with_more" do
   end
 
   context "with no changed assets" do
+    before { subject.stub(:git => stub(:dirty? => false)) }
+
     it "prints no message" do
       subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git => mock(:dirty? => false))
       subject.should_not_receive(:say)
 
       subject.package_with_more
     end
 
-    it "does not call git_add_and_commit_all_more_assets" do
+    it "does not call git_add_and_commit_all_assets_in" do
       subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git => mock(:dirty? => false))
       subject.should_not_receive(:git_add_and_commit_all_assets_in)
 
       subject.package_with_more
@@ -273,11 +271,7 @@ describe Kumade::Deployer, "#package_with_more" do
   end
 
   it "prints an error if packaging failed" do
-    subject.stub(:run) do |arg|
-      if arg == "bundle exec rake more:generate"
-        raise "blerg"
-      end
-    end
+    subject.should_receive(:run).with("bundle exec rake more:generate").and_raise(RuntimeError.new("blerg"))
 
     subject.should_receive(:error).with("Error: RuntimeError: blerg")
 
@@ -297,15 +291,16 @@ describe Kumade::Deployer, "#git_add_and_commit_all_assets_in" do
 end
 
 describe Kumade::Deployer, "#jammit_assets_path" do
+  let(:current_dir) { File.expand_path(Dir.pwd) }
+
   it "returns the correct asset path" do
     Jammit.stub(:package_path => 'blerg')
-    current_dir = File.expand_path(Dir.pwd)
     subject.jammit_assets_path.should == File.join(current_dir, 'public', 'blerg')
   end
 end
 
 describe Kumade::Deployer, "#more_assets_path" do
-  it "returns the correct asset path" do
+  before do
     module ::Less
       class More
         def self.destination_path
@@ -313,16 +308,15 @@ describe Kumade::Deployer, "#more_assets_path" do
         end
       end
     end
+  end
+
+  it "returns the correct asset path" do
     subject.more_assets_path.should == 'public/blerg'
   end
 end
 
 describe Kumade::Deployer, "#jammit_installed?" do
   it "returns true because it's loaded by the Gemfile" do
-    Kumade::Deployer.new.jammit_installed?.should be_true
-  end
-
-  it "returns false if jammit is not installed" do
     Kumade::Deployer.new.jammit_installed?.should be_true
   end
 end
