@@ -438,16 +438,32 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
 end
 
 describe Kumade::Deployer, "#cedar?" do
+  let(:cocaine_mock) { mock("Cocaine::CommandLine") }
+  before { Cocaine::CommandLine.should_receive(:new).with("bundle exec heroku stack --remote staging").and_return(cocaine_mock) }
   context "when on Cedar" do
     subject { Kumade::Deployer.new('staging', false) }
-    before  { subject.stub(:heroku).and_return("  bamboo\n* cedar\n") }
-    its(:cedar?) { should be_true }
+    it "should be true" do
+      cocaine_mock.should_receive(:run).and_return(%{
+  aspen-mri-1.8.6
+  bamboo-mri-1.9.2
+  bamboo-ree-1.8.7
+*  cedar (beta)
+})
+      subject.cedar?.should be_true
+    end
   end
 
   context "when not on Cedar" do
     subject { Kumade::Deployer.new('staging', false) }
-    before  { subject.stub(:heroku).and_return("* bamboo\n  cedar\n") }
-    its(:cedar?) { should be_false }
+    it "should be false" do
+      cocaine_mock.should_receive(:run).and_return(%{
+  aspen-mri-1.8.6
+* bamboo-mri-1.9.2
+  bamboo-ree-1.8.7
+  cedar (beta)
+})
+      subject.cedar?.should be_false
+    end
   end
 end
 

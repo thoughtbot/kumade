@@ -1,4 +1,5 @@
 require "rake"
+require 'cocaine'
 
 module Kumade
   class Deployer < Base
@@ -58,11 +59,10 @@ module Kumade
       run_or_error("#{heroku_command} #{command} --remote #{environment}",
                    "Failed to run #{command} on Heroku")
     end
-
+    
     def cedar?
       return @cedar unless @cedar.nil?
-
-      @cedar = heroku("stack").split("\n").grep(/\*/).any? do |line|
+      @cedar = Cocaine::CommandLine.new("bundle exec heroku stack --remote #{environment}").run.split("\n").grep(/\*/).any? do |line|
         line.include?("cedar")
       end
     end
