@@ -2,7 +2,7 @@ require 'optparse'
 require 'stringio'
 
 module Kumade
-  class Runner
+  class CLI
     class << self
       attr_reader :environment
     end
