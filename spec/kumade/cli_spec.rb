@@ -4,27 +4,44 @@ describe Kumade::CLI do
   let(:out)         { StringIO.new }
   let(:environment) { 'my-environment' }
 
-  subject { Kumade::CLI }
+  let(:deployer)          { stub("Deployer", :new => deployer_instance) }
+  let(:deployer_instance) { stub("DeployerInstance", :deploy => nil) }
 
-  %w(-p --pretend).each do |pretend_arg|
-    it "sets pretend mode when run with #{pretend_arg}" do
-      subject.stub(:deploy)
+  before  { Kumade::CLI.deployer = deployer }
+  after   { Kumade::CLI.deployer = nil }
 
-      subject.run([environment, pretend_arg], out)
-      subject.pretending?.should be_true
+  context "when pretending" do
+    %w(-p --pretend).each do |pretend_flag|
+      context pretend_flag do
+        subject { Kumade::CLI.new([pretend_flag, environment], out) }
+
+        it "deploys correctly" do
+          deployer.should_receive(:new).with(environment, true)
+          deployer_instance.should_receive(:deploy)
+          subject
+        end
+      end
     end
   end
 
-  it "defaults to staging" do
-    subject.stub(:deploy)
-    subject.run([], out)
-    subject.environment.should == 'staging'
+  context "running normally" do
+    subject { Kumade::CLI.new([environment], out) }
+
+    it "deploys correctly" do
+      deployer.should_receive(:new).with(environment, false)
+      deployer_instance.should_receive(:deploy)
+      subject
+    end
   end
+end
 
-  it "deploys" do
-    Kumade::Deployer.any_instance.should_receive(:deploy)
+describe Kumade::CLI, ".deployer" do
+  after { Kumade::CLI.deployer = nil }
+  it    { Kumade::CLI.deployer.should == Kumade::Deployer }
 
-    subject.run
+  it "can override deployer" do
+    Kumade::CLI.deployer = "deployer!"
+    Kumade::CLI.deployer.should == "deployer!"
   end
 end
 
@@ -53,14 +70,10 @@ describe Kumade::CLI, ".swapping_stdout_for" do
   end
 
   context "in pretend mode" do
-    before do
-      Kumade::CLI.should_receive(:pretending?).and_return(true)
-    end
-
     it 'prints everything' do
       stdout.should_receive(:puts)
 
-      Kumade::CLI.swapping_stdout_for(output) do
+      Kumade::CLI.swapping_stdout_for(output, true) do
         $stdout.puts "Hello, you can see me!"
       end
     end
