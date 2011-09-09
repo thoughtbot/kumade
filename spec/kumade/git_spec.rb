@@ -20,12 +20,12 @@ describe Kumade::Git, "#heroku_remote?" do
   end
 
   it "returns true when the remote is a heroku repository" do
-    Kumade::Git.new(false, environment).heroku_remote?.should be_true
-    Kumade::Git.new(false, another_heroku_environment).heroku_remote?.should be_true
+    Kumade::Git.new(environment).heroku_remote?.should be_true
+    Kumade::Git.new(another_heroku_environment).heroku_remote?.should be_true
   end
 
   it "returns false when the remote is not a heroku repository" do
-    Kumade::Git.new(false, 'kumade').heroku_remote?.should be_false
+    Kumade::Git.new('kumade').heroku_remote?.should be_false
   end
 end
 
@@ -51,10 +51,7 @@ end
 
 describe Kumade::Git, "#branch_exist?" do
   let(:command_line_mock) { mock("Cocaine::CommandLine") }
-  let(:branch)            { "branch" }
-  let(:environment)       { "staging" }
-
-  subject { Kumade::Git.new(false, environment) }
+  let(:branch)           { "branch" }
 
   before do
     Cocaine::CommandLine.should_receive(:new).with("git show-ref #{branch}").and_return(command_line_mock)
@@ -73,8 +70,6 @@ describe Kumade::Git, "#branch_exist?" do
 end
 
 describe Kumade::Git, "#dirty?" do
-  subject { Kumade::Git.new(false, "staging") }
-
   it "returns true when dirty" do
     subject.should_receive(:run).with("git diff --exit-code").and_return(false)
 

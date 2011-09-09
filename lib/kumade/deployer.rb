@@ -9,7 +9,7 @@ module Kumade
       super()
       @environment = environment
       @pretending  = pretending
-      @git         = Git.new(pretending, environment)
+      @git         = Git.new(environment, pretending)
       @branch      = @git.current_branch
     end
 
