@@ -67,6 +67,7 @@ describe Kumade::Git, "#branch_exist?" do
 
   it "returns false if the branch doesn't exist" do
     command_line_mock.should_receive(:run).and_raise(Cocaine::ExitStatusError)
+
     subject.branch_exist?("branch").should be_false
   end
 end

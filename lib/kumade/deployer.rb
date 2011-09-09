@@ -57,6 +57,7 @@ module Kumade
 
     def cedar?
       return @cedar unless @cedar.nil?
+
       @cedar = heroku("stack").split("\n").grep(/\*/).any? do |line|
         line.include?("cedar")
       end
@@ -107,7 +108,7 @@ module Kumade
     end
 
     def invoke_custom_task
-      success "Running kumade:before_asset_compilation task"
+      success("Running kumade:before_asset_compilation task")
       Rake::Task["kumade:before_asset_compilation"].invoke unless pretending
     end
 

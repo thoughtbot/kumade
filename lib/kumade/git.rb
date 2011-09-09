@@ -4,7 +4,7 @@ module Kumade
     attr_reader :environment
     def initialize(pretending, environment)
       super()
-      @pretending = pretending
+      @pretending  = pretending
       @environment = environment
     end
 
