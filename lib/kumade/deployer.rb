@@ -19,6 +19,7 @@ module Kumade
         pre_deploy
         sync_heroku
         heroku_migrate
+      rescue
       ensure
         post_deploy
       end
