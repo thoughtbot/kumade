@@ -1,3 +1,4 @@
+require 'cocaine'
 module Kumade
   class Git < Base
     attr_reader :environment, :pretending
@@ -21,7 +22,7 @@ module Kumade
       command << remote
       command << branch
       command = command.join(" ")
-      run_or_error([command], "Failed to push #{branch} -> #{remote}")
+      run_or_error(command, "Failed to push #{branch} -> #{remote}")
       success("Pushed #{branch} -> #{remote}")
     end
 
@@ -32,12 +33,12 @@ module Kumade
     end
 
     def delete(branch_to_delete, branch_to_checkout)
-      run_or_error(["git checkout #{branch_to_checkout}", "git branch -D #{branch_to_delete}"],
+      run_or_error("git checkout #{branch_to_checkout} && git branch -D #{branch_to_delete}",
                    "Failed to clean up #{branch_to_delete} branch")
     end
 
     def add_and_commit_all_in(dir, branch, commit_message, success_output, error_output)
-      run_or_error ["git checkout -b #{branch}", "git add -f #{dir}", "git commit -m '#{commit_message}'"],
+      run_or_error "git checkout -b #{branch} && git add -f #{dir} && git commit -m '#{commit_message}'",
                    "Cannot deploy: #{error_output}"
       success success_output
     end
@@ -55,7 +56,7 @@ module Kumade
     end
 
     def dirty?
-      ! system("git diff --exit-code")
+      !run("git diff --exit-code")
     end
 
     def ensure_clean_git
@@ -67,7 +68,7 @@ module Kumade
     end
 
     def branch_exist?(branch)
-      system("git show-ref #{branch}")
+      run("git show-ref #{branch}")
     end
   end
 end

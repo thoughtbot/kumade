@@ -2,4 +2,4 @@
 
 require 'kumade'
 
-Kumade::Runner.run
+Kumade::CLI.run

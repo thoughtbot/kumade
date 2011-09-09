@@ -1,8 +1,7 @@
 require 'rspec'
-require 'kumade'
-require 'rake'
-require 'stringio'
 require 'aruba/api'
+
+require 'kumade'
 
 module GitRemoteHelpers
   def force_add_heroku_remote(remote_name)
@@ -16,7 +15,9 @@ module GitRemoteHelpers
 end
 
 RSpec.configure do |config|
-  config.include RSpec::Mocks::Methods
+  config.mock_with :rspec
+  config.color_enabled = true
+
   config.include GitRemoteHelpers
   config.include Aruba::Api
 
