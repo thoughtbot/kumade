@@ -59,7 +59,7 @@ module Kumade
       run_or_error("#{heroku_command} #{command} --remote #{environment}",
                    "Failed to run #{command} on Heroku")
     end
-    
+
     def cedar?
       return @cedar unless @cedar.nil?
       @cedar = Cocaine::CommandLine.new("bundle exec heroku stack --remote #{environment}").run.split("\n").grep(/\*/).any? do |line|
