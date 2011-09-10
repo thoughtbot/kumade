@@ -2,9 +2,9 @@ require 'cocaine'
 module Kumade
   class Git < Base
     attr_reader :environment
-    def initialize(pretending, environment)
+    def initialize(environment = 'staging', pretending = false)
       super()
-      @pretending = pretending
+      @pretending  = pretending
       @environment = environment
     end
 

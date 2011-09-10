@@ -1,4 +1,5 @@
 require "rake"
+require 'cocaine'
 
 module Kumade
   class Deployer < Base
@@ -9,16 +10,20 @@ module Kumade
       super()
       @environment = environment
       @pretending  = pretending
-      @git         = Git.new(pretending, environment)
+      @git         = Git.new(environment, pretending)
       @branch      = @git.current_branch
     end
 
     def deploy
-      ensure_heroku_remote_exists
-      pre_deploy
-      sync_heroku
-      heroku_migrate
-      post_deploy
+      begin
+        ensure_heroku_remote_exists
+        pre_deploy
+        sync_heroku
+        heroku_migrate
+      rescue
+      ensure
+        post_deploy
+      end
     end
 
     def pre_deploy
@@ -56,7 +61,8 @@ module Kumade
     end
 
     def cedar?
-      @cedar ||= heroku("stack").split("\n").grep(/\*/).any? do |line|
+      return @cedar unless @cedar.nil?
+      @cedar = Cocaine::CommandLine.new("bundle exec heroku stack --remote #{environment}").run.split("\n").grep(/\*/).any? do |line|
         line.include?("cedar")
       end
     end
@@ -106,7 +112,7 @@ module Kumade
     end
 
     def invoke_custom_task
-      success "Running kumade:before_asset_compilation task"
+      success("Running kumade:before_asset_compilation task")
       Rake::Task["kumade:before_asset_compilation"].invoke unless pretending
     end
 

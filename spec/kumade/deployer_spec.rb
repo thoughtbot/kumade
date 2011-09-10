@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-include Rake::DSL if defined?(Rake::DSL)
-
 describe Kumade::Deployer, "#pre_deploy" do
   before { subject.stub(:say) }
 
@@ -59,6 +57,15 @@ describe Kumade::Deployer, "#deploy" do
 
     subject.deploy
   end
+
+  it "should call post_deploy if deploy fails" do
+    subject.git.stub!(:heroku_remote?).and_return(false)
+
+    subject.should_receive(:post_deploy)
+
+    subject.deploy
+  end
+
 end
 
 describe Kumade::Deployer, "#sync_github" do
@@ -199,9 +206,7 @@ describe Kumade::Deployer, "#package_with_jammit" do
   end
 
   it "prints an error if packaging failed" do
-    Jammit.stub(:package!) do
-      raise Jammit::MissingConfiguration.new("random Jammit error")
-    end
+    Jammit.stub(:package!).and_raise(Jammit::MissingConfiguration.new("random Jammit error"))
     subject.should_receive(:error).with("Error: Jammit::MissingConfiguration: random Jammit error")
 
     subject.package_with_jammit
@@ -257,17 +262,17 @@ describe Kumade::Deployer, "#package_with_more" do
   end
 
   context "with no changed assets" do
+    before { subject.stub(:git => stub(:dirty? => false)) }
+
     it "prints no message" do
       subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git => mock(:dirty? => false))
       subject.should_not_receive(:say)
 
       subject.package_with_more
     end
 
-    it "does not call git_add_and_commit_all_more_assets" do
+    it "does not call git_add_and_commit_all_assets_in" do
       subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git => mock(:dirty? => false))
       subject.should_not_receive(:git_add_and_commit_all_assets_in)
 
       subject.package_with_more
@@ -275,11 +280,7 @@ describe Kumade::Deployer, "#package_with_more" do
   end
 
   it "prints an error if packaging failed" do
-    subject.stub(:run) do |arg|
-      if arg == "bundle exec rake more:generate"
-        raise "blerg"
-      end
-    end
+    subject.should_receive(:run).with("bundle exec rake more:generate").and_raise(RuntimeError.new("blerg"))
 
     subject.should_receive(:error).with("Error: RuntimeError: blerg")
 
@@ -299,15 +300,18 @@ describe Kumade::Deployer, "#git_add_and_commit_all_assets_in" do
 end
 
 describe Kumade::Deployer, "#jammit_assets_path" do
-  it "returns the correct asset path" do
+  before do
     Jammit.stub(:package_path => 'blerg')
+  end
+
+  it "returns the correct asset path" do
     current_dir = File.expand_path(Dir.pwd)
     subject.jammit_assets_path.should == File.join(current_dir, 'public', 'blerg')
   end
 end
 
 describe Kumade::Deployer, "#more_assets_path" do
-  it "returns the correct asset path" do
+  before do
     module ::Less
       class More
         def self.destination_path
@@ -315,16 +319,15 @@ describe Kumade::Deployer, "#more_assets_path" do
         end
       end
     end
+  end
+
+  it "returns the correct asset path" do
     subject.more_assets_path.should == 'public/blerg'
   end
 end
 
 describe Kumade::Deployer, "#jammit_installed?" do
   it "returns true because it's loaded by the Gemfile" do
-    Kumade::Deployer.new.jammit_installed?.should be_true
-  end
-
-  it "returns false if jammit is not installed" do
     Kumade::Deployer.new.jammit_installed?.should be_true
   end
 end
@@ -354,12 +357,12 @@ describe Kumade::Deployer, "#custom_task?" do
     Rake::Task.clear
   end
 
-  it "returns true if it task found" do
+  it "returns true if the task exists" do
     namespace :kumade do
       task :before_asset_compilation do
-
       end
     end
+
     Kumade::Deployer.new.custom_task?.should be_true
   end
 
@@ -412,7 +415,6 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
     end
   end
 
-
   context "when the remote does not exist" do
     subject { Kumade::Deployer.new(environment) }
     before { remove_remote(environment) }
@@ -436,16 +438,38 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
 end
 
 describe Kumade::Deployer, "#cedar?" do
+  let(:cocaine_mock) { mock("Cocaine::CommandLine") }
+
+  before { Cocaine::CommandLine.should_receive(:new).with("bundle exec heroku stack --remote staging").and_return(cocaine_mock) }
+
   context "when on Cedar" do
-    subject { Kumade::Deployer.new('staging', false) }
-    before  { subject.stub(:heroku).and_return("  bamboo\n* cedar\n") }
-    its(:cedar?) { should be_true }
+    before do
+      cocaine_mock.should_receive(:run).and_return(%{
+  aspen-mri-1.8.6
+  bamboo-mri-1.9.2
+  bamboo-ree-1.8.7
+* cedar (beta)
+})
+    end
+
+    it "returns true" do
+      subject.cedar?.should == true
+    end
   end
 
   context "when not on Cedar" do
-    subject { Kumade::Deployer.new('staging', false) }
-    before  { subject.stub(:heroku).and_return("* bamboo\n  cedar\n") }
-    its(:cedar?) { should be_false }
+    before do
+      cocaine_mock.should_receive(:run).and_return(%{
+  aspen-mri-1.8.6
+* bamboo-mri-1.9.2
+  bamboo-ree-1.8.7
+  cedar (beta)
+})
+    end
+
+    it "returns false" do
+      subject.cedar?.should == false
+    end
   end
 end
 
@@ -462,6 +486,7 @@ describe Kumade::Deployer, "#heroku" do
   context "when not on Cedar" do
     subject { Kumade::Deployer.new('staging', false) }
     before  { subject.stub(:cedar?).and_return(false) }
+
     it "runs commands without `run`" do
       subject.should_receive(:run_or_error).with("bundle exec heroku rake --remote staging", //)
       subject.heroku("rake")

@@ -4,39 +4,61 @@ require 'stringio'
 module Kumade
   class CLI
     class << self
-      attr_reader :environment
+      attr_writer :deployer
+
+      def deployer
+        @deployer || Kumade::Deployer
+      end
     end
 
-    def self.run(args=ARGV, out=StringIO.new)
-      @out         = out
-      @options     = parse_arguments!(args)
+    def initialize(args = ARGV, out = StringIO.new)
+      @options     = {}
+      parse_arguments!(args)
       @environment = args.shift || 'staging'
 
-      swapping_stdout_for(@out) do
+      self.class.swapping_stdout_for(out, print_output?) do
         deploy
       end
     end
+    
+    def self.swapping_stdout_for(io, print_output = false)
+      if print_output
+        yield
+      else
+        begin
+          real_stdout = $stdout
+          $stdout     = io
+          yield
+        rescue Kumade::DeploymentError
+          io.rewind
+          real_stdout.print(io.read)
+        ensure
+          $stdout = real_stdout
+        end
+      end
+    end
 
-    def self.deploy
+    private
+
+    def deploy
       if pretending?
         puts "==> In Pretend Mode"
       end
-      puts "==> Deploying to: #{environment}"
-      Deployer.new(environment, pretending?).deploy
-      puts "==> Deployed to: #{environment}"
+      puts "==> Deploying to: #{@environment}"
+      self.class.deployer.new(@environment, pretending?).deploy
+      puts "==> Deployed to: #{@environment}"
     end
 
-    def self.parse_arguments!(args)
-      options = {}
+    def parse_arguments!(args)
       OptionParser.new do |opts|
         opts.banner = "Usage: kumade <environment> [options]"
 
         opts.on("-p", "--pretend", "Pretend mode: print what kumade would do") do |p|
-          options[:pretend] = p
+          @options[:pretend] = p
         end
 
         opts.on_tail("-v", "--verbose", "Print what kumade is doing") do
-          options[:verbose] = true
+          @options[:verbose] = true
         end
 
         opts.on_tail('--version', 'Show version') do
@@ -49,34 +71,17 @@ module Kumade
           exit
         end
       end.parse!(args)
-
-      options
     end
 
-    def self.swapping_stdout_for(io)
-      begin
-        $real_stdout = $stdout
-        $stdout = io unless print_output?
-        yield
-      rescue Kumade::DeploymentError
-        unless print_output?
-          io.rewind
-          $real_stdout.print(io.read)
-        end
-      ensure
-        $stdout = $real_stdout
-      end
-    end
-
-    def self.pretending?
-      @options[:pretend]
+    def pretending?
+      !!@options[:pretend]
     end
     
-    def self.verbose?
+    def verbose?
       @options[:verbose]
     end
     
-    def self.print_output?
+    def print_output?
       pretending? || verbose?
     end
   end

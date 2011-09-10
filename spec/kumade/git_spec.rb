@@ -20,14 +20,13 @@ describe Kumade::Git, "#heroku_remote?" do
   end
 
   it "returns true when the remote is a heroku repository" do
-    Kumade::Git.new(false, environment).heroku_remote?.should be_true
-    Kumade::Git.new(false, another_heroku_environment).heroku_remote?.should be_true
+    Kumade::Git.new(environment).heroku_remote?.should be_true
+    Kumade::Git.new(another_heroku_environment).heroku_remote?.should be_true
   end
 
   it "returns false when the remote is not a heroku repository" do
-    Kumade::Git.new(false, 'kumade').heroku_remote?.should be_false
+    Kumade::Git.new('kumade').heroku_remote?.should be_false
   end
-
 end
 
 describe Kumade::Git, ".environments" do
@@ -51,39 +50,35 @@ describe Kumade::Git, ".environments" do
 end
 
 describe Kumade::Git, "#branch_exist?" do
-  let(:comand_line_mock) { mock("Cocaine::CommandLine") }
-  let(:branch) { "branch" }
-  let(:environment) { "staging" }
-  
-  subject { Kumade::Git.new(false, environment) }
+  let(:command_line_mock) { mock("Cocaine::CommandLine") }
+  let(:branch)           { "branch" }
 
-  before(:each) do
-    Cocaine::CommandLine.should_receive(:new).with("git show-ref #{branch}").and_return(comand_line_mock)
+  before do
+    Cocaine::CommandLine.should_receive(:new).with("git show-ref #{branch}").and_return(command_line_mock)
   end
-  
-  it "should return true when branch exist" do
-    comand_line_mock.should_receive(:run)
+
+  it "returns true when the branch exists" do
+    command_line_mock.should_receive(:run)
     subject.branch_exist?("branch").should be_true
   end
-  
-  it "should return false if branch doesn't exist" do
-    comand_line_mock.should_receive(:run).and_raise(Cocaine::ExitStatusError)
+
+  it "returns false if the branch doesn't exist" do
+    command_line_mock.should_receive(:run).and_raise(Cocaine::ExitStatusError)
+
     subject.branch_exist?("branch").should be_false
   end
 end
 
 describe Kumade::Git, "#dirty?" do
-  let(:environment) { "staging" }
-  
-  subject { Kumade::Git.new(false, environment) }
-
-  it "should return true when dirty" do
+  it "returns true when dirty" do
     subject.should_receive(:run).with("git diff --exit-code").and_return(false)
-    subject.dirty?.should be_true
+
+    subject.should be_dirty
   end
-  
-  it "should return false when not dirty" do
+
+  it "returns false when not dirty" do
     subject.should_receive(:run).with("git diff --exit-code").and_return(true)
-    subject.dirty?.should be_false
+
+    subject.should_not be_dirty
   end
 end
