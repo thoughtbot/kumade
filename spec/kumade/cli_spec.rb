@@ -69,7 +69,7 @@ describe Kumade::CLI, ".swapping_stdout_for" do
     end
   end
 
-  context "in pretend mode" do
+  context "in print output mode" do
     it 'prints everything' do
       stdout.should_receive(:puts)
 
