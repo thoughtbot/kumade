@@ -1,32 +1,30 @@
+require "rake"
+require 'cocaine'
+
 module Kumade
   class Deployer < Base
     DEPLOY_BRANCH = "deploy"
     attr_reader :environment, :pretending, :git
 
-    def initialize(options = { })
+    def initialize(environment = 'staging', pretending = false, tests = true)
       super()
-      default = {
-        :environment => 'staging',
-        :pretending => false,
-        :cedar => false,
-        :tests => false
-      }
-      @git         = Git.new(pretending, environment)
-      options = default.merge(options)
-      @environment = options[:environment]
-      @pretending  = options[:pretending]
-      @git         = Git.new(pretending, environment)
+      @environment = environment
+      @pretending  = pretending
+      @git         = Git.new(environment, pretending)
       @branch      = @git.current_branch
-      @cedar       = options[:cedar]
-      @tests       = options[:tests]
+      @tests       = tests
     end
-
+        
     def deploy
-      ensure_heroku_remote_exists
-      pre_deploy
-      sync_heroku
-      heroku_migrate
-      post_deploy
+      begin
+        ensure_heroku_remote_exists
+        pre_deploy
+        sync_heroku
+        heroku_migrate
+      rescue
+      ensure
+        post_deploy
+      end
     end
 
     def pre_deploy
@@ -57,13 +55,20 @@ module Kumade
     end
 
     def heroku(command)
-      heroku_command = if @cedar
+      heroku_command = if cedar?
                          "bundle exec heroku run"
                        else
                          "bundle exec heroku"
                        end
       run_or_error("#{heroku_command} #{command} --remote #{environment}",
                    "Failed to run #{command} on Heroku")
+    end
+
+    def cedar?
+      return @cedar unless @cedar.nil?
+      @cedar = Cocaine::CommandLine.new("bundle exec heroku stack --remote #{environment}").run.split("\n").grep(/\*/).any? do |line|
+        line.include?("cedar")
+      end
     end
 
     def ensure_clean_git
@@ -108,7 +113,7 @@ module Kumade
       else
         begin
           run "bundle exec rake more:generate"
-          if git.git_dirty?
+          if git.dirty?
             success(success_message)
             git_add_and_commit_all_assets_in(more_assets_path)
           end
