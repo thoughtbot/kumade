@@ -41,6 +41,8 @@ or
     # kumade auto-generates a deploy:ENV task for every Heroku environment
     $ rake deploy:bamboo
 
+Using rake tasks you cannot use any kind of customizations.
+
 which will autodetect the name of the Heroku app that the bamboo remote points
 to and deploy to it.
 
