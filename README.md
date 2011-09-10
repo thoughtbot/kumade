@@ -82,9 +82,7 @@ You can hook in any custom code you want to run there before deploying!
 
 Want to skip tests before your deploy?
 
-``` bash
-	git config --add my-environment.tests "false"
-```
+	$ bundle exec kumade bamboo --skip-tests
 
 ## What's with the name?
 

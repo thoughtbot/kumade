@@ -32,13 +32,15 @@ describe Kumade::CLI do
       deployer_instance.should_receive(:deploy)
       subject
     end
-    
-    it "should not run tests if git config environment tests is false" do
-      `git config --add my-environment.tests "false"`
+  end
+  
+  context "when skipping tests" do
+    subject { Kumade::CLI.new([environment, "--skip-tests"], out) }
+
+    it "should not run tests with --skip-tests" do
       deployer.should_receive(:new).with(environment, false, false)
       deployer_instance.should_receive(:deploy)
       subject
-      `git config --unset my-environment.stack "cedar"`
     end
   end
 end

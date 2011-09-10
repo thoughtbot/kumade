@@ -57,6 +57,10 @@ module Kumade
           @options[:pretend] = p
         end
 
+        opts.on_tail('--skip-tests', 'Skip tests') do
+          @options[:tests] = false
+        end
+
         opts.on_tail('-v', '--version', 'Show version') do
           puts "kumade #{Kumade::VERSION}"
           exit
@@ -74,7 +78,8 @@ module Kumade
     end
     
     def tests?
-      !`git config --get #{@environment}.tests`.include?("false")
+      return true if @options[:tests].nil?
+      @options[:tests]
     end
   end
 end

@@ -81,6 +81,16 @@ Feature: Kumade executable
     And I run kumade with "pretend-staging"
     Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Cannot deploy: repo is not clean"
 
+  Scenario: No tests run if with --skip-tests flag
+    Given I write to "Rakefile" with:
+      """
+        task :spec do
+          puts 'Hi!'
+        end
+      """
+    When I run kumade with "pretend-staging --skip-tests"
+    Then the output should not contain "Running spec task"
+
   Scenario: Using rspec
     Given I write to "Rakefile" with:
       """
