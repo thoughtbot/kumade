@@ -84,15 +84,31 @@ describe Kumade::Git, "#branch_exist?" do
 end
 
 describe Kumade::Git, "#dirty?" do
-  it "returns true when dirty" do
-    subject.should_receive(:run).with("git diff --exit-code").and_return(false)
+  context "when dirty" do
+    let(:command_line) { mock("CommandLine instance") }
 
-    subject.should be_dirty
+    before do
+      command_line.should_receive(:run).and_raise(Cocaine::ExitStatusError)
+
+      Cocaine::CommandLine.should_receive(:new).
+        with("git diff --exit-code").
+        and_return(command_line)
+    end
+
+    it "returns true" do
+      subject.dirty?.should == true
+    end
   end
 
-  it "returns false when not dirty" do
-    subject.should_receive(:run).with("git diff --exit-code").and_return(true)
+  context "when clean" do
+    before do
+      Cocaine::CommandLine.should_receive(:new).
+        with("git diff --exit-code").
+        and_return(mock(:run => true))
+    end
 
-    subject.should_not be_dirty
+    it "returns false" do
+      subject.dirty?.should == false
+    end
   end
 end
