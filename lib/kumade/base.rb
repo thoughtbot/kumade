@@ -2,14 +2,13 @@ require "thor"
 
 module Kumade
   class Base < Thor::Shell::Color
-    attr_reader :pretending
     def initialize
       super()
     end
 
     def run_or_error(command, error_message)
       say_status(:run, command)
-      if !pretending
+      if ! Kumade.configuration.pretending?
         error(error_message) unless run(command)
       end
     end

@@ -14,13 +14,15 @@ module Kumade
     def initialize(args = ARGV, out = StringIO.new)
       @options     = {}
       parse_arguments!(args)
-      @environment = args.shift || 'staging'
+
+      Kumade.configuration.pretending  = !!@options[:pretend]
+      Kumade.configuration.environment = args.shift || 'staging'
 
       self.class.swapping_stdout_for(out, print_output?) do
         deploy
       end
     end
-    
+
     def self.swapping_stdout_for(io, print_output = false)
       if print_output
         yield
@@ -41,12 +43,12 @@ module Kumade
     private
 
     def deploy
-      if pretending?
+      if Kumade.configuration.pretending?
         puts "==> In Pretend Mode"
       end
-      puts "==> Deploying to: #{@environment}"
-      self.class.deployer.new(@environment, pretending?).deploy
-      puts "==> Deployed to: #{@environment}"
+      puts "==> Deploying to: #{Kumade.configuration.environment}"
+      self.class.deployer.new.deploy
+      puts "==> Deployed to: #{Kumade.configuration.environment}"
     end
 
     def parse_arguments!(args)
@@ -73,16 +75,12 @@ module Kumade
       end.parse!(args)
     end
 
-    def pretending?
-      !!@options[:pretend]
-    end
-    
     def verbose?
       @options[:verbose]
     end
-    
+
     def print_output?
-      pretending? || verbose?
+      Kumade.configuration.pretending? || verbose?
     end
   end
 end

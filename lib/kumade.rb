@@ -8,6 +8,10 @@ module Kumade
   autoload :Configuration,   "kumade/configuration"
 
   def self.configuration
-    @@configuration ||= Kumade::Configuration.new
+    @@configuration ||= Configuration.new
+  end
+
+  def self.configuration=(new_configuration)
+    @@configuration = new_configuration
   end
 end

@@ -3,7 +3,9 @@ require 'aruba/api'
 
 require 'kumade'
 
+# Since we autoload, these aren't require'd when we require kumade.
 require 'rake'
+require 'cocaine'
 
 module GitRemoteHelpers
   def force_add_heroku_remote(remote_name)
@@ -35,5 +37,9 @@ RSpec.configure do |config|
       `git commit -m First`
       example.run
     end
+  end
+
+  config.after do
+    Kumade.configuration = Kumade::Configuration.new
   end
 end

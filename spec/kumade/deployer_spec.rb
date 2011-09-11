@@ -83,9 +83,10 @@ describe Kumade::Deployer, "#sync_heroku" do
   let(:environment) { 'my-env' }
   let(:git_mock)    { mock() }
 
-  subject { Kumade::Deployer.new(environment) }
-
-  before { subject.stub(:git => git_mock) }
+  before do
+    Kumade.configuration.environment = environment
+    subject.stub(:git => git_mock)
+  end
 
   it "calls git.create and git.push" do
     git_mock.should_receive(:create).with("deploy")
@@ -391,17 +392,14 @@ end
 
 describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   let(:environment)     { 'staging' }
-  let(:bad_environment) { 'bad' }
 
   before do
     subject.stub(:say)
     force_add_heroku_remote(environment)
-    `git remote add #{bad_environment} blerg@example.com`
+    Kumade.configuration.environment = environment
   end
 
   context "when the remote points to Heroku" do
-    subject { Kumade::Deployer.new(environment) }
-
     it "does not print an error" do
       subject.should_not_receive(:error)
 
@@ -416,8 +414,9 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 
   context "when the remote does not exist" do
-    subject { Kumade::Deployer.new(environment) }
-    before { remove_remote(environment) }
+    before do
+      remove_remote(environment)
+    end
 
     it "prints an error" do
       subject.should_receive(:error).with(%{Cannot deploy: "#{environment}" remote does not exist})
@@ -427,7 +426,12 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 
   context "when the remote does not point to Heroku" do
-    subject { Kumade::Deployer.new(bad_environment) }
+    let(:bad_environment) { 'bad' }
+
+    before do
+      `git remote add #{bad_environment} blerg@example.com`
+      Kumade.configuration.environment = bad_environment
+    end
 
     it "prints an error" do
       subject.should_receive(:error).with(%{Cannot deploy: "#{bad_environment}" remote does not point to Heroku})
@@ -475,8 +479,8 @@ end
 
 describe Kumade::Deployer, "#heroku" do
   context "when on Cedar" do
-    subject { Kumade::Deployer.new('staging', false) }
     before  { subject.stub(:cedar?).and_return(true) }
+
     it "runs commands with `run`" do
       subject.should_receive(:run_or_error).with("bundle exec heroku run rake --remote staging", //)
       subject.heroku("rake")
@@ -484,7 +488,6 @@ describe Kumade::Deployer, "#heroku" do
   end
 
   context "when not on Cedar" do
-    subject { Kumade::Deployer.new('staging', false) }
     before  { subject.stub(:cedar?).and_return(false) }
 
     it "runs commands without `run`" do

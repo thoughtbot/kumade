@@ -1,8 +1,8 @@
 module Kumade
   class Configuration
-    def initialize
-      @environment = 'staging'
-      @pretending  = false
+    def initialize(environment = 'staging', pretending = false )
+      @environment = environment
+      @pretending  = pretending
     end
 
     def pretending?

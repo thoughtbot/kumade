@@ -4,14 +4,12 @@ require 'cocaine'
 module Kumade
   class Deployer < Base
     DEPLOY_BRANCH = "deploy"
-    attr_reader :environment, :pretending, :git
+    attr_reader :git
 
-    def initialize(environment = 'staging', pretending = false)
+    def initialize
       super()
-      @environment = environment
-      @pretending  = pretending
-      @git         = Git.new(environment, pretending)
-      @branch      = @git.current_branch
+      @git    = Git.new
+      @branch = @git.current_branch
     end
 
     def deploy
@@ -38,12 +36,12 @@ module Kumade
 
     def sync_heroku
       git.create(DEPLOY_BRANCH)
-      git.push("#{DEPLOY_BRANCH}:master", environment, true)
+      git.push("#{DEPLOY_BRANCH}:master", Kumade.configuration.environment, true)
     end
 
     def heroku_migrate
-      heroku("rake db:migrate") unless pretending
-      success("Migrated #{environment}")
+      heroku("rake db:migrate") unless Kumade.configuration.pretending?
+      success("Migrated #{Kumade.configuration.environment}")
     end
 
     def post_deploy
@@ -56,13 +54,13 @@ module Kumade
                        else
                          "bundle exec heroku"
                        end
-      run_or_error("#{heroku_command} #{command} --remote #{environment}",
+      run_or_error("#{heroku_command} #{command} --remote #{Kumade.configuration.environment}",
                    "Failed to run #{command} on Heroku")
     end
 
     def cedar?
       return @cedar unless @cedar.nil?
-      @cedar = Cocaine::CommandLine.new("bundle exec heroku stack --remote #{environment}").run.split("\n").grep(/\*/).any? do |line|
+      @cedar = Cocaine::CommandLine.new("bundle exec heroku stack --remote #{Kumade.configuration.environment}").run.split("\n").grep(/\*/).any? do |line|
         line.include?("cedar")
       end
     end
@@ -81,7 +79,7 @@ module Kumade
       begin
         success_message = "Packaged assets with Jammit"
 
-        if pretending
+        if Kumade.configuration.pretending?
           success(success_message)
         else
           Jammit.package!
@@ -96,7 +94,7 @@ module Kumade
 
     def package_with_more
       success_message = "Packaged assets with More"
-      if pretending
+      if Kumade.configuration.pretending?
         success(success_message)
       else
         begin
@@ -113,7 +111,7 @@ module Kumade
 
     def invoke_custom_task
       success("Running kumade:before_asset_compilation task")
-      Rake::Task["kumade:before_asset_compilation"].invoke unless pretending
+      Rake::Task["kumade:before_asset_compilation"].invoke unless Kumade.configuration.pretending?
     end
 
     def git_add_and_commit_all_assets_in(dir)
@@ -156,14 +154,14 @@ module Kumade
     end
 
     def ensure_heroku_remote_exists
-      if git.remote_exists?(environment)
+      if git.remote_exists?(Kumade.configuration.environment)
         if git.heroku_remote?
-          success("#{environment} is a Heroku remote")
+          success("#{Kumade.configuration.environment} is a Heroku remote")
         else
-          error(%{Cannot deploy: "#{environment}" remote does not point to Heroku})
+          error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not point to Heroku})
         end
       else
-        error(%{Cannot deploy: "#{environment}" remote does not exist})
+        error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not exist})
       end
     end
   end

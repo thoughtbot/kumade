@@ -10,3 +10,9 @@ describe Kumade, ".configuration" do
   end
 end
 
+describe Kumade, ".configuration=" do
+  it "sets Kumade.configuration" do
+    Kumade.configuration = "new-value"
+    Kumade.configuration.should == "new-value"
+  end
+end
