@@ -58,14 +58,14 @@ describe Kumade::Git, ".environments" do
     remove_remote(not_a_heroku_env)
   end
 
-  it "returns all environments" do
+  it "returns all Heroku environments" do
     Kumade::Git.environments.should == ["staging"]
   end
 end
 
 describe Kumade::Git, "#branch_exist?" do
   let(:command_line_mock) { mock("Cocaine::CommandLine") }
-  let(:branch)           { "branch" }
+  let(:branch)            { "branch" }
 
   before do
     Cocaine::CommandLine.should_receive(:new).with("git show-ref #{branch}").and_return(command_line_mock)

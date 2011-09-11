@@ -12,7 +12,7 @@ module Kumade
         error(error_message) unless run(command)
       end
     end
-    
+
     def run(command)
       line = Cocaine::CommandLine.new(command)
       begin
