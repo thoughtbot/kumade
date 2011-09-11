@@ -13,7 +13,7 @@ describe Kumade::Base, "#error" do
 
   it "prints its message and raises its message" do
     subject.should_receive(:say).with("==> ! I'm an error!", :red)
-    lambda{ subject.error("I'm an error!") }.should raise_error(Kumade::DeploymentError)
+    lambda { subject.error("I'm an error!") }.should raise_error(Kumade::DeploymentError)
   end
 end
 
@@ -22,7 +22,7 @@ describe Kumade::Base, "#run_or_error" do
   let(:error_message) { "dummy error message" }
 
   before do
-    subject.should_receive(:say_status).with(:run, command)
+    STDOUT.should_receive(:puts).with(/#{command}/)
   end
 
   context "when pretending" do
@@ -49,6 +49,7 @@ describe Kumade::Base, "#run_or_error" do
       it "should call CommandLine.run and error with error_message" do
         subject.should_receive(:run).and_return(false)
         subject.should_receive(:error).with(error_message)
+
         subject.run_or_error(command, error_message)
       end
     end
