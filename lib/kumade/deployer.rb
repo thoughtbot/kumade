@@ -3,12 +3,12 @@ require 'cocaine'
 
 module Kumade
   class Deployer < Base
-    DEPLOY_BRANCH = "deploy"
-    attr_reader :git
+    attr_reader :git, :heroku
 
     def initialize
       super()
       @git    = Git.new
+      @heroku = Heroku.new
       @branch = @git.current_branch
     end
 
@@ -16,8 +16,8 @@ module Kumade
       begin
         ensure_heroku_remote_exists
         pre_deploy
-        sync_heroku
-        heroku_migrate
+        heroku.sync
+        heroku.migrate_database
       rescue
       ensure
         post_deploy
@@ -34,35 +34,8 @@ module Kumade
       git.push(@branch)
     end
 
-    def sync_heroku
-      git.create(DEPLOY_BRANCH)
-      git.push("#{DEPLOY_BRANCH}:master", Kumade.configuration.environment, true)
-    end
-
-    def heroku_migrate
-      heroku("rake db:migrate") unless Kumade.configuration.pretending?
-      success("Migrated #{Kumade.configuration.environment}")
-    end
-
     def post_deploy
-      git.delete(DEPLOY_BRANCH, @branch)
-    end
-
-    def heroku(command)
-      heroku_command = if cedar?
-                         "bundle exec heroku run"
-                       else
-                         "bundle exec heroku"
-                       end
-      run_or_error("#{heroku_command} #{command} --remote #{Kumade.configuration.environment}",
-                   "Failed to run #{command} on Heroku")
-    end
-
-    def cedar?
-      return @cedar unless @cedar.nil?
-      @cedar = Cocaine::CommandLine.new("bundle exec heroku stack --remote #{Kumade.configuration.environment}").run.split("\n").grep(/\*/).any? do |line|
-        line.include?("cedar")
-      end
+      heroku.delete_deploy_branch
     end
 
     def ensure_clean_git
@@ -115,7 +88,7 @@ module Kumade
     end
 
     def git_add_and_commit_all_assets_in(dir)
-      git.add_and_commit_all_in(dir, DEPLOY_BRANCH, 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
+      git.add_and_commit_all_in(dir, Kumade::Heroku::DEPLOY_BRANCH, 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
     end
 
     def jammit_assets_path

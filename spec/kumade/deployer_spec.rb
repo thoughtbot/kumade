@@ -2,46 +2,6 @@ require 'spec_helper'
 
 require 'jammit'
 
-# This should really be done by mocking out a Heroku class
-shared_context "when on Cedar" do
-  let(:cocaine_mock) { mock("Cocaine::CommandLine") }
-
-  before do
-    Cocaine::CommandLine.should_receive(:new).
-      with("bundle exec heroku stack --remote staging").
-      and_return(cocaine_mock)
-
-    cocaine_mock.should_receive(:run).and_return(%{
-  aspen-mri-1.8.6
-  bamboo-mri-1.9.2
-  bamboo-ree-1.8.7
-* cedar (beta)
-})
-  end
-end
-
-shared_context "when not on Cedar" do
-  let(:cocaine_mock) { mock("Cocaine::CommandLine") }
-
-  before do
-    Cocaine::CommandLine.should_receive(:new).
-      with("bundle exec heroku stack --remote staging").
-      and_return(cocaine_mock)
-    cocaine_mock.should_receive(:run).and_return(%{
-  aspen-mri-1.8.6
-* bamboo-mri-1.9.2
-  bamboo-ree-1.8.7
-  cedar (beta)
-})
-  end
-end
-
-describe Kumade::Deployer, "DEPLOY_BRANCH" do
-  subject { Kumade::Deployer::DEPLOY_BRANCH }
-
-  it { should == "deploy" }
-end
-
 describe Kumade::Deployer, "#pre_deploy" do
   let(:git) { subject.git }
 
@@ -58,20 +18,15 @@ describe Kumade::Deployer, "#deploy" do
   let(:remote_name) { 'staging' }
 
   before do
+    STDOUT.stub(:puts)
     force_add_heroku_remote(remote_name)
   end
 
-  it "calls the correct methods in order" do
-    subject.stub(:run)
-    subject.stub(:post_deploy)
-
-    %w(ensure_heroku_remote_exists
-       pre_deploy
-       sync_heroku
-       heroku_migrate
-      ).each do |command|
-      subject.should_receive(command).ordered
-    end
+  it "calls the correct methods" do
+    subject.should_receive(:pre_deploy)
+    subject.heroku.should_receive(:sync)
+    subject.heroku.should_receive(:migrate_database)
+    subject.should_receive(:post_deploy)
 
     subject.deploy
   end
@@ -83,7 +38,6 @@ describe Kumade::Deployer, "#deploy" do
 
     subject.deploy
   end
-
 end
 
 describe Kumade::Deployer, "#sync_github" do
@@ -93,26 +47,13 @@ describe Kumade::Deployer, "#sync_github" do
     `git checkout -b #{new_branch}`
   end
 
-  it "calls git.push with the current branch" do
+  it "pushes the current branch to github" do
     subject.git.should_receive(:push).with(new_branch)
 
     subject.sync_github
   end
 end
 
-describe Kumade::Deployer, "#sync_heroku" do
-  let(:environment) { 'staging' }
-
-  before do
-    force_add_heroku_remote(environment)
-  end
-
-  it "creates and pushes the deploy branch" do
-    subject.git.should_receive(:create).with("deploy")
-    subject.git.should_receive(:push).with("deploy:master", environment, true)
-    subject.sync_heroku
-  end
-end
 
 describe Kumade::Deployer, "#ensure_clean_git" do
   it "calls git.ensure_clean_git" do
@@ -386,36 +327,11 @@ describe Kumade::Deployer, "#custom_task?" do
   end
 end
 
-describe Kumade::Deployer, "#heroku_migrate" do
-  let(:environment) { 'staging' }
+describe Kumade::Deployer, "#post_deploy" do
+  it "deletes the deploy branch" do
+    Kumade::Git.any_instance.should_receive(:delete).with('deploy', 'master')
 
-  before do
-    STDOUT.stub(:puts)
-    force_add_heroku_remote(environment)
-  end
-
-  it "runs db:migrate with the correct app" do
-    subject.should_receive(:heroku).with("rake db:migrate")
-
-    subject.heroku_migrate
-  end
-
-  context "when pretending" do
-    before do
-      STDOUT.stub(:puts)
-      Kumade.configuration.pretending = true
-    end
-
-    it "does not run heroku" do
-      subject.should_not_receive(:heroku)
-      subject.heroku_migrate
-    end
-
-    it "prints a message" do
-      STDOUT.should_receive(:puts).with(/Migrated #{environment}/)
-
-      subject.heroku_migrate
-    end
+    subject.post_deploy
   end
 end
 
@@ -469,53 +385,3 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 end
 
-describe Kumade::Deployer, "#cedar?" do
-  context "when on Cedar" do
-    include_context "when on Cedar"
-
-    it "returns true" do
-      subject.cedar?.should == true
-    end
-  end
-
-  context "when not on Cedar" do
-    include_context "when not on Cedar"
-
-    it "returns false" do
-      subject.cedar?.should == false
-    end
-  end
-end
-
-describe Kumade::Deployer, "#heroku" do
-  before { STDOUT.stub(:puts) }
-
-  context "when on Cedar" do
-    include_context "when on Cedar"
-
-    it "runs commands with `run`" do
-      Cocaine::CommandLine.should_receive(:new).
-        with(/bundle exec heroku run rake/).
-        and_return(stub(:run => true))
-      subject.heroku("rake")
-    end
-  end
-
-  context "when not on Cedar" do
-    include_context "when not on Cedar"
-
-    it "runs commands without `run`" do
-      Cocaine::CommandLine.should_receive(:new).
-        with(/bundle exec heroku rake/).
-        and_return(stub(:run => true))
-      subject.heroku("rake")
-    end
-  end
-end
-
-describe Kumade::Deployer, "#post_deploy" do
-  it "calls git.delete" do
-    subject.git.should_receive(:delete).with('deploy', 'master')
-    subject.post_deploy
-  end
-end
