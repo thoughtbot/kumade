@@ -6,7 +6,7 @@ module Kumade
     end
 
     def pretending?
-      !!@pretending
+      @pretending
     end
 
     attr_accessor :pretending, :environment
