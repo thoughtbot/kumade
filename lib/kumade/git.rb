@@ -1,15 +1,13 @@
 require 'cocaine'
 module Kumade
   class Git < Base
-    attr_reader :environment
-    def initialize(environment = 'staging', pretending = false)
+    def initialize
       super()
-      @pretending  = pretending
-      @environment = environment
     end
 
     def heroku_remote?
-      `git config --get remote.#{environment}.url`.strip =~ /^git@heroku\..+:(.+)\.git$/
+      remote_url = `git config --get remote.#{Kumade.configuration.environment}.url`.strip
+      !! remote_url.strip.match(/^git@heroku\..+:(.+)\.git$/)
     end
 
     def self.environments
@@ -48,7 +46,7 @@ module Kumade
     end
 
     def remote_exists?(remote_name)
-      if @pretending
+      if Kumade.configuration.pretending?
         true
       else
         `git remote` =~ /^#{remote_name}$/
@@ -60,7 +58,7 @@ module Kumade
     end
 
     def ensure_clean_git
-      if ! @pretending && dirty?
+      if ! Kumade.configuration.pretending? && dirty?
         error("Cannot deploy: repo is not clean.")
       else
         success("Git repo is clean")

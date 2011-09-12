@@ -14,15 +14,17 @@ module Kumade
     def initialize(args = ARGV, out = StringIO.new)
       @options     = {}
       parse_arguments!(args)
-      @environment = args.shift || 'staging'
 
-      self.class.swapping_stdout_for(out, pretending?) do
+      Kumade.configuration.pretending  = !!@options[:pretend]
+      Kumade.configuration.environment = args.shift || 'staging'
+
+      self.class.swapping_stdout_for(out, print_output?) do
         deploy
       end
     end
 
-    def self.swapping_stdout_for(io, pretending = false)
-      if pretending
+    def self.swapping_stdout_for(io, print_output = false)
+      if print_output
         yield
       else
         begin
@@ -41,12 +43,12 @@ module Kumade
     private
 
     def deploy
-      if pretending?
+      if Kumade.configuration.pretending?
         puts "==> In Pretend Mode"
       end
-      puts "==> Deploying to: #{@environment}"
-      self.class.deployer.new(@environment, pretending?).deploy
-      puts "==> Deployed to: #{@environment}"
+      puts "==> Deploying to: #{Kumade.configuration.environment}"
+      self.class.deployer.new.deploy
+      puts "==> Deployed to: #{Kumade.configuration.environment}"
     end
 
     def parse_arguments!(args)
@@ -57,7 +59,11 @@ module Kumade
           @options[:pretend] = p
         end
 
-        opts.on_tail('-v', '--version', 'Show version') do
+        opts.on_tail("-v", "--verbose", "Print what kumade is doing") do
+          @options[:verbose] = true
+        end
+
+        opts.on_tail('--version', 'Show version') do
           puts "kumade #{Kumade::VERSION}"
           exit
         end
@@ -69,8 +75,12 @@ module Kumade
       end.parse!(args)
     end
 
-    def pretending?
-      !!@options[:pretend]
+    def verbose?
+      @options[:verbose]
+    end
+
+    def print_output?
+      Kumade.configuration.pretending? || verbose?
     end
   end
 end

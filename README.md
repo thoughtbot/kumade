@@ -1,5 +1,5 @@
 # Kumade 熊手 [![Build Status](https://secure.travis-ci.org/thoughtbot/kumade.png)](http://travis-ci.org/thoughtbot/kumade)
-Kumade is a set of basic Rake tasks for deploying to Heroku. It aims to
+Kumade is a command-line program  for deploying to Heroku. It aims to
 provide most of what you want. Unlike other Heroku deploy gems, it is
 well-tested.
 
@@ -9,11 +9,11 @@ public API is constant (e.g. `kumade production` will work), but you may have to
 rebase against master a couple times before your pull request can be merged.
 
 ## What does Kumade do?
-Before deploying, Kumade ensures the git repo is clean and that all tests pass.
+Before deploying, Kumade ensures the git repo is clean.
 After that, it packages assets using
 [Jammit](http://documentcloud.github.com/jammit/) and/or
 [More](https://github.com/cloudhead/more), commits them, and pushes to origin.
-Then it force pushes to the correct remote and runs `rake db:migrate` on the
+Then it force pushes to the correct Heroku remote and runs `rake db:migrate` on the
 Heroku app.
 
 If any step fails, it immediately prints an error and stops the deploy
@@ -29,34 +29,42 @@ gem 'kumade'
 ## Usage
 
 kumade will deploy to any Heroku remote in the repo.
-For example, if you have a remote named "bamboo":
+For example, if you have a remote named "staging":
 
-    $ bundle exec kumade bamboo
-
-or
-
-    # in your Rakefile:
-    require 'kumade'
-
-    # kumade auto-generates a deploy:ENV task for every Heroku environment
-    $ rake deploy:bamboo
-
-which will autodetect the name of the Heroku app that the bamboo remote points
-to and deploy to it.
+    $ bundle exec kumade staging
 
 To run in pretend mode, which prints what would be done without actually doing
 any of it:
 
-    $ bundle exec kumade bamboo -p
+    $ bundle exec kumade staging -p
 
 The default is to deploy to staging:
 
-    $ bundle exec kumade # equivalent to "bundle exec kumade staging"
+    # equivalent to "bundle exec kumade staging"
+    $ bundle exec kumade
 
+## Rake
+
+Kumade auto-generates a deploy:ENV task for every Heroku environment.
+
+    # in your Rakefile:
+    require 'kumade'
+
+    $ rake deploy:staging
+
+If you use rake tasks, you can't pass in options (like -p/--pretend).
 
 ## Does it support the Cedar stack?
 
-Yes. kumade will automatically detect if your app is running on Cedar.
+Yes. Kumade will automatically detect if your app is running on Cedar.
+
+## Compatibility
+
+Tested against:
+
+* MRI 1.8.7
+* MRI 1.9.2
+* REE 1.8.7
 
 ## Callbacks
 
