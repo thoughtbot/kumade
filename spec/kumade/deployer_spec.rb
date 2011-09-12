@@ -31,7 +31,6 @@ describe Kumade::Deployer, "#deploy" do
     subject.deploy
   end
 
-
   it "calls post_deploy if deploy fails" do
     subject.git.stub(:heroku_remote?).and_raise(RuntimeError)
 
