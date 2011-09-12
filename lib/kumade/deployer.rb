@@ -9,7 +9,7 @@ module Kumade
       super()
       @git    = Git.new
       @branch = @git.current_branch
-      @packager    = Packager.new(Kumade.configuration.pretending?, Kumade.configuration.environment, @git)
+      @packager    = Packager.new(@git)
     end
 
     def deploy

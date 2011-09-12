@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Kumade::Packager, "#run" do
   let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(false, 'staging', git_mock) }
+  subject { Kumade::Packager.new(git_mock) }
   context "with Jammit installed" do
     it "calls package_with_jammit" do
       subject.should_receive(:package_with_jammit)
@@ -73,7 +73,7 @@ end
 
 describe Kumade::Packager, "#invoke_custom_task" do
   let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(false, 'staging', git_mock) }
+  subject { Kumade::Packager.new(git_mock) }
   before do
     subject.stub(:say)
     Rake::Task.stub(:[] => task)
@@ -90,7 +90,7 @@ end
 
 describe Kumade::Packager, "#custom_task?" do
   let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(false, 'staging', git_mock) }
+  subject { Kumade::Packager.new(git_mock) }
   before do
     Rake::Task.clear
   end
@@ -111,7 +111,7 @@ end
 
 describe Kumade::Packager, "#package_with_jammit" do
   let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(false, 'staging', git_mock) }
+  subject { Kumade::Packager.new(git_mock) }
   before do
     subject.stub(:git_add_and_commit_all_assets_in)
     subject.stub(:say)
@@ -154,7 +154,7 @@ end
 
 describe Kumade::Packager, "#package_with_more" do
   let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(false, 'staging', git_mock) }
+  subject { Kumade::Packager.new(git_mock) }
   before do
     subject.stub(:git_add_and_commit_all_assets_in => true,
                  :more_assets_path                 => 'assets')
@@ -221,7 +221,7 @@ end
 
 describe Kumade::Packager, "#git_add_and_commit_all_assets_in" do
   let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(false, 'staging', git_mock) }
+  subject { Kumade::Packager.new(git_mock) }
   let(:git_mock) { mock() }
   before { subject.stub(:git => git_mock) }
   
@@ -233,7 +233,7 @@ end
 
 describe Kumade::Packager, "#jammit_assets_path" do
   let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(false, 'staging', git_mock) }
+  subject { Kumade::Packager.new(git_mock) }
   it "returns the correct asset path" do
     Jammit.stub(:package_path => 'blerg')
     current_dir = File.expand_path(Dir.pwd)
@@ -243,7 +243,7 @@ end
 
 describe Kumade::Packager, "#more_assets_path" do
   let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(false, 'staging', git_mock) }
+  subject { Kumade::Packager.new(git_mock) }
   it "returns the correct asset path" do
     module ::Less
       class More
@@ -258,7 +258,7 @@ end
 
 describe Kumade::Packager, "#jammit_installed?" do
   let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(false, 'staging', git_mock) }
+  subject { Kumade::Packager.new(git_mock) }
   it "returns true because it's loaded by the Gemfile" do
     subject.jammit_installed?.should be_true
   end
@@ -270,7 +270,7 @@ end
 
 describe Kumade::Packager, "#more_installed?" do
   let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(false, 'staging', git_mock) }
+  subject { Kumade::Packager.new(git_mock) }
   before do
     if defined?(Less)
       Object.send(:remove_const, :Less)

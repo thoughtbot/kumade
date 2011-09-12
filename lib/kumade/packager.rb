@@ -1,12 +1,10 @@
 module Kumade
   class Packager < Base
     DEPLOY_BRANCH = "deploy"
-    attr_reader :git, :environment, :pretending
+    attr_reader :git
     
-    def initialize(pretending, environment, git)
+    def initialize(git)
       super()
-      @pretending = pretending
-      @environment = environment
       @git = git
     end
     
@@ -18,7 +16,7 @@ module Kumade
     
     def invoke_custom_task
       success "Running kumade:before_asset_compilation task"
-      Rake::Task["kumade:before_asset_compilation"].invoke unless pretending
+      Rake::Task["kumade:before_asset_compilation"].invoke unless Kumade.configuration.pretending?
     end
     
     def custom_task?
@@ -30,7 +28,7 @@ module Kumade
       begin
         success_message = "Packaged assets with Jammit"
 
-        if pretending
+        if Kumade.configuration.pretending?
           success(success_message)
         else
           Jammit.package!
@@ -45,7 +43,7 @@ module Kumade
     
     def package_with_more
       success_message = "Packaged assets with More"
-      if pretending
+      if Kumade.configuration.pretending?
         success(success_message)
       else
         begin
