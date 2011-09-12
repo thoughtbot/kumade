@@ -1,18 +1,15 @@
 require 'spec_helper'
 
 describe Kumade::Base, "#success" do
-  it "exists" do
-    subject.should respond_to(:success)
-  end
+  it { should respond_to(:success) }
 end
 
 describe Kumade::Base, "#error" do
-  it "exists" do
-    subject.should respond_to(:error)
-  end
+  it { should respond_to(:error) }
 
   it "prints its message and raises its message" do
-    subject.should_receive(:say).with("==> ! I'm an error!", :red)
+    STDOUT.should_receive(:puts).with(/I'm an error!/)
+
     lambda { subject.error("I'm an error!") }.should raise_error(Kumade::DeploymentError)
   end
 end
@@ -37,15 +34,16 @@ describe Kumade::Base, "#run_or_error" do
   end
 
   context "when not pretending" do
-    context "with success" do
-      it "should not call error" do
-        subject.should_receive(:run).and_return(true)
-        subject.should_receive(:error).never
+    context "when it runs successfully" do
+      it "does not print an error" do
+        STDOUT.should_not_receive(:puts).with(/#{error_message}/)
+        Cocaine::CommandLine.stub(:new).and_return(stub(:run => true))
+
         subject.run_or_error(command, error_message)
       end
     end
 
-    context "without success" do
+    context "when it does not run successfully " do
       it "should call CommandLine.run and error with error_message" do
         subject.should_receive(:run).and_return(false)
         subject.should_receive(:error).with(error_message)
