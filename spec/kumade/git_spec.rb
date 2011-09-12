@@ -1,31 +1,45 @@
 require 'spec_helper'
 
 describe Kumade::Git, "#heroku_remote?" do
-  let(:environment)                { 'staging' }
-  let(:another_heroku_environment) { 'another_staging' }
-  let(:not_a_heroku_env)           { 'fake_heroku' }
-  let(:not_a_heroku_url)           { 'git@github.com:gabebw/kumade.git' }
-  let(:another_heroku_url)         { 'git@heroku.work:my-app.git' }
+  context "when the environment is a Heroku repository" do
+    let(:environment) { 'staging' }
 
-  before do
-    force_add_heroku_remote(environment)
-    `git remote add #{not_a_heroku_env} #{not_a_heroku_url}`
-    `git remote add #{another_heroku_environment} #{another_heroku_url}`
+    before do
+      force_add_heroku_remote(environment)
+      Kumade.configuration.environment = environment
+    end
+
+    after { remove_remote(environment) }
+
+    its(:heroku_remote?) { should == true }
   end
 
-  after do
-    remove_remote(environment)
-    remove_remote(not_a_heroku_env)
-    remove_remote(another_heroku_environment)
+  context "when the environment is a Heroku repository managed with heroku-accounts" do
+    let(:another_heroku_environment) { 'another_staging' }
+    let(:another_heroku_url)         { 'git@heroku.work:my-app.git' }
+
+    before do
+      force_add_heroku_remote(another_heroku_environment)
+      Kumade.configuration.environment = another_heroku_environment
+    end
+
+    after { remove_remote(another_heroku_environment) }
+
+    its(:heroku_remote?) { should == true }
   end
 
-  it "returns true when the remote is a heroku repository" do
-    Kumade::Git.new(environment).heroku_remote?.should be_true
-    Kumade::Git.new(another_heroku_environment).heroku_remote?.should be_true
-  end
+  context "when the environment is not a Heroku repository" do
+    let(:not_a_heroku_env) { 'fake_heroku' }
+    let(:not_a_heroku_url) { 'git@github.com:gabebw/kumade.git' }
 
-  it "returns false when the remote is not a heroku repository" do
-    Kumade::Git.new('kumade').heroku_remote?.should be_false
+    before do
+      `git remote add #{not_a_heroku_env} #{not_a_heroku_url}`
+      Kumade.configuration.environment = not_a_heroku_env
+    end
+
+    after { remove_remote(not_a_heroku_env) }
+
+    its(:heroku_remote?) { should == false }
   end
 end
 
@@ -44,14 +58,14 @@ describe Kumade::Git, ".environments" do
     remove_remote(not_a_heroku_env)
   end
 
-  it "returns all environments" do
+  it "returns all Heroku environments" do
     Kumade::Git.environments.should == ["staging"]
   end
 end
 
 describe Kumade::Git, "#branch_exist?" do
   let(:command_line_mock) { mock("Cocaine::CommandLine") }
-  let(:branch)           { "branch" }
+  let(:branch)            { "branch" }
 
   before do
     Cocaine::CommandLine.should_receive(:new).with("git show-ref #{branch}").and_return(command_line_mock)
@@ -70,15 +84,31 @@ describe Kumade::Git, "#branch_exist?" do
 end
 
 describe Kumade::Git, "#dirty?" do
-  it "returns true when dirty" do
-    subject.should_receive(:run).with("git diff --exit-code").and_return(false)
+  context "when dirty" do
+    let(:command_line) { mock("CommandLine instance") }
 
-    subject.should be_dirty
+    before do
+      command_line.should_receive(:run).and_raise(Cocaine::ExitStatusError)
+
+      Cocaine::CommandLine.should_receive(:new).
+        with("git diff --exit-code").
+        and_return(command_line)
+    end
+
+    it "returns true" do
+      subject.dirty?.should == true
+    end
   end
 
-  it "returns false when not dirty" do
-    subject.should_receive(:run).with("git diff --exit-code").and_return(true)
+  context "when clean" do
+    before do
+      Cocaine::CommandLine.should_receive(:new).
+        with("git diff --exit-code").
+        and_return(mock(:run => true))
+    end
 
-    subject.should_not be_dirty
+    it "returns false" do
+      subject.dirty?.should == false
+    end
   end
 end

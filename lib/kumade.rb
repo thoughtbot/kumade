@@ -5,4 +5,13 @@ module Kumade
   autoload :CLI,             "kumade/cli"
   autoload :Railtie,         "kumade/railtie"
   autoload :DeploymentError, "kumade/deployment_error"
+  autoload :Configuration,   "kumade/configuration"
+
+  def self.configuration
+    @@configuration ||= Configuration.new
+  end
+
+  def self.configuration=(new_configuration)
+    @@configuration = new_configuration
+  end
 end

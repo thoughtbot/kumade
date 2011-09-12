@@ -3,7 +3,6 @@ require 'spec_helper'
 describe Kumade::CLI do
   let(:out)         { StringIO.new }
   let(:environment) { 'my-environment' }
-
   let(:deployer)          { stub("Deployer", :new => deployer_instance) }
   let(:deployer_instance) { stub("DeployerInstance", :deploy => nil) }
 
@@ -12,11 +11,15 @@ describe Kumade::CLI do
 
   context "when pretending" do
     %w(-p --pretend).each do |pretend_flag|
-      context pretend_flag do
-        subject { Kumade::CLI.new([pretend_flag, environment], out) }
+      subject { Kumade::CLI.new([pretend_flag, environment], out) }
 
-        it "deploys correctly" do
-          deployer.should_receive(:new).with(environment, true, true)
+      context pretend_flag do
+        it "sets pretending to true" do
+          subject
+          Kumade.configuration.pretending.should == true
+        end
+
+        it "deploys" do
           deployer_instance.should_receive(:deploy)
           subject
         end
@@ -24,30 +27,36 @@ describe Kumade::CLI do
     end
   end
 
-  context "running normally" do
-    subject { Kumade::CLI.new([environment], out) }
+  context "with no command-line arguments" do
+    subject { Kumade::CLI.new([], out) }
 
-    it "deploys correctly" do
-      deployer.should_receive(:new).with(environment, false, true)
-      deployer_instance.should_receive(:deploy)
-      subject
+    it "sets the environment to staging" do
+      Kumade.configuration.environment.should == 'staging'
+    end
+
+    it "sets pretending to false" do
+      Kumade.configuration.pretending.should == false
+    end
+
+    it "sets tests to true" do
+      Kumade.configuration.tests.should == true
     end
   end
-  
+
   context "when skipping tests" do
     subject { Kumade::CLI.new([environment, "--skip-tests"], out) }
-
-    it "should not run tests with --skip-tests" do
-      deployer.should_receive(:new).with(environment, false, false)
-      deployer_instance.should_receive(:deploy)
-      subject
+    it "sets the tests to false" do
+      Kumade.configuration.tests.should be_true
     end
   end
 end
 
 describe Kumade::CLI, ".deployer" do
   after { Kumade::CLI.deployer = nil }
-  it    { Kumade::CLI.deployer.should == Kumade::Deployer }
+
+  it "sets the deployer to the Deployer class by default" do
+    Kumade::CLI.deployer.should == Kumade::Deployer
+  end
 
   it "can override deployer" do
     Kumade::CLI.deployer = "deployer!"
@@ -79,7 +88,7 @@ describe Kumade::CLI, ".swapping_stdout_for" do
     end
   end
 
-  context "in pretend mode" do
+  context "in print output mode" do
     it 'prints everything' do
       stdout.should_receive(:puts)
 
