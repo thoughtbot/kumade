@@ -1,7 +1,7 @@
 module Kumade
   class Packager < Base
+    DEPLOY_BRANCH = "deploy"
     attr_reader :git, :environment, :pretending
-    
     
     def initialize(pretending, environment, git)
       super()

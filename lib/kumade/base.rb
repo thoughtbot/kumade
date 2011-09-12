@@ -2,8 +2,6 @@ require "thor"
 
 module Kumade
   class Base < Thor::Shell::Color
-    DEPLOY_BRANCH = "deploy"
-    attr_reader :pretending
 
     def initialize
       super()
@@ -11,11 +9,11 @@ module Kumade
 
     def run_or_error(command, error_message)
       say_status(:run, command)
-      if !pretending
+      if ! Kumade.configuration.pretending?
         error(error_message) unless run(command)
       end
     end
-    
+
     def run(command)
       line = Cocaine::CommandLine.new(command)
       begin
