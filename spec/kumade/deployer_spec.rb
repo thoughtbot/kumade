@@ -47,8 +47,8 @@ describe Kumade::Deployer, "#sync_github" do
     `git checkout -b #{new_branch}`
   end
 
-  it "should invoke kumade:before_github_sync task and call git.push" do
-    subject.expects(:invoke_task).with("kumade:before_github_sync")
+  it "should invoke kumade:before_origin_sync task and call git.push" do
+    subject.expects(:invoke_task).with("kumade:before_origin_sync")
     subject.git.expects(:push).with(new_branch)
     subject.sync_github
   end

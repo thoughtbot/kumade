@@ -32,7 +32,7 @@ module Kumade
     end
 
     def sync_github
-      invoke_task("kumade:before_github_sync")
+      invoke_task("kumade:before_origin_sync")
       git.push(@branch)
     end
     

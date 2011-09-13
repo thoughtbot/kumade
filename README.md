@@ -78,12 +78,12 @@ namespace :kumade do
 end
 ```
 
-Want to run a task before github sync? In your rails app's rake tasks, drop in:
+Want to run a task before origin sync? In your rails app's rake tasks, drop in:
 
 ``` ruby
 namespace :kumade do
-  task :before_github_sync do
-    puts "This runs before your code are pushed to gihub"
+  task :before_origin_sync do
+    puts "This runs before your code are pushed to origin"
   end
 end
 ```
