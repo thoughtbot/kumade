@@ -14,8 +14,8 @@ describe Kumade::Heroku, "#sync" do
   end
 
   it "creates and pushes the deploy branch" do
-    subject.git.should_receive(:create).with("deploy")
-    subject.git.should_receive(:push).with("deploy:master", environment, true)
+    subject.git.expects(:create).with("deploy")
+    subject.git.expects(:push).with("deploy:master", environment, true)
     subject.sync
   end
 end
@@ -24,30 +24,30 @@ describe Kumade::Heroku, "#migrate_database" do
   let(:environment) { 'staging' }
 
   before do
-    STDOUT.stub(:puts)
+    STDOUT.stubs(:puts)
     force_add_heroku_remote(environment)
   end
 
   it "runs db:migrate with the correct app" do
-    subject.should_receive(:heroku).with("rake db:migrate")
+    subject.expects(:heroku).with("rake db:migrate")
 
     subject.migrate_database
   end
 
   context "when pretending" do
     before do
-      STDOUT.stub(:puts)
+      STDOUT.stubs(:puts)
       Kumade.configuration.pretending = true
     end
 
     it "does not run the command" do
-      subject.should_not_receive(:heroku)
+      subject.expects(:heroku).never
 
       subject.migrate_database
     end
 
     it "prints a message" do
-      STDOUT.should_receive(:puts).with(/Migrated #{environment}/)
+      STDOUT.expects(:puts).with(regexp_matches(/Migrated #{environment}/))
 
       subject.migrate_database
     end
@@ -58,16 +58,16 @@ describe Kumade::Heroku, "#heroku" do
   let(:command_line_instance) { stub("Cocaine::CommandLine instance", :run => true) }
 
   before do
-    STDOUT.stub(:puts)
+    STDOUT.stubs(:puts)
   end
 
   context "when on Cedar" do
     include_context "when on Cedar"
 
     it "runs commands with `run`" do
-      Cocaine::CommandLine.should_receive(:new).
-        with(/bundle exec heroku run/).
-        and_return(command_line_instance)
+      Cocaine::CommandLine.expects(:new).
+        with(regexp_matches(/bundle exec heroku run/)).
+        returns(command_line_instance)
 
       subject.heroku("rake")
     end
@@ -77,9 +77,9 @@ describe Kumade::Heroku, "#heroku" do
     include_context "when not on Cedar"
 
     it "runs commands without `run`" do
-      Cocaine::CommandLine.should_receive(:new).
-        with(/bundle exec heroku rake/).
-        and_return(command_line_instance)
+      Cocaine::CommandLine.expects(:new).
+        with(regexp_matches(/bundle exec heroku rake/)).
+        returns(command_line_instance)
 
       subject.heroku("rake")
     end
@@ -105,12 +105,12 @@ describe Kumade::Heroku, "#cedar?" do
 end
 
 describe Kumade::Heroku, "#delete_deploy_branch" do
-  before { STDOUT.stub(:puts) }
+  before { STDOUT.stubs(:puts) }
 
   it "deletes the deploy branch" do
-    Cocaine::CommandLine.should_receive(:new).
+    Cocaine::CommandLine.expects(:new).
       with("git checkout master && git branch -D deploy").
-      and_return(stub(:run => true))
+      returns(stub(:run => true))
     subject.delete_deploy_branch
   end
 end

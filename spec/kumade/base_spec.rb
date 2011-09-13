@@ -8,7 +8,7 @@ describe Kumade::Base, "#error" do
   it { should respond_to(:error) }
 
   it "prints its message and raises its message" do
-    STDOUT.should_receive(:puts).with(/I'm an error!/)
+    STDOUT.expects(:puts).with(regexp_matches(/I'm an error!/))
 
     lambda { subject.error("I'm an error!") }.should raise_error(Kumade::DeploymentError)
   end
@@ -19,7 +19,7 @@ describe Kumade::Base, "#run_or_error" do
   let(:error_message) { "dummy error message" }
 
   before do
-    STDOUT.should_receive(:puts).with(/#{command}/)
+    STDOUT.expects(:puts).with(regexp_matches(/#{command}/))
   end
 
   context "when pretending" do
@@ -28,7 +28,7 @@ describe Kumade::Base, "#run_or_error" do
     end
 
     it "does not run the command" do
-      subject.should_not_receive(:run)
+      subject.expects(:run).never
       subject.run_or_error("dummy command", "dummy error message")
     end
   end
@@ -36,8 +36,8 @@ describe Kumade::Base, "#run_or_error" do
   context "when not pretending" do
     context "when it runs successfully" do
       it "does not print an error" do
-        STDOUT.should_not_receive(:puts).with(/#{error_message}/)
-        Cocaine::CommandLine.stub(:new).and_return(stub(:run => true))
+        STDOUT.expects(:puts).with(regexp_matches(/#{error_message}/)).never
+        Cocaine::CommandLine.stubs(:new).returns(stub(:run => true))
 
         subject.run_or_error(command, error_message)
       end
@@ -45,8 +45,8 @@ describe Kumade::Base, "#run_or_error" do
 
     context "when it does not run successfully " do
       it "should call CommandLine.run and error with error_message" do
-        subject.should_receive(:run).and_return(false)
-        subject.should_receive(:error).with(error_message)
+        subject.expects(:run).returns(false)
+        subject.expects(:error).with(error_message)
 
         subject.run_or_error(command, error_message)
       end
@@ -59,12 +59,12 @@ describe Kumade::Base, "#run" do
   let(:command)           { "command" }
 
   before do
-    Cocaine::CommandLine.stub(:new).with(command).and_return(command_line_mock)
+    Cocaine::CommandLine.stubs(:new).with(command).returns(command_line_mock)
   end
 
   context "when not successful" do
     before do
-      command_line_mock.should_receive(:run)
+      command_line_mock.expects(:run)
     end
 
     it "returns true" do
@@ -74,7 +74,7 @@ describe Kumade::Base, "#run" do
 
   context "when successful" do
     before do
-      command_line_mock.should_receive(:run).and_raise(Cocaine::ExitStatusError)
+      command_line_mock.expects(:run).raises(Cocaine::ExitStatusError)
     end
 
     it "returns false" do

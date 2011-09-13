@@ -1,5 +1,7 @@
 require 'spec_helper'
 
+require 'jammit'
+
 shared_context "with a fake Git" do
   let(:git) { stub() }
   subject   { Kumade::Packager.new(git) }
@@ -10,67 +12,67 @@ describe Kumade::Packager, "#run" do
 
   context "with Jammit installed" do
     it "calls package_with_jammit" do
-      subject.should_receive(:package_with_jammit)
+      subject.expects(:package_with_jammit)
       subject.run
     end
   end
 
   context "with Jammit not installed" do
-    before { subject.stub(:jammit_installed? => false) }
+    before { subject.stubs(:jammit_installed? => false) }
     it "does not call package_with_jammit" do
-      subject.should_not_receive(:package_with_jammit)
+      subject.expects(:package_with_jammit).never
       subject.run
     end
   end
 
   context "with More installed" do
     before do
-      subject.stub(:jammit_installed? => false)
-      subject.stub(:more_installed? => true)
+      subject.stubs(:jammit_installed? => false)
+      subject.stubs(:more_installed? => true)
     end
 
     it "calls package_with_more" do
-      subject.should_receive(:package_with_more)
+      subject.expects(:package_with_more)
       subject.run
     end
   end
 
   context "with More not installed" do
     before do
-      subject.stub(:jammit_installed? => false)
-      subject.stub(:more_installed? => false)
+      subject.stubs(:jammit_installed? => false)
+      subject.stubs(:more_installed? => false)
     end
 
     it "does not call package_with_more" do
-      subject.should_not_receive(:package_with_more)
+      subject.expects(:package_with_more).never
       subject.run
     end
   end
 
   context "with custom rake task installed" do
     before do
-      subject.stub(:jammit_installed?  => false,
+      subject.stubs(:jammit_installed?  => false,
                    :more_installed?    => false,
                    :invoke_custom_task => nil,
                    :custom_task?       => true)
     end
 
     it "invokes custom task" do
-      subject.should_receive(:invoke_custom_task)
+      subject.expects(:invoke_custom_task)
       subject.run
     end
   end
 
   context "with custom rake task not installed" do
     before do
-      subject.stub(:jammit_installed?  => false,
+      subject.stubs(:jammit_installed?  => false,
                    :more_installed?    => false,
                    :invoke_custom_task => nil,
                    :custom_task?       => false)
     end
 
     it "does not invoke custom task" do
-      subject.should_not_receive(:invoke_custom_task)
+      subject.expects(:invoke_custom_task).never
       subject.run
     end
   end
@@ -80,15 +82,16 @@ describe Kumade::Packager, "#invoke_custom_task" do
   include_context "with a fake Git"
 
   before do
-    subject.stub(:say)
-    Rake::Task.stub(:[] => task)
+    subject.stubs(:say)
+    Rake::Task.stubs(:[] => task)
   end
 
-  let(:task) { stub('task', :invoke => nil) }
+  let(:task) { stub('kumade:before_asset_compilation task', :invoke => nil) }
 
   it "calls deploy task" do
-    Rake::Task.should_receive(:[]).with("kumade:before_asset_compilation")
-    task.should_receive(:invoke)
+    task.expects(:invoke)
+    Rake::Task.expects(:[]).with("kumade:before_asset_compilation").returns(task)
+
     subject.invoke_custom_task
   end
 end
@@ -103,9 +106,9 @@ describe Kumade::Packager, "#custom_task?" do
   it "returns true if it task found" do
     namespace :kumade do
       task :before_asset_compilation do
-
       end
     end
+
     subject.custom_task?.should be_true
   end
 
@@ -118,40 +121,39 @@ describe Kumade::Packager, "#package_with_jammit" do
   include_context "with a fake Git"
 
   before do
-    subject.stub(:git_add_and_commit_all_assets_in)
-    subject.stub(:say)
-    Jammit.stub(:package!)
+    subject.stubs(:git_add_and_commit_all_assets_in)
+    subject.stubs(:say)
+    Jammit.stubs(:package!)
   end
 
   it "calls Jammit.package!" do
-    Jammit.should_receive(:package!).once
+    Jammit.expects(:package!).once
     subject.package_with_jammit
   end
 
   context "with updated assets" do
-    before { subject.stub(:git => mock(:dirty? => true)) }
+    before { subject.git.stubs(:dirty? => true) }
 
     it "prints the correct message" do
-      subject.should_receive(:success).with("Packaged assets with Jammit")
+      subject.expects(:success).with("Packaged assets with Jammit")
 
       subject.package_with_jammit
     end
 
     it "calls git_add_and_commit_all_assets_in" do
-      subject.stub(:jammit_assets_path => 'jammit-assets')
-      subject.should_receive(:git_add_and_commit_all_assets_in).
+      subject.stubs(:jammit_assets_path => 'jammit-assets')
+      subject.expects(:git_add_and_commit_all_assets_in).
         with('jammit-assets').
-        and_return(true)
+        returns(true)
 
       subject.package_with_jammit
     end
   end
 
   it "prints an error if packaging failed" do
-    Jammit.stub(:package!) do
-      raise Jammit::MissingConfiguration.new("random Jammit error")
-    end
-    subject.should_receive(:error).with("Error: Jammit::MissingConfiguration: random Jammit error")
+    Jammit.expects(:package!).raises(Jammit::MissingConfiguration.new("random Jammit error"))
+
+    subject.expects(:error).with("Error: Jammit::MissingConfiguration: random Jammit error")
 
     subject.package_with_jammit
   end
@@ -161,33 +163,35 @@ describe Kumade::Packager, "#package_with_more" do
   include_context "with a fake Git"
 
   before do
-    subject.stub(:git_add_and_commit_all_assets_in => true,
+    subject.stubs(:git_add_and_commit_all_assets_in => true,
                  :more_assets_path                 => 'assets')
-    subject.stub(:say)
+    subject.stubs(:say)
   end
 
   it "calls the more:generate task" do
-    git.should_receive(:dirty?).and_return(true)
-    subject.should_receive(:run).with("bundle exec rake more:generate")
+    git.expects(:dirty?).returns(true)
+    subject.expects(:run).with("bundle exec rake more:generate")
     subject.package_with_more
   end
 
   context "with changed assets" do
+    before do
+      git.stubs(:dirty? => true)
+    end
+
     it "prints a success message" do
-      subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git => mock(:dirty? => true))
-      subject.should_receive(:success).with("Packaged assets with More")
+      subject.stubs(:run).with("bundle exec rake more:generate")
+      subject.expects(:success).with("Packaged assets with More")
 
       subject.package_with_more
     end
 
     it "calls git_add_and_commit_all_assets_in if assets were added" do
-      subject.stub(:git => mock(:dirty? => true),
-                   :more_assets_path => 'blerg')
-      subject.stub(:run).with("bundle exec rake more:generate")
-      subject.should_receive(:git_add_and_commit_all_assets_in).
+      subject.stubs(:more_assets_path => 'blerg')
+      subject.stubs(:run).with("bundle exec rake more:generate")
+      subject.expects(:git_add_and_commit_all_assets_in).
         with('blerg').
-        and_return(true)
+        returns(true)
 
       subject.package_with_more
     end
@@ -195,30 +199,26 @@ describe Kumade::Packager, "#package_with_more" do
 
   context "with no changed assets" do
     it "prints no message" do
-      subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git => mock(:dirty? => false))
-      subject.should_not_receive(:say)
+      subject.stubs(:run).with("bundle exec rake more:generate")
+      subject.stubs(:git => mock(:dirty? => false))
+      subject.expects(:say).never
 
       subject.package_with_more
     end
 
     it "does not call git_add_and_commit_all_more_assets" do
-      subject.stub(:run).with("bundle exec rake more:generate")
-      subject.stub(:git => mock(:dirty? => false))
-      subject.should_not_receive(:git_add_and_commit_all_assets_in)
+      subject.stubs(:run).with("bundle exec rake more:generate")
+      subject.stubs(:git => mock(:dirty? => false))
+      subject.expects(:git_add_and_commit_all_assets_in).never
 
       subject.package_with_more
     end
   end
 
   it "prints an error if packaging failed" do
-    subject.stub(:run) do |arg|
-      if arg == "bundle exec rake more:generate"
-        raise "blerg"
-      end
-    end
+    subject.stubs(:run).with("bundle exec rake more:generate").raises("blerg")
 
-    subject.should_receive(:error).with("Error: RuntimeError: blerg")
+    subject.expects(:error).with("Error: RuntimeError: blerg")
 
     subject.package_with_more
   end
@@ -228,7 +228,7 @@ describe Kumade::Packager, "#git_add_and_commit_all_assets_in" do
   include_context "with a fake Git"
 
   it "should call git.add_and_commit_all_in" do
-    git.should_receive(:add_and_commit_all_in).with("dir", 'deploy', 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
+    git.expects(:add_and_commit_all_in).with("dir", 'deploy', 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
     subject.git_add_and_commit_all_assets_in("dir")
   end
 end
@@ -238,7 +238,7 @@ describe Kumade::Packager, "#jammit_assets_path" do
   let(:packager) { Kumade::Packager.new(git) }
 
   before do
-    Jammit.stub(:package_path).and_return('blerg')
+    Jammit.stubs(:package_path).returns('blerg')
   end
 
   subject { packager.jammit_assets_path }

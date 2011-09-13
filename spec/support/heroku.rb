@@ -1,12 +1,12 @@
 shared_context "when on Cedar" do
-  let(:cocaine_mock) { mock("Cocaine::CommandLine") }
+  let(:command_line) { mock("Cocaine::CommandLine") }
 
   before do
-    Cocaine::CommandLine.should_receive(:new).
+    Cocaine::CommandLine.expects(:new).
       with("bundle exec heroku stack --remote staging").
-      and_return(cocaine_mock)
+      returns(command_line)
 
-    cocaine_mock.should_receive(:run).and_return(%{
+    command_line.expects(:run).returns(%{
   aspen-mri-1.8.6
   bamboo-mri-1.9.2
   bamboo-ree-1.8.7
@@ -16,13 +16,14 @@ shared_context "when on Cedar" do
 end
 
 shared_context "when not on Cedar" do
-  let(:cocaine_mock) { mock("Cocaine::CommandLine") }
+  let(:command_line) { mock("Cocaine::CommandLine") }
 
   before do
-    Cocaine::CommandLine.should_receive(:new).
+    Cocaine::CommandLine.expects(:new).
       with("bundle exec heroku stack --remote staging").
-      and_return(cocaine_mock)
-    cocaine_mock.should_receive(:run).and_return(%{
+      returns(command_line)
+
+    command_line.expects(:run).returns(%{
   aspen-mri-1.8.6
 * bamboo-mri-1.9.2
   bamboo-ree-1.8.7

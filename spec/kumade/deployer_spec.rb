@@ -6,9 +6,9 @@ describe Kumade::Deployer, "#pre_deploy" do
   let(:git) { subject.git }
 
   it "calls the correct methods" do
-    git.should_receive(:ensure_clean_git)
-    subject.should_receive(:package_assets)
-    git.should_receive(:push).with(subject.git.current_branch)
+    git.expects(:ensure_clean_git)
+    subject.expects(:package_assets)
+    git.expects(:push).with(subject.git.current_branch)
 
     subject.pre_deploy
   end
@@ -18,23 +18,23 @@ describe Kumade::Deployer, "#deploy" do
   let(:remote_name) { 'staging' }
 
   before do
-    STDOUT.stub(:puts)
+    STDOUT.stubs(:puts)
     force_add_heroku_remote(remote_name)
   end
 
   it "calls the correct methods" do
-    subject.should_receive(:pre_deploy)
-    subject.heroku.should_receive(:sync)
-    subject.heroku.should_receive(:migrate_database)
-    subject.should_receive(:post_deploy)
+    subject.expects(:pre_deploy)
+    subject.heroku.expects(:sync)
+    subject.heroku.expects(:migrate_database)
+    subject.expects(:post_deploy)
 
     subject.deploy
   end
 
   it "calls post_deploy if deploy fails" do
-    subject.git.stub(:heroku_remote?).and_raise(RuntimeError)
+    subject.git.stubs(:heroku_remote?).raises(RuntimeError)
 
-    subject.should_receive(:post_deploy)
+    subject.expects(:post_deploy)
 
     subject.deploy
   end
@@ -48,7 +48,7 @@ describe Kumade::Deployer, "#sync_github" do
   end
 
   it "pushes the current branch to github" do
-    subject.git.should_receive(:push).with(new_branch)
+    subject.git.expects(:push).with(new_branch)
 
     subject.sync_github
   end
@@ -56,7 +56,7 @@ end
 
 describe Kumade::Deployer, "#ensure_clean_git" do
   it "calls git.ensure_clean_git" do
-    subject.git.should_receive(:ensure_clean_git)
+    subject.git.expects(:ensure_clean_git)
     subject.ensure_clean_git
   end
 end
@@ -70,14 +70,16 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 
   context "when the remote points to Heroku" do
+    before { STDOUT.stubs(:puts) }
+
     it "does not print an error" do
-      STDOUT.should_not_receive(:puts).with(/==> !/)
+      STDOUT.expects(:puts).with(regexp_matches(/==> !/)).never
 
       subject.ensure_heroku_remote_exists
     end
 
     it "prints a success message" do
-      STDOUT.should_receive(:puts).with(/#{environment} is a Heroku remote/)
+      STDOUT.expects(:puts).with(regexp_matches(/#{environment} is a Heroku remote/))
 
       subject.ensure_heroku_remote_exists
     end
@@ -89,7 +91,7 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
     end
 
     it "prints an error" do
-      STDOUT.should_receive(:puts).with(/Cannot deploy: "#{environment}" remote does not exist/)
+      STDOUT.expects(:puts).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
 
       lambda { subject.ensure_heroku_remote_exists }.should raise_error(Kumade::DeploymentError)
     end
@@ -104,7 +106,7 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
     end
 
     it "prints an error" do
-      STDOUT.should_receive(:puts).with(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/)
+      STDOUT.expects(:puts).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
 
       lambda { subject.ensure_heroku_remote_exists }.should raise_error(Kumade::DeploymentError)
     end
