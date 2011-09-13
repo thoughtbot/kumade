@@ -1,8 +1,12 @@
 require 'spec_helper'
 
+shared_context "with a fake Git" do
+  let(:git) { stub() }
+  subject   { Kumade::Packager.new(git) }
+end
+
 describe Kumade::Packager, "#run" do
-  let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(git_mock) }
+  include_context "with a fake Git"
 
   context "with Jammit installed" do
     it "calls package_with_jammit" do
@@ -73,8 +77,8 @@ describe Kumade::Packager, "#run" do
 end
 
 describe Kumade::Packager, "#invoke_custom_task" do
-  let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(git_mock) }
+  include_context "with a fake Git"
+
   before do
     subject.stub(:say)
     Rake::Task.stub(:[] => task)
@@ -90,8 +94,8 @@ describe Kumade::Packager, "#invoke_custom_task" do
 end
 
 describe Kumade::Packager, "#custom_task?" do
-  let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(git_mock) }
+  include_context "with a fake Git"
+
   before do
     Rake::Task.clear
   end
@@ -111,8 +115,8 @@ describe Kumade::Packager, "#custom_task?" do
 end
 
 describe Kumade::Packager, "#package_with_jammit" do
-  let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(git_mock) }
+  include_context "with a fake Git"
+
   before do
     subject.stub(:git_add_and_commit_all_assets_in)
     subject.stub(:say)
@@ -154,8 +158,8 @@ describe Kumade::Packager, "#package_with_jammit" do
 end
 
 describe Kumade::Packager, "#package_with_more" do
-  let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(git_mock) }
+  include_context "with a fake Git"
+
   before do
     subject.stub(:git_add_and_commit_all_assets_in => true,
                  :more_assets_path                 => 'assets')
@@ -163,7 +167,7 @@ describe Kumade::Packager, "#package_with_more" do
   end
 
   it "calls the more:generate task" do
-    git_mock.should_receive(:dirty?).and_return(true)
+    git.should_receive(:dirty?).and_return(true)
     subject.should_receive(:run).with("bundle exec rake more:generate")
     subject.package_with_more
   end
@@ -221,18 +225,16 @@ describe Kumade::Packager, "#package_with_more" do
 end
 
 describe Kumade::Packager, "#git_add_and_commit_all_assets_in" do
-  let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(git_mock) }
-  before { subject.stub(:git => git_mock) }
+  include_context "with a fake Git"
 
   it "should call git.add_and_commit_all_in" do
-    git_mock.should_receive(:add_and_commit_all_in).with("dir", 'deploy', 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
+    git.should_receive(:add_and_commit_all_in).with("dir", 'deploy', 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
     subject.git_add_and_commit_all_assets_in("dir")
   end
 end
 
 describe Kumade::Packager, "#jammit_assets_path" do
-  let(:git)      { mock() }
+  let(:git)      { stub() }
   let(:packager) { Kumade::Packager.new(git) }
 
   before do
@@ -245,8 +247,8 @@ describe Kumade::Packager, "#jammit_assets_path" do
 end
 
 describe Kumade::Packager, "#more_assets_path" do
-  let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(git_mock) }
+  include_context "with a fake Git"
+
   it "returns the correct asset path" do
     module ::Less
       class More
@@ -260,8 +262,8 @@ describe Kumade::Packager, "#more_assets_path" do
 end
 
 describe Kumade::Packager, "#jammit_installed?" do
-  let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(git_mock) }
+  include_context "with a fake Git"
+
   it "returns true because it's loaded by the Gemfile" do
     subject.jammit_installed?.should be_true
   end
@@ -272,23 +274,30 @@ describe Kumade::Packager, "#jammit_installed?" do
 end
 
 describe Kumade::Packager, "#more_installed?" do
-  let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(git_mock) }
-  before do
-    if defined?(Less)
-      Object.send(:remove_const, :Less)
-    end
-  end
+  include_context "with a fake Git"
 
-  it "returns false if it does not find Less::More" do
-    subject.more_installed?.should be_false
-  end
-
-  it "returns true if it finds Less::More" do
-    module Less
-      class More
+  context "when More is not installed" do
+    before do
+      if defined?(Less)
+        Object.send(:remove_const, :Less)
       end
     end
-    subject.more_installed?.should be_true
+
+    it "returns false" do
+      subject.more_installed?.should be_false
+    end
+  end
+
+  context "when More is installed" do
+    before do
+      module Less
+        class More
+        end
+      end
+    end
+
+    it "returns true" do
+      subject.more_installed?.should be_true
+    end
   end
 end
