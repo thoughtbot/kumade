@@ -12,6 +12,7 @@ describe Kumade::Packager, "#run" do
 
   before do
     subject.stubs(:package_with_jammit)
+    subject.expects(:invoke_task).with("kumade:before_asset_compilation")
   end
 
   context "with Jammit installed" do
@@ -57,76 +58,6 @@ describe Kumade::Packager, "#run" do
 
       subject.should_not have_received(:package_with_more)
     end
-  end
-
-  context "with custom rake task installed" do
-    before do
-      subject.stubs(:jammit_installed?  => false,
-                    :more_installed?    => false,
-                    :invoke_custom_task => nil,
-                    :custom_task?       => true)
-    end
-
-    it "invokes custom task" do
-      subject.run
-
-      subject.should have_received(:invoke_custom_task)
-    end
-  end
-
-  context "with custom rake task not installed" do
-    before do
-      subject.stubs(:jammit_installed?  => false,
-                    :more_installed?    => false,
-                    :invoke_custom_task => nil,
-                    :custom_task?       => false)
-    end
-
-    it "does not invoke custom task" do
-      subject.run
-
-      subject.should_not have_received(:invoke_custom_task)
-    end
-  end
-end
-
-describe Kumade::Packager, "#invoke_custom_task" do
-  include_context "with a fake Git"
-
-  let(:task) { stub('kumade:before_asset_compilation task', :invoke => nil) }
-
-  before do
-    subject.stubs(:say)
-    Rake::Task.stubs(:[] => task)
-  end
-
-  it "calls deploy task" do
-    Rake::Task.expects(:[]).with("kumade:before_asset_compilation").returns(task)
-
-    subject.invoke_custom_task
-
-    task.should have_received(:invoke)
-  end
-end
-
-describe Kumade::Packager, "#custom_task?" do
-  include_context "with a fake Git"
-
-  before do
-    Rake::Task.clear
-  end
-
-  it "returns true if it task found" do
-    namespace :kumade do
-      task :before_asset_compilation do
-      end
-    end
-
-    subject.custom_task?.should be_true
-  end
-
-  it "returns false if task not found" do
-    subject.custom_task?.should be_false
   end
 end
 

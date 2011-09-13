@@ -97,3 +97,57 @@ describe Kumade::Base, "#run" do
     end
   end
 end
+
+describe Kumade::Base, "#invoke_task" do
+  before do
+    STDOUT.stubs(:puts)
+    Rake::Task.stubs(:[] => task)
+  end
+  
+  let(:task) { stubs('task') }
+  let(:task_name) { "kumade:before_asset_compilation" }
+  
+  it "calls deploy task when it exists" do
+    subject.expects(:task_exist?).with(task_name).returns(true)
+    Rake::Task.expects(:[]).with(task_name)
+    task.expects(:invoke)
+    subject.invoke_task(task_name)
+  end
+  it "should not calls deploy task when it doesn't exists" do
+    subject.expects(:task_exist?).with(task_name).returns(false)
+    Rake::Task.expects(:[]).never
+    task.expects(:invoke).never
+    subject.invoke_task(task_name)
+  end
+end
+
+describe Kumade::Base, "#task_exist?" do
+  before do
+    Rake::Task.clear
+  end
+  
+  it "should load Rakefile when it is available" do
+    subject.expects(:load).with('Rakefile')
+    File.expects(:exist?).with("Rakefile").returns(true)
+    subject.task_exist?("kumade:before_asset_compilation")
+  end
+
+  it "should not load Rakefile when it isn't available" do
+    subject.expects(:load).with('Rakefile').never
+    File.expects(:exist?).with("Rakefile").returns(false)
+    subject.task_exist?("kumade:before_asset_compilation")
+  end
+
+  it "returns true if it task found" do
+    namespace :kumade do
+      task :before_asset_compilation do
+
+      end
+    end
+    Kumade::Base.new.task_exist?("kumade:before_asset_compilation").should be_true
+  end
+
+  it "returns false if task not found" do
+    subject.task_exist?("kumade:before_asset_compilation").should be_false
+  end
+end

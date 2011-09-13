@@ -8,19 +8,9 @@ module Kumade
     end
 
     def run
-      invoke_custom_task  if custom_task?
+      invoke_task("kumade:before_asset_compilation")
       package_with_jammit if jammit_installed?
       package_with_more   if more_installed?
-    end
-
-    def invoke_custom_task
-      success "Running kumade:before_asset_compilation task"
-      Rake::Task["kumade:before_asset_compilation"].invoke unless Kumade.configuration.pretending?
-    end
-
-    def custom_task?
-      load("Rakefile") if File.exist?("Rakefile")
-      Rake::Task.task_defined?("kumade:before_asset_compilation")
     end
 
     def package_with_jammit
