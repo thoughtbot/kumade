@@ -1,5 +1,6 @@
 require 'rspec'
 require 'aruba/api'
+require 'bourne'
 
 require 'kumade'
 

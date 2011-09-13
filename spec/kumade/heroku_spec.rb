@@ -11,12 +11,15 @@ describe Kumade::Heroku, "#sync" do
 
   before do
     force_add_heroku_remote(environment)
+    subject.git.stubs(:create)
+    subject.git.stubs(:push)
   end
 
   it "creates and pushes the deploy branch" do
-    subject.git.expects(:create).with("deploy")
-    subject.git.expects(:push).with("deploy:master", environment, true)
     subject.sync
+
+    subject.git.should have_received(:create).with("deploy")
+    subject.git.should have_received(:push).with("deploy:master", environment, true)
   end
 end
 
@@ -25,13 +28,14 @@ describe Kumade::Heroku, "#migrate_database" do
 
   before do
     STDOUT.stubs(:puts)
+    subject.stubs(:heroku)
     force_add_heroku_remote(environment)
   end
 
   it "runs db:migrate with the correct app" do
-    subject.expects(:heroku).with("rake db:migrate")
-
     subject.migrate_database
+
+    subject.should have_received(:heroku).with("rake db:migrate")
   end
 
   context "when pretending" do
@@ -41,15 +45,15 @@ describe Kumade::Heroku, "#migrate_database" do
     end
 
     it "does not run the command" do
-      subject.expects(:heroku).never
-
       subject.migrate_database
+
+      subject.should_not have_received(:heroku)
     end
 
     it "prints a message" do
-      STDOUT.expects(:puts).with(regexp_matches(/Migrated #{environment}/))
-
       subject.migrate_database
+
+      STDOUT.should have_received(:puts).with(regexp_matches(/Migrated #{environment}/))
     end
   end
 end
@@ -111,7 +115,7 @@ describe Kumade::Heroku, "#delete_deploy_branch" do
     Cocaine::CommandLine.expects(:new).
       with("git checkout master && git branch -D deploy").
       returns(stub(:run => true))
+
     subject.delete_deploy_branch
   end
 end
-

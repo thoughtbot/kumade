@@ -10,18 +10,25 @@ end
 describe Kumade::Packager, "#run" do
   include_context "with a fake Git"
 
+  before do
+    subject.stubs(:package_with_jammit)
+  end
+
   context "with Jammit installed" do
     it "calls package_with_jammit" do
-      subject.expects(:package_with_jammit)
       subject.run
+
+      subject.should have_received(:package_with_jammit)
     end
   end
 
   context "with Jammit not installed" do
     before { subject.stubs(:jammit_installed? => false) }
+
     it "does not call package_with_jammit" do
-      subject.expects(:package_with_jammit).never
       subject.run
+
+      subject.should_not have_received(:package_with_jammit)
     end
   end
 
@@ -29,11 +36,13 @@ describe Kumade::Packager, "#run" do
     before do
       subject.stubs(:jammit_installed? => false)
       subject.stubs(:more_installed? => true)
+      subject.stubs(:package_with_more)
     end
 
     it "calls package_with_more" do
-      subject.expects(:package_with_more)
       subject.run
+
+      subject.should have_received(:package_with_more)
     end
   end
 
@@ -44,36 +53,39 @@ describe Kumade::Packager, "#run" do
     end
 
     it "does not call package_with_more" do
-      subject.expects(:package_with_more).never
       subject.run
+
+      subject.should_not have_received(:package_with_more)
     end
   end
 
   context "with custom rake task installed" do
     before do
       subject.stubs(:jammit_installed?  => false,
-                   :more_installed?    => false,
-                   :invoke_custom_task => nil,
-                   :custom_task?       => true)
+                    :more_installed?    => false,
+                    :invoke_custom_task => nil,
+                    :custom_task?       => true)
     end
 
     it "invokes custom task" do
-      subject.expects(:invoke_custom_task)
       subject.run
+
+      subject.should have_received(:invoke_custom_task)
     end
   end
 
   context "with custom rake task not installed" do
     before do
       subject.stubs(:jammit_installed?  => false,
-                   :more_installed?    => false,
-                   :invoke_custom_task => nil,
-                   :custom_task?       => false)
+                    :more_installed?    => false,
+                    :invoke_custom_task => nil,
+                    :custom_task?       => false)
     end
 
     it "does not invoke custom task" do
-      subject.expects(:invoke_custom_task).never
       subject.run
+
+      subject.should_not have_received(:invoke_custom_task)
     end
   end
 end
@@ -81,18 +93,19 @@ end
 describe Kumade::Packager, "#invoke_custom_task" do
   include_context "with a fake Git"
 
+  let(:task) { stub('kumade:before_asset_compilation task', :invoke => nil) }
+
   before do
     subject.stubs(:say)
     Rake::Task.stubs(:[] => task)
   end
 
-  let(:task) { stub('kumade:before_asset_compilation task', :invoke => nil) }
-
   it "calls deploy task" do
-    task.expects(:invoke)
     Rake::Task.expects(:[]).with("kumade:before_asset_compilation").returns(task)
 
     subject.invoke_custom_task
+
+    task.should have_received(:invoke)
   end
 end
 
@@ -122,22 +135,24 @@ describe Kumade::Packager, "#package_with_jammit" do
 
   before do
     subject.stubs(:git_add_and_commit_all_assets_in)
-    subject.stubs(:say)
+    subject.stubs(:success)
+    subject.stubs(:error)
     Jammit.stubs(:package!)
   end
 
   it "calls Jammit.package!" do
-    Jammit.expects(:package!).once
     subject.package_with_jammit
+
+    Jammit.should have_received(:package!).once
   end
 
   context "with updated assets" do
     before { subject.git.stubs(:dirty? => true) }
 
     it "prints the correct message" do
-      subject.expects(:success).with("Packaged assets with Jammit")
-
       subject.package_with_jammit
+
+      subject.should have_received(:success).with("Packaged assets with Jammit")
     end
 
     it "calls git_add_and_commit_all_assets_in" do
@@ -153,9 +168,9 @@ describe Kumade::Packager, "#package_with_jammit" do
   it "prints an error if packaging failed" do
     Jammit.expects(:package!).raises(Jammit::MissingConfiguration.new("random Jammit error"))
 
-    subject.expects(:error).with("Error: Jammit::MissingConfiguration: random Jammit error")
-
     subject.package_with_jammit
+
+    subject.should have_received(:error).with("Error: Jammit::MissingConfiguration: random Jammit error")
   end
 end
 

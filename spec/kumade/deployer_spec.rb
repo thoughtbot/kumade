@@ -73,27 +73,28 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
     before { STDOUT.stubs(:puts) }
 
     it "does not print an error" do
-      STDOUT.expects(:puts).with(regexp_matches(/==> !/)).never
-
       subject.ensure_heroku_remote_exists
+
+      STDOUT.should_not have_received(:puts).with(regexp_matches(/==> !/))
     end
 
     it "prints a success message" do
-      STDOUT.expects(:puts).with(regexp_matches(/#{environment} is a Heroku remote/))
-
       subject.ensure_heroku_remote_exists
+
+      STDOUT.should have_received(:puts).with(regexp_matches(/#{environment} is a Heroku remote/))
     end
   end
 
   context "when the remote does not exist" do
     before do
       remove_remote(environment)
+      STDOUT.stubs(:puts)
     end
 
     it "prints an error" do
-      STDOUT.expects(:puts).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
-
       lambda { subject.ensure_heroku_remote_exists }.should raise_error(Kumade::DeploymentError)
+
+      STDOUT.should have_received(:puts).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
     end
   end
 
@@ -102,13 +103,14 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
 
     before do
       `git remote add #{bad_environment} blerg@example.com`
+      STDOUT.stubs(:puts)
       Kumade.configuration.environment = bad_environment
     end
 
     it "prints an error" do
-      STDOUT.expects(:puts).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
-
       lambda { subject.ensure_heroku_remote_exists }.should raise_error(Kumade::DeploymentError)
+
+      STDOUT.should have_received(:puts).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
     end
   end
 end
