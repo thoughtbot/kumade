@@ -232,13 +232,16 @@ describe Kumade::Packager, "#git_add_and_commit_all_assets_in" do
 end
 
 describe Kumade::Packager, "#jammit_assets_path" do
-  let(:git_mock) { mock() }
-  subject { Kumade::Packager.new(git_mock) }
-  it "returns the correct asset path" do
-    Jammit.stub(:package_path => 'blerg')
-    current_dir = File.expand_path(Dir.pwd)
-    subject.jammit_assets_path.should == File.join(current_dir, 'public', 'blerg')
+  let(:git)      { mock() }
+  let(:packager) { Kumade::Packager.new(git) }
+
+  before do
+    Jammit.stub(:package_path).and_return('blerg')
   end
+
+  subject { packager.jammit_assets_path }
+
+  it { should == File.join(Jammit::PUBLIC_ROOT, 'blerg') }
 end
 
 describe Kumade::Packager, "#more_assets_path" do

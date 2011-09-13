@@ -54,41 +54,10 @@ describe Kumade::Deployer, "#sync_github" do
   end
 end
 
-describe Kumade::Deployer, "#sync_heroku" do
-  let(:environment) { 'my-env' }
-  subject { Kumade::Deployer.new(environment) }
-  let(:git_mock) { mock() }
-  before { subject.stub(:git => git_mock) }
-  it "should call git.create and git.push" do
-    git_mock.should_receive(:create).with("deploy")
-    git_mock.should_receive(:push).with("deploy:master", environment, true)
-    subject.sync_heroku
-  end
-end
-
-
 describe Kumade::Deployer, "#ensure_clean_git" do
   it "calls git.ensure_clean_git" do
     subject.git.should_receive(:ensure_clean_git)
     subject.ensure_clean_git
-  end
-end
-
-describe Kumade::Deployer, "#heroku_migrate" do
-  let(:environment){ 'staging' }
-
-  before do
-    subject.stub(:say)
-    force_add_heroku_remote(environment)
-  end
-
-  it "runs db:migrate with the correct app" do
-    subject.stub(:run => true)
-    subject.should_receive(:heroku).
-      with("rake db:migrate")
-    subject.should_receive(:success).with("Migrated staging")
-
-    subject.post_deploy
   end
 end
 
