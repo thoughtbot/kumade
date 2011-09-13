@@ -55,7 +55,7 @@ module Kumade
       OptionParser.new do |opts|
         opts.banner = "Usage: kumade <environment> [options]"
 
-        opts.on("-p", "--pretend", "Pretend mode: print what kumade would do") do |p|
+        opts.on_tail("-p", "--pretend", "Pretend mode: print what kumade would do") do
           @options[:pretend] = true
         end
 
