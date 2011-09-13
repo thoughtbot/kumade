@@ -40,7 +40,7 @@ describe Kumade::Deployer, "#deploy" do
   end
 end
 
-describe Kumade::Deployer, "#sync_github" do
+describe Kumade::Deployer, "#sync_origin" do
   let(:new_branch) { 'new-branch' }
 
   before do
@@ -50,7 +50,7 @@ describe Kumade::Deployer, "#sync_github" do
   it "should invoke kumade:before_origin_sync task and call git.push" do
     subject.expects(:invoke_task).with("kumade:before_origin_sync")
     subject.git.expects(:push).with(new_branch)
-    subject.sync_github
+    subject.sync_origin
   end
 end
 

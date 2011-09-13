@@ -28,10 +28,14 @@ module Kumade
     def pre_deploy
       ensure_clean_git
       package_assets
-      sync_github
+      sync_origin
     end
 
-    def sync_github
+    def package_assets
+      packager.run
+    end
+
+    def sync_origin
       invoke_task("kumade:before_origin_sync")
       git.push(@branch)
     end
