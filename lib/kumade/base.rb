@@ -31,5 +31,17 @@ module Kumade
     def success(message)
       say("==> #{message}", :green)
     end
+    
+    def invoke_task(task)
+      if task_exist?(task)
+        success "Running #{task} task"
+        Rake::Task[task].invoke unless Kumade.configuration.pretending?
+      end
+    end
+    
+    def task_exist?(task)
+      load("Rakefile") if File.exist?("Rakefile")
+      Rake::Task.task_defined?(task)
+    end
   end
 end

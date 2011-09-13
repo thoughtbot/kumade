@@ -56,7 +56,7 @@ module Kumade
         opts.banner = "Usage: kumade <environment> [options]"
 
         opts.on("-p", "--pretend", "Pretend mode: print what kumade would do") do |p|
-          @options[:pretend] = p
+          @options[:pretend] = true
         end
 
         opts.on_tail("-v", "--verbose", "Print what kumade is doing") do

@@ -6,6 +6,8 @@ module Kumade
   autoload :Railtie,         "kumade/railtie"
   autoload :DeploymentError, "kumade/deployment_error"
   autoload :Configuration,   "kumade/configuration"
+  autoload :Heroku,          "kumade/heroku"
+  autoload :Packager,        "kumade/packager"
 
   def self.configuration
     @@configuration ||= Configuration.new

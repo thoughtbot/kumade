@@ -20,8 +20,9 @@ describe Kumade::CLI do
         end
 
         it "deploys" do
-          deployer_instance.should_receive(:deploy)
           subject
+
+          deployer_instance.should have_received(:deploy)
         end
       end
     end
@@ -48,8 +49,9 @@ describe Kumade::CLI do
     end
 
     it "deploys" do
-      deployer_instance.should_receive(:deploy)
       subject
+
+      deployer_instance.should have_received(:deploy)
     end
   end
 end
@@ -71,33 +73,37 @@ describe Kumade::CLI, ".swapping_stdout_for" do
   let(:stdout) { $stdout }
   let(:output) { StringIO.new }
 
-  it 'does not let anything get printed' do
-    stdout.should_not_receive(:print)
+  before do
+    stdout.stubs(:print => nil, :puts => nil)
+  end
 
+  it 'does not let anything get printed' do
     Kumade::CLI.swapping_stdout_for(output) do
       $stdout.puts "Hello, you can't see me."
     end
+
+    stdout.should_not have_received(:print)
 
     output.rewind
     output.read.should == "Hello, you can't see me.\n"
   end
 
   it 'dumps the output stash to real stdout when an error happens' do
-    stdout.should_receive(:print)
-
     Kumade::CLI.swapping_stdout_for(output) do
       $stdout.puts "Hello, you can see me!"
       raise Kumade::DeploymentError.new("error")
     end
+
+    stdout.should have_received(:print)
   end
 
   context "in print output mode" do
     it 'prints everything' do
-      stdout.should_receive(:puts)
-
       Kumade::CLI.swapping_stdout_for(output, true) do
         $stdout.puts "Hello, you can see me!"
       end
+
+      stdout.should have_received(:puts)
     end
   end
 end

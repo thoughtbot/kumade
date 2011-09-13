@@ -1,5 +1,6 @@
 require 'rspec'
 require 'aruba/api'
+require 'bourne'
 
 require 'kumade'
 
@@ -18,8 +19,12 @@ module GitRemoteHelpers
   end
 end
 
+
+spec_dir = Pathname.new(File.expand_path(File.dirname(__FILE__)))
+Dir[spec_dir.join('support', '**')].each {|f| require File.expand_path(f) }
+
 RSpec.configure do |config|
-  config.mock_with :rspec
+  config.mock_with :mocha
   config.color_enabled = true
 
   config.include Rake::DSL if defined?(Rake::DSL)

@@ -64,35 +64,39 @@ describe Kumade::Git, ".environments" do
 end
 
 describe Kumade::Git, "#branch_exist?" do
-  let(:command_line_mock) { mock("Cocaine::CommandLine") }
-  let(:branch)            { "branch" }
+  let(:command_line) { mock("Cocaine::CommandLine") }
+  let(:branch)       { "branch" }
 
   before do
-    Cocaine::CommandLine.should_receive(:new).with("git show-ref #{branch}").and_return(command_line_mock)
+    command_line.stubs(:run)
+    Cocaine::CommandLine.expects(:new).with("git show-ref #{branch}").returns(command_line)
   end
 
   it "returns true when the branch exists" do
-    command_line_mock.should_receive(:run)
     subject.branch_exist?("branch").should be_true
+
+    command_line.should have_received(:run)
   end
 
   it "returns false if the branch doesn't exist" do
-    command_line_mock.should_receive(:run).and_raise(Cocaine::ExitStatusError)
+    command_line.stubs(:run).raises(Cocaine::ExitStatusError)
 
     subject.branch_exist?("branch").should be_false
+
+    command_line.should have_received(:run)
   end
 end
 
 describe Kumade::Git, "#dirty?" do
   context "when dirty" do
-    let(:command_line) { mock("CommandLine instance") }
+    let(:failing_command_line) { mock("CommandLine instance") }
 
     before do
-      command_line.should_receive(:run).and_raise(Cocaine::ExitStatusError)
+      failing_command_line.stubs(:run).raises(Cocaine::ExitStatusError)
 
-      Cocaine::CommandLine.should_receive(:new).
+      Cocaine::CommandLine.expects(:new).
         with("git diff --exit-code").
-        and_return(command_line)
+        returns(failing_command_line)
     end
 
     it "returns true" do
@@ -102,9 +106,9 @@ describe Kumade::Git, "#dirty?" do
 
   context "when clean" do
     before do
-      Cocaine::CommandLine.should_receive(:new).
+      Cocaine::CommandLine.expects(:new).
         with("git diff --exit-code").
-        and_return(mock(:run => true))
+        returns(stub("Successful CommandLine", :run => true))
     end
 
     it "returns false" do
