@@ -23,7 +23,7 @@ Feature: Kumade without jammit
       end
       """
     When I run kumade with "pretend-staging"
-    Then the output should contain "Running kumade:before_asset_compilation task"
+    Then the output should contain "Running rake task: kumade:before_asset_compilation"
     And the output should contain "Hi!"
 
   Scenario: Don't run rake task in pretend mode
@@ -36,5 +36,5 @@ Feature: Kumade without jammit
       end
       """
     When I run kumade with "pretend-staging -p"
-    Then the output should contain "Running kumade:before_asset_compilation task"
+    Then the output should contain "Running rake task: kumade:before_asset_compilation"
     And the output should not contain "Hi!"
