@@ -16,7 +16,7 @@ describe Kumade::CLI do
       context pretend_flag do
         it "sets pretending to true" do
           subject
-          Kumade.configuration.pretending.should == true
+          Kumade.configuration.should be_pretending
         end
 
         it "deploys" do
@@ -36,7 +36,7 @@ describe Kumade::CLI do
     end
 
     it "sets pretending to false" do
-      Kumade.configuration.pretending.should == false
+      Kumade.configuration.should_not be_pretending
     end
   end
 
@@ -45,7 +45,7 @@ describe Kumade::CLI do
 
     it "sets pretending to false" do
       subject
-      Kumade.configuration.pretending.should == false
+      Kumade.configuration.should_not be_pretending
     end
 
     it "deploys" do

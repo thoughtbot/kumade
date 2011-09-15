@@ -1,14 +1,13 @@
 module Kumade
   class Configuration
-    def initialize(environment = 'staging', pretending = false )
-      @environment = environment
-      @pretending  = pretending
-    end
+    attr_writer :pretending, :environment
 
     def pretending?
-      @pretending
+      @pretending || false
     end
 
-    attr_accessor :pretending, :environment
+    def environment
+      @environment || "staging"
+    end
   end
 end
