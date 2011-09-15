@@ -8,7 +8,7 @@ end
 describe Kumade::Configuration, "#pretending" do
   it "has read/write access for the pretending attribute" do
     subject.pretending = true
-    subject.pretending.should == true
+    subject.should be_pretending
   end
 end
 
@@ -24,7 +24,7 @@ describe Kumade::Configuration, "#pretending?" do
   end
 
   it "defaults to false" do
-    subject.pretending.should == false
+    subject.should_not be_pretending
   end
 end
 

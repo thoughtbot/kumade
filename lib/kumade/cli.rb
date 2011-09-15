@@ -16,7 +16,7 @@ module Kumade
       parse_arguments!(args)
 
       Kumade.configuration.pretending  = !!@options[:pretend]
-      Kumade.configuration.environment = args.shift || 'staging'
+      Kumade.configuration.environment = args.shift
 
       self.class.swapping_stdout_for(out, print_output?) do
         deploy
