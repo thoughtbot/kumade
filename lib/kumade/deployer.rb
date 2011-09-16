@@ -32,7 +32,7 @@ module Kumade
     end
 
     def package_assets
-      packager.run
+      @packager.run
     end
 
     def sync_github
