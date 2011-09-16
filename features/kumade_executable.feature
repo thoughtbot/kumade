@@ -21,7 +21,7 @@ Feature: Kumade executable
     And the output should contain:
       """
       ==> Git repo is clean
-      ==> Packaged assets with Jammit
+      ==> Packaged with Kumade::JammitPackager
                run  git push origin master
       ==> Pushed master -> origin
                run  git branch deploy
@@ -31,7 +31,7 @@ Feature: Kumade executable
                run  git checkout master && git branch -D deploy
       ==> Deployed to: pretend-staging
       """
-    But the output should not contain "==> Packaged assets with More"
+    But the output should not contain "==> Packaged with Kumade::MorePackager"
 
   Scenario: Default environment is staging
     When I run kumade with "-p"
@@ -52,7 +52,7 @@ Feature: Kumade executable
     Then the output should contain:
       """
       ==> Git repo is clean
-      ==> Packaged assets with Jammit
+      ==> Packaged with Kumade::JammitPackager
                run  git push origin new_branch
       ==> Pushed new_branch -> origin
                run  git branch deploy
@@ -95,4 +95,5 @@ Feature: Kumade executable
       end
       """
     When I run kumade with "pretend-staging -p"
-    Then the output should match /kumade:before_asset_compilation.*Packaged assets with Jammit/
+    Then the output should contain "kumade:before_asset_compilation"
+    And the output should contain "==> Packaged with Kumade::JammitPackager"

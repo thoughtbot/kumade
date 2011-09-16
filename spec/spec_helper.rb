@@ -21,7 +21,7 @@ end
 
 
 spec_dir = Pathname.new(File.expand_path(File.dirname(__FILE__)))
-Dir[spec_dir.join('support', '**')].each {|f| require File.expand_path(f) }
+Dir[spec_dir.join('support', '**', "*.rb")].each {|f| require File.expand_path(f) }
 
 RSpec.configure do |config|
   config.mock_with :mocha
