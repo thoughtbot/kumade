@@ -26,5 +26,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency('cucumber', '~> 1.0.2')
   s.add_development_dependency('aruba', '~> 0.4.3')
   s.add_development_dependency('jammit', '~> 0.6.3')
+  s.add_development_dependency('less', '~> 2.0')
   s.add_development_dependency('bourne')
 end

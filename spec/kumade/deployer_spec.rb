@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-require 'jammit'
-
 describe Kumade::Deployer, "#pre_deploy" do
   let(:git) { subject.git }
 
@@ -112,5 +110,20 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
 
       STDOUT.should have_received(:puts).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
     end
+  end
+end
+
+describe Kumade::Deployer, "packaging" do
+  let(:git)      { stub("git", :current_branch => "awesome", :delete => true) }
+  let(:packager) { stub("packager", :run => true) }
+
+  before do
+    Kumade::Git.stubs(:new => git)
+    Kumade::Packager.stubs(:new => packager)
+  end
+
+  it "builds the correct packager" do
+    subject.deploy
+    Kumade::Packager.should have_received(:new).with(git)
   end
 end

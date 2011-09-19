@@ -1,84 +1,46 @@
 module Kumade
   class Packager < Base
-    attr_reader :git
-
-    def initialize(git)
+    def initialize(git, packager = Packager.available_packager)
       super()
-      @git = git
+      @packager = packager
+      @git      = git
     end
 
     def run
-      invoke_task("kumade:before_asset_compilation")
-      package_with_jammit if jammit_installed?
-      package_with_more   if more_installed?
+      precompile_assets
+      package
     end
 
-    def package_with_jammit
+    def self.available_packager
+      Kumade::PackagerList.new.first
+    end
+
+    private
+
+    def precompile_assets
+      RakeTaskRunner.new("kumade:before_asset_compilation", self).invoke
+    end
+
+    def package
+      return success(success_message) if Kumade.configuration.pretending?
+
       begin
-        success_message = "Packaged assets with Jammit"
-
-        if Kumade.configuration.pretending?
+        @packager.package
+        if @git.dirty?
+          git_add_and_commit_all_assets_in(@packager.assets_path)
           success(success_message)
-        else
-          Jammit.package!
-
-          success(success_message)
-          git_add_and_commit_all_assets_in(jammit_assets_path)
         end
-      rescue => jammit_error
-        error("Error: #{jammit_error.class}: #{jammit_error.message}")
+      rescue => packager_exception
+        error("Error: #{packager_exception.class}: #{packager_exception.message}")
       end
     end
 
-    def package_with_more
-      success_message = "Packaged assets with More"
-      if Kumade.configuration.pretending?
-        success(success_message)
-      else
-        begin
-          run "bundle exec rake more:generate"
-          if git.dirty?
-            success(success_message)
-            git_add_and_commit_all_assets_in(more_assets_path)
-          end
-        rescue => more_error
-          error("Error: #{more_error.class}: #{more_error.message}")
-        end
-      end
+    def success_message
+      "Packaged with #{@packager.name}"
     end
 
     def git_add_and_commit_all_assets_in(dir)
-      git.add_and_commit_all_in(dir, Kumade::Heroku::DEPLOY_BRANCH, 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
-    end
-
-    def jammit_assets_path
-      File.join(Jammit::PUBLIC_ROOT, Jammit.package_path)
-    end
-
-    def more_assets_path
-      File.join('public', ::Less::More.destination_path)
-    end
-
-    def jammit_installed?
-      @jammit_installed ||=
-        (defined?(Jammit) ||
-          begin
-            require 'jammit'
-            true
-          rescue LoadError
-            false
-          end)
-    end
-
-    def more_installed?
-      @more_installed ||=
-        (defined?(Less::More) ||
-          begin
-            require 'less/more'
-            true
-          rescue LoadError
-            false
-          end)
+      @git.add_and_commit_all_in(dir, Kumade::Heroku::DEPLOY_BRANCH, 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
     end
   end
 end
