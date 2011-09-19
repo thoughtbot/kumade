@@ -85,15 +85,39 @@ Feature: Kumade executable
     When I run kumade with "pretend-staging"
     Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Error: Jammit::MissingConfiguration"
 
-  Scenario: Run custom task before jammit
+	Scenario: Run custom task before jammit
+	    Given I write to "Rakefile" with:
+	      """
+	      namespace :kumade do
+	        task :before_asset_compilation do
+	          puts 'Hi!'
+	        end
+	      end
+	      """
+	    When I run kumade with "pretend-staging -p"
+	    Then the output should contain "kumade:before_asset_compilation"
+	    And the output should contain "==> Packaged with Kumade::JammitPackager"
+
+  Scenario: Run custom task before origin sync
     Given I write to "Rakefile" with:
       """
       namespace :kumade do
-        task :before_asset_compilation do
+        task :before_origin_sync do
           puts 'Hi!'
         end
       end
       """
-    When I run kumade with "pretend-staging -p"
-    Then the output should contain "kumade:before_asset_compilation"
-    And the output should contain "==> Packaged with Kumade::JammitPackager"
+    When I run kumade
+    Then the output should contains "Running kumade:before_origin_sync task"
+
+  Scenario: Run custom task before heroku deploy
+    Given I write to "Rakefile" with:
+      """
+      namespace :kumade do
+        task :before_heroku_deploy do
+          puts 'Hi!'
+        end
+      end
+      """
+    When I run kumade
+    Then the output should contains "Running kumade:before_heroku_deploy task"

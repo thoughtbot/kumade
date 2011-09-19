@@ -66,7 +66,7 @@ Tested against:
 * MRI 1.9.2
 * REE 1.8.7
 
-## Miscellaneous Features
+## Callbacks
 
 Want to run a task before bundling your assets on deploy? In your Rails app's rake tasks, drop in:
 
@@ -78,7 +78,33 @@ namespace :kumade do
 end
 ```
 
-You can hook in any custom code you want to run there before deploying!
+Want to run a task before origin sync? In your rails app's rake tasks, drop in:
+
+``` ruby
+namespace :kumade do
+  task :before_origin_sync do
+    puts "This runs before your code are pushed to origin"
+  end
+end
+```
+
+Want to run a task before deploy to Heroku? In your rails app's rake tasks, drop in:
+
+``` ruby
+namespace :kumade do
+  task :before_heroku_deploy do
+    puts "This runs before your code are pushed to heroku"
+  end
+end
+```
+
+## Compatibility
+
+Tested against:
+
+* MRI 1.8.7
+* MRI 1.9.2
+* REE 1.8.7
 
 ## What's with the name?
 

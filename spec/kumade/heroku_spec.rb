@@ -16,6 +16,8 @@ describe Kumade::Heroku, "#sync" do
   end
 
   it "creates and pushes the deploy branch" do
+    subject.expects(:invoke_task).with("kumade:before_heroku_deploy")
+
     subject.sync
 
     subject.git.should have_received(:create).with("deploy")

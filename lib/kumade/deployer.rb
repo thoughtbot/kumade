@@ -28,15 +28,20 @@ module Kumade
     def pre_deploy
       ensure_clean_git
       package_assets
-      sync_github
+      sync_origin
     end
 
     def package_assets
       @packager.run
     end
 
-    def sync_github
+    def sync_origin
+      invoke_task("kumade:before_origin_sync")
       git.push(@branch)
+    end
+    
+    def package_assets
+      packager.run
     end
 
     def post_deploy
@@ -45,6 +50,18 @@ module Kumade
 
     def ensure_clean_git
       git.ensure_clean_git
+    end
+
+    def invoke_task(task)
+      if task_exist?(task)
+        success "Running #{task} task"
+        Rake::Task[task].invoke unless Kumade.configuration.pretending?
+      end
+    end
+
+    def task_exist?(task)
+      load("Rakefile") if File.exist?("Rakefile")
+      Rake::Task.task_defined?(task)
     end
 
     def ensure_heroku_remote_exists

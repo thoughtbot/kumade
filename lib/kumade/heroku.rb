@@ -12,6 +12,7 @@ module Kumade
     end
 
     def sync
+      invoke_task("kumade:before_heroku_deploy")
       git.create(DEPLOY_BRANCH)
       git.push("#{DEPLOY_BRANCH}:master", Kumade.configuration.environment, true)
     end
