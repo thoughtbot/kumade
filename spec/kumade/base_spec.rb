@@ -33,7 +33,7 @@ describe Kumade::Base, "#run_or_error" do
     it "does not run the command" do
       subject.run_or_error("dummy command", "dummy error message")
 
-      subject.should_not have_received(:run)
+      subject.should have_received(:run).never
       STDOUT.should have_received(:puts).with(regexp_matches(/#{command}/))
     end
   end
@@ -47,7 +47,7 @@ describe Kumade::Base, "#run_or_error" do
       it "does not print an error" do
         subject.run_or_error(command, error_message)
 
-        STDOUT.should_not have_received(:puts).with(regexp_matches(/#{error_message}/))
+        STDOUT.should have_received(:puts).with(regexp_matches(/#{error_message}/)).never
       end
     end
 

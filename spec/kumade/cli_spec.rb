@@ -82,7 +82,7 @@ describe Kumade::CLI, ".swapping_stdout_for" do
       $stdout.puts "Hello, you can't see me."
     end
 
-    stdout.should_not have_received(:print)
+    stdout.should have_received(:print).never
 
     output.rewind
     output.read.should == "Hello, you can't see me.\n"

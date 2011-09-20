@@ -47,7 +47,7 @@ describe Kumade::Heroku, "#migrate_database" do
     it "does not run the command" do
       subject.migrate_database
 
-      subject.should_not have_received(:heroku)
+      subject.should have_received(:heroku).never
     end
 
     it "prints a message" do

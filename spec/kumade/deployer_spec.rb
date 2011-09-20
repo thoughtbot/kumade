@@ -73,7 +73,7 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
     it "does not print an error" do
       subject.ensure_heroku_remote_exists
 
-      STDOUT.should_not have_received(:puts).with(regexp_matches(/==> !/))
+      STDOUT.should have_received(:puts).with(regexp_matches(/==> !/)).never
     end
 
     it "prints a success message" do
