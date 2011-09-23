@@ -26,20 +26,28 @@ module Kumade
     end
 
     def heroku(command)
-      heroku_command = if cedar?
-                         "bundle exec heroku run"
-                       else
-                         "bundle exec heroku"
-                       end
-      run_or_error("#{heroku_command} #{command} --remote #{Kumade.configuration.environment}",
-                   "Failed to run #{command} on Heroku")
+      full_heroku_command = "#{bundle_exec_heroku} #{command} --remote #{Kumade.configuration.environment}"
+      command_line = CommandLine.new(full_heroku_command)
+      command_line.run_or_error("Failed to run #{command} on Heroku")
     end
 
     def cedar?
       return @cedar unless @cedar.nil?
 
-      @cedar = Cocaine::CommandLine.new("bundle exec heroku stack --remote #{Kumade.configuration.environment}").run.split("\n").grep(/\*/).any? do |line|
+      command_line = CommandLine.new("bundle exec heroku stack --remote #{Kumade.configuration.environment}")
+
+      @cedar = command_line.run_or_error.split("\n").grep(/\*/).any? do |line|
         line.include?("cedar")
+      end
+    end
+
+    private
+
+    def bundle_exec_heroku
+      if cedar?
+        "bundle exec heroku run"
+      else
+        "bundle exec heroku"
       end
     end
   end

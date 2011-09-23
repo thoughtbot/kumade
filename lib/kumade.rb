@@ -13,6 +13,7 @@ module Kumade
   autoload :NoopPackager,    "kumade/packagers/noop_packager"
   autoload :PackagerList,    "kumade/packager_list"
   autoload :RakeTaskRunner,  "kumade/rake_task_runner"
+  autoload :CommandLine,     "kumade/command_line"
 
   def self.configuration
     @@configuration ||= Configuration.new
