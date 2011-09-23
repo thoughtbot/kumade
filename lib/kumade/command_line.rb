@@ -1,9 +1,6 @@
 require 'cocaine'
 
 module Kumade
-  class CommandFailedError < RuntimeError
-  end
-
   class CommandLine < Base
     def initialize(command_to_run)
       super()
@@ -11,11 +8,7 @@ module Kumade
     end
 
     def run_or_error(error_message = nil)
-      if run_with_status
-        true
-      else
-        error(error_message)
-      end
+      run_with_status || error(error_message)
     end
 
     def run_with_status
