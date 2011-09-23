@@ -30,6 +30,8 @@ RSpec.configure do |config|
   config.include Rake::DSL if defined?(Rake::DSL)
 
   config.include GitRemoteHelpers
+  config.include GitHelpers
+  config.include EnvironmentHelpers
   config.include Aruba::Api
 
   config.around do |example|

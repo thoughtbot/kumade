@@ -2,44 +2,21 @@ require 'spec_helper'
 
 describe Kumade::Git, "#heroku_remote?" do
   context "when the environment is a Heroku repository" do
-    let(:environment) { 'staging' }
+    include_context "with Heroku environment"
 
-    before do
-      force_add_heroku_remote(environment)
-      Kumade.configuration.environment = environment
-    end
-
-    after { remove_remote(environment) }
-
-    its(:heroku_remote?) { should == true }
+    it { should be_heroku_remote }
   end
 
   context "when the environment is a Heroku repository managed with heroku-accounts" do
-    let(:another_heroku_environment) { 'another_staging' }
-    let(:another_heroku_url)         { 'git@heroku.work:my-app.git' }
+    include_context "with Heroku-accounts environment"
 
-    before do
-      force_add_heroku_remote(another_heroku_environment)
-      Kumade.configuration.environment = another_heroku_environment
-    end
-
-    after { remove_remote(another_heroku_environment) }
-
-    its(:heroku_remote?) { should == true }
+    it { should be_heroku_remote }
   end
 
   context "when the environment is not a Heroku repository" do
-    let(:not_a_heroku_env) { 'fake_heroku' }
-    let(:not_a_heroku_url) { 'git@github.com:gabebw/kumade.git' }
+    include_context "with non-Heroku environment"
 
-    before do
-      `git remote add #{not_a_heroku_env} #{not_a_heroku_url}`
-      Kumade.configuration.environment = not_a_heroku_env
-    end
-
-    after { remove_remote(not_a_heroku_env) }
-
-    its(:heroku_remote?) { should == false }
+    it { should_not be_heroku_remote }
   end
 end
 
@@ -63,56 +40,188 @@ describe Kumade::Git, ".environments" do
   end
 end
 
-describe Kumade::Git, "#branch_exist?" do
-  let(:command_line) { mock("Cocaine::CommandLine") }
-  let(:branch)       { "branch" }
+describe Kumade::Git, "#push" do
+  let(:branch)       { 'branch' }
+  let(:remote)       { 'my-remote' }
+  let(:command_line) { stub("Kumade::CommandLine instance", :run_or_error => true) }
 
   before do
-    command_line.stubs(:run)
-    Cocaine::CommandLine.expects(:new).with("git show-ref #{branch}").returns(command_line)
+    Kumade::CommandLine.stubs(:new => command_line)
+    subject.stubs(:success)
   end
 
-  it "returns true when the branch exists" do
-    subject.branch_exist?("branch").should be_true
-
-    command_line.should have_received(:run)
+  it "pushes to the correct remote" do
+    subject.push(branch, remote)
+    Kumade::CommandLine.should have_received(:new).with("git push #{remote} #{branch}")
+    command_line.should have_received(:run_or_error).once
   end
 
-  it "returns false if the branch doesn't exist" do
-    command_line.stubs(:run).raises(Cocaine::ExitStatusError)
+  it "can force push" do
+    subject.push(branch, remote, true)
+    Kumade::CommandLine.should have_received(:new).with("git push -f #{remote} #{branch}")
+    command_line.should have_received(:run_or_error).once
+  end
 
-    subject.branch_exist?("branch").should be_false
+  it "prints a success message" do
+    subject.push(branch, remote)
+    subject.should have_received(:success).with("Pushed #{branch} -> #{remote}")
+  end
+end
 
-    command_line.should have_received(:run)
+describe Kumade::Git, "#create" do
+  let(:branch) { "my-new-branch" }
+  it "creates a branch" do
+    subject.create(branch)
+    system("git show-ref #{branch}").should be_true
+  end
+
+  context "when the branch already exists" do
+    before do
+      subject.create(branch)
+      subject.stubs(:error)
+    end
+
+    it "does not error" do
+      subject.create(branch)
+      subject.should have_received(:error).never
+    end
+  end
+end
+
+describe Kumade::Git, "#delete" do
+  let(:branch_to_delete)   { 'branch_to_delete' }
+  let(:branch_to_checkout) { 'branch_to_checkout' }
+
+  before do
+    subject.create(branch_to_delete)
+    subject.create(branch_to_checkout)
+  end
+
+  it "switches to a branch" do
+    subject.delete(branch_to_delete, branch_to_checkout)
+    subject.current_branch.should == branch_to_checkout
+  end
+
+  it "deletes a branch" do
+    subject.delete(branch_to_delete, branch_to_checkout)
+    `git show-ref #{branch_to_delete}`.strip.should be_empty
+  end
+end
+
+describe Kumade::Git, "#add_and_commit_all_in" do
+  let(:branch)         { 'branch' }
+  let(:directory)      { 'assets' }
+  let(:commit_message) { 'Committed some assets' }
+
+  before do
+    Dir.mkdir(directory)
+    Dir.chdir(directory) do
+      File.open('new-file', 'w') do |f|
+        f.write('some content')
+      end
+    end
+
+    subject.stubs(:success)
+  end
+
+  it "switches to the given branch" do
+    subject.add_and_commit_all_in(directory, branch, commit_message, 'success', 'error')
+    subject.current_branch.should == branch
+  end
+
+  it "uses the given commit message" do
+    subject.add_and_commit_all_in(directory, branch, commit_message, 'success', 'error')
+    `git log -n1 --pretty=format:%s`.should == commit_message
+  end
+
+  it "commits everything in the dir" do
+    subject.add_and_commit_all_in(directory, branch, commit_message, 'success', 'error')
+    subject.should_not be_dirty
+  end
+
+  it "prints a success message" do
+    subject.add_and_commit_all_in(directory, branch, commit_message, 'success', 'error')
+    subject.should have_received(:success).with('success')
+  end
+end
+
+describe Kumade::Git, "#current_branch" do
+  it "returns the current branch" do
+    subject.current_branch.should == 'master'
+    `git checkout -b new-branch`
+    subject.current_branch.should == 'new-branch'
+  end
+end
+
+describe Kumade::Git, "#remote_exists?" do
+  context "when pretending" do
+    before { Kumade.configuration.pretending = true }
+    it "returns true no matter what" do
+      subject.remote_exists?('not-a-remote').should be_true
+    end
+  end
+
+  context "when not pretending" do
+    let(:good_remote) { 'good-remote' }
+    let(:bad_remote)  { 'bad-remote' }
+    before do
+      Kumade.configuration.pretending = false
+      force_add_heroku_remote(good_remote)
+    end
+
+    it "returns true if the remote exists" do
+      subject.remote_exists?(good_remote).should be_true
+    end
+
+    it "returns false if the remote does not exist" do
+      subject.remote_exists?(bad_remote).should be_false
+    end
   end
 end
 
 describe Kumade::Git, "#dirty?" do
   context "when dirty" do
-    let(:failing_command_line) { mock("CommandLine instance") }
+    before { dirty_the_repo }
 
-    before do
-      failing_command_line.stubs(:run).raises(Cocaine::ExitStatusError)
-
-      Cocaine::CommandLine.expects(:new).
-        with("git diff --exit-code").
-        returns(failing_command_line)
-    end
-
-    it "returns true" do
-      subject.dirty?.should == true
-    end
+    it { should be_dirty }
   end
 
   context "when clean" do
+    it { should_not be_dirty }
+  end
+end
+
+
+describe Kumade::Git, "#ensure_clean_git" do
+  before do
+    subject.stubs(:success => nil, :error => nil)
+  end
+
+  context "when pretending" do
     before do
-      Cocaine::CommandLine.expects(:new).
-        with("git diff --exit-code").
-        returns(stub("Successful CommandLine", :run => true))
+      Kumade.configuration.pretending = true
+      dirty_the_repo
     end
 
-    it "returns false" do
-      subject.dirty?.should == false
+    it "prints a success message" do
+      subject.ensure_clean_git
+      subject.should have_received(:success).with("Git repo is clean")
+    end
+  end
+
+  context "when repo is clean" do
+    it "prints a success message" do
+      subject.ensure_clean_git
+      subject.should have_received(:success).with("Git repo is clean")
+    end
+  end
+
+  context "when repo is dirty" do
+    before { dirty_the_repo }
+
+    it "prints an error message" do
+      subject.ensure_clean_git
+      subject.should have_received(:error).with("Cannot deploy: repo is not clean.")
     end
   end
 end

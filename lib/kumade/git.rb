@@ -20,25 +20,27 @@ module Kumade
       command << remote
       command << branch
       command = command.join(" ")
-      run_or_error(command, "Failed to push #{branch} -> #{remote}")
+
+      command_line = CommandLine.new(command)
+      command_line.run_or_error("Failed to push #{branch} -> #{remote}")
       success("Pushed #{branch} -> #{remote}")
     end
 
     def create(branch)
-      unless branch_exist?(branch)
-        run_or_error("git branch #{branch}", "Failed to create #{branch}")
+      unless has_branch?(branch)
+        CommandLine.new("git branch #{branch}").run_or_error("Failed to create #{branch}")
       end
     end
 
     def delete(branch_to_delete, branch_to_checkout)
-      run_or_error("git checkout #{branch_to_checkout} && git branch -D #{branch_to_delete}",
-                   "Failed to clean up #{branch_to_delete} branch")
+      command_line = CommandLine.new("git checkout #{branch_to_checkout} && git branch -D #{branch_to_delete}")
+      command_line.run_or_error("Failed to clean up #{branch_to_delete} branch")
     end
 
     def add_and_commit_all_in(dir, branch, commit_message, success_output, error_output)
-      run_or_error "git checkout -b #{branch} && git add -f #{dir} && git commit -m '#{commit_message}'",
-                   "Cannot deploy: #{error_output}"
-      success success_output
+      command_line = CommandLine.new("git checkout -b #{branch} && git add -f #{dir} && git commit -m '#{commit_message}'")
+      command_line.run_or_error("Cannot deploy: #{error_output}")
+      success(success_output)
     end
 
     def current_branch
@@ -54,7 +56,7 @@ module Kumade
     end
 
     def dirty?
-      !run("git diff --exit-code")
+      ! CommandLine.new("git diff --exit-code").run
     end
 
     def ensure_clean_git
@@ -65,8 +67,10 @@ module Kumade
       end
     end
 
-    def branch_exist?(branch)
-      run("git show-ref #{branch}")
+    private
+
+    def has_branch?(branch)
+      CommandLine.new("git show-ref #{branch}").run
     end
   end
 end

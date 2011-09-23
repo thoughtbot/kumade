@@ -59,9 +59,10 @@ describe Kumade::Heroku, "#migrate_database" do
 end
 
 describe Kumade::Heroku, "#heroku" do
-  let(:command_line_instance) { stub("Cocaine::CommandLine instance", :run => true) }
+  let(:command_instance) { stub("Kumade::CommandLine instance", :run_or_error => true) }
 
   before do
+    Kumade::CommandLine.stubs(:new => command_instance)
     STDOUT.stubs(:puts)
   end
 
@@ -69,11 +70,10 @@ describe Kumade::Heroku, "#heroku" do
     include_context "when on Cedar"
 
     it "runs commands with `run`" do
-      Cocaine::CommandLine.expects(:new).
-        with(regexp_matches(/bundle exec heroku run/)).
-        returns(command_line_instance)
-
       subject.heroku("rake")
+
+      Kumade::CommandLine.should have_received(:new).with(regexp_matches(/bundle exec heroku run rake/)).once
+      command_instance.should have_received(:run_or_error).once
     end
   end
 
@@ -81,11 +81,10 @@ describe Kumade::Heroku, "#heroku" do
     include_context "when not on Cedar"
 
     it "runs commands without `run`" do
-      Cocaine::CommandLine.expects(:new).
-        with(regexp_matches(/bundle exec heroku rake/)).
-        returns(command_line_instance)
-
       subject.heroku("rake")
+
+      Kumade::CommandLine.should have_received(:new).with(regexp_matches(/bundle exec heroku rake/)).once
+      command_instance.should have_received(:run_or_error).once
     end
   end
 end
@@ -109,13 +108,16 @@ describe Kumade::Heroku, "#cedar?" do
 end
 
 describe Kumade::Heroku, "#delete_deploy_branch" do
-  before { STDOUT.stubs(:puts) }
+  let(:command_instance) { stub("Kumade::CommandLine instance", :run_or_error => true) }
+
+  before do
+    Kumade::CommandLine.stubs(:new => command_instance)
+  end
 
   it "deletes the deploy branch" do
-    Cocaine::CommandLine.expects(:new).
-      with("git checkout master && git branch -D deploy").
-      returns(stub(:run => true))
-
     subject.delete_deploy_branch
+
+    Kumade::CommandLine.should have_received(:new).with("git checkout master && git branch -D deploy").once
+    command_instance.should have_received(:run_or_error).once
   end
 end
