@@ -27,7 +27,7 @@ module Kumade
       begin
         @packager.package
         if @git.dirty?
-          git_add_and_commit_all_assets_in(@packager.assets_path)
+          @git.add_and_commit_all_assets_in(@packager.assets_path)
           success(success_message)
         end
       rescue => packager_exception
@@ -37,10 +37,6 @@ module Kumade
 
     def success_message
       "Packaged with #{@packager.name}"
-    end
-
-    def git_add_and_commit_all_assets_in(dir)
-      @git.add_and_commit_all_in(dir, Kumade::Heroku::DEPLOY_BRANCH, 'Compiled assets', "Added and committed all assets", "couldn't commit assets")
     end
   end
 end

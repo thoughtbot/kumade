@@ -108,10 +108,8 @@ describe Kumade::Git, "#delete" do
   end
 end
 
-describe Kumade::Git, "#add_and_commit_all_in" do
-  let(:branch)         { 'branch' }
-  let(:directory)      { 'assets' }
-  let(:commit_message) { 'Committed some assets' }
+describe Kumade::Git, "#add_and_commit_all_assets_in" do
+  let(:directory) { 'assets' }
 
   before do
     Dir.mkdir(directory)
@@ -124,24 +122,36 @@ describe Kumade::Git, "#add_and_commit_all_in" do
     subject.stubs(:success)
   end
 
-  it "switches to the given branch" do
-    subject.add_and_commit_all_in(directory, branch, commit_message, 'success', 'error')
-    subject.current_branch.should == branch
+  it "switches to the deploy branch" do
+    subject.add_and_commit_all_assets_in(directory)
+    subject.current_branch.should == Kumade::Heroku::DEPLOY_BRANCH
   end
 
-  it "uses the given commit message" do
-    subject.add_and_commit_all_in(directory, branch, commit_message, 'success', 'error')
-    `git log -n1 --pretty=format:%s`.should == commit_message
+  it "uses a bland commit message" do
+    subject.add_and_commit_all_assets_in(directory)
+    `git log -n1 --pretty=format:%s`.should == 'Compiled assets.'
   end
 
   it "commits everything in the dir" do
-    subject.add_and_commit_all_in(directory, branch, commit_message, 'success', 'error')
+    subject.add_and_commit_all_assets_in(directory)
     subject.should_not be_dirty
   end
 
   it "prints a success message" do
-    subject.add_and_commit_all_in(directory, branch, commit_message, 'success', 'error')
-    subject.should have_received(:success).with('success')
+    subject.add_and_commit_all_assets_in(directory)
+    subject.should have_received(:success).with('Added and committed all assets')
+  end
+
+  context "if the command fails" do
+    let(:command_line) { mock('CommandLine', :run_or_error => nil) }
+    before do
+      Kumade::CommandLine.stubs(:new => command_line)
+    end
+
+    it "prints an error message if something goes wrong" do
+      subject.add_and_commit_all_assets_in(directory)
+      command_line.should have_received(:run_or_error).once
+    end
   end
 end
 

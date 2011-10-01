@@ -37,10 +37,13 @@ module Kumade
       command_line.run_or_error("Failed to clean up #{branch_to_delete} branch")
     end
 
-    def add_and_commit_all_in(dir, branch, commit_message, success_output, error_output)
-      command_line = CommandLine.new("git checkout -b #{branch} && git add -f #{dir} && git commit -m '#{commit_message}'")
-      command_line.run_or_error("Cannot deploy: #{error_output}")
-      success(success_output)
+    def add_and_commit_all_assets_in(dir)
+      command = ["git checkout -b #{Kumade::Heroku::DEPLOY_BRANCH}",
+                 "git add -f #{dir}",
+                 "git commit -m 'Compiled assets.'"].join(' && ')
+      command_line = CommandLine.new(command)
+      command_line.run_or_error("Cannot deploy: couldn't commit assets")
+      success("Added and committed all assets")
     end
 
     def current_branch

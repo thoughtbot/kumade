@@ -16,7 +16,7 @@ describe Kumade::Packager, ".available_packager" do
 end
 
 describe Kumade::Packager, "#run" do
-  let(:git)              { stub("git", :dirty? => true, :add_and_commit_all_in => true) }
+  let(:git)              { stub("git", :dirty? => true, :add_and_commit_all_assets_in => true) }
   let(:packager)         { stub("packager", :name => "MyPackager", :package => true, :assets_path => 'fake_assets_path') }
   let(:rake_task_runner) { stub("RakeTaskRunner", :invoke => true) }
 
@@ -81,16 +81,11 @@ describe Kumade::Packager, "#run" do
 
     it "performs a commit" do
       subject.run
-      git.should have_received(:add_and_commit_all_in).
-        with(packager.assets_path,
-             Kumade::Heroku::DEPLOY_BRANCH,
-             'Compiled assets',
-             "Added and committed all assets",
-             "couldn't commit assets")
+      git.should have_received(:add_and_commit_all_assets_in).with(packager.assets_path)
     end
 
     it "prints the success message after committing" do
-      git.stubs(:add_and_commit_all_in).raises(RuntimeError.new("something broke"))
+      git.stubs(:add_and_commit_all_assets_in).raises(RuntimeError.new("something broke"))
       subject.run
       subject.should have_received(:success).never
     end
@@ -109,7 +104,7 @@ describe Kumade::Packager, "#run" do
 
     it "doesn't perform a commit" do
       subject.run
-      git.should have_received(:add_and_commit_all_in).never
+      git.should have_received(:add_and_commit_all_assets_in).never
     end
   end
 end
