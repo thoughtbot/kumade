@@ -1,7 +1,6 @@
 module Kumade
-  class Packager < Base
+  class Packager
     def initialize(git, packager = Packager.available_packager)
-      super()
       @packager = packager
       @git      = git
     end
@@ -18,20 +17,20 @@ module Kumade
     private
 
     def precompile_assets
-      RakeTaskRunner.new("kumade:before_asset_compilation", self).invoke
+      RakeTaskRunner.new("kumade:before_asset_compilation").invoke
     end
 
     def package
-      return success(success_message) if Kumade.configuration.pretending?
+      return Kumade.outputter.success(success_message) if Kumade.configuration.pretending?
 
       begin
         @packager.package
         if @git.dirty?
           @git.add_and_commit_all_assets_in(@packager.assets_path)
-          success(success_message)
+          Kumade.outputter.success(success_message)
         end
       rescue => packager_exception
-        error("Error: #{packager_exception.class}: #{packager_exception.message}")
+        Kumade.outputter.error("Error: #{packager_exception.class}: #{packager_exception.message}")
       end
     end
 

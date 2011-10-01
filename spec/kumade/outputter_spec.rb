@@ -1,17 +1,32 @@
 require 'spec_helper'
 
-describe Kumade::Outputter, "#success" do
-  it { should respond_to(:success) }
-end
-
-describe Kumade::Outputter, "#error" do
+describe Kumade::Outputter, "#success", :with_real_outputter => true do
   before { STDOUT.stubs(:puts) }
 
-  it { should respond_to(:error) }
+  it "prints a message to STDOUT" do
+    subject.success("woo hoo")
+    STDOUT.should have_received(:puts).with(regexp_matches(/==> woo hoo/))
+  end
+end
 
-  it "prints its message and raises its message" do
-    lambda { subject.error("I'm an error!") }.should raise_error(Kumade::DeploymentError)
+describe Kumade::Outputter, "#error", :with_real_outputter => true do
+  before { STDOUT.stubs(:puts) }
 
-    STDOUT.should have_received(:puts).with(regexp_matches(/I'm an error!/))
+  it "raises a DeploymentError with the given message" do
+    lambda { subject.error("uh oh") }.should raise_error(Kumade::DeploymentError, "uh oh")
+  end
+
+  it "prints a message to STDOUT" do
+    subject.error("uh oh") rescue nil
+    STDOUT.should have_received(:puts).with(regexp_matches(/==> ! uh oh/))
+  end
+end
+
+describe Kumade::Outputter, "#info", :with_real_outputter => true do
+  before { STDOUT.stubs(:puts) }
+
+  it "prints a message to STDOUT" do
+    subject.info("the more you know")
+    STDOUT.should have_received(:puts).with(regexp_matches(/==> the more you know/))
   end
 end

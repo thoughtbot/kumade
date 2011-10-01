@@ -47,7 +47,6 @@ describe Kumade::Git, "#push" do
 
   before do
     Kumade::CommandLine.stubs(:new => command_line)
-    subject.stubs(:success)
   end
 
   it "pushes to the correct remote" do
@@ -64,7 +63,7 @@ describe Kumade::Git, "#push" do
 
   it "prints a success message" do
     subject.push(branch, remote)
-    subject.should have_received(:success).with("Pushed #{branch} -> #{remote}")
+    Kumade.outputter.should have_received(:success).with("Pushed #{branch} -> #{remote}")
   end
 end
 
@@ -72,18 +71,17 @@ describe Kumade::Git, "#create" do
   let(:branch) { "my-new-branch" }
   it "creates a branch" do
     subject.create(branch)
-    system("git show-ref #{branch}").should be_true
+    system("git show-ref #{branch} > /dev/null").should be_true
   end
 
   context "when the branch already exists" do
     before do
       subject.create(branch)
-      subject.stubs(:error)
     end
 
     it "does not error" do
       subject.create(branch)
-      subject.should have_received(:error).never
+      Kumade.outputter.should have_received(:error).never
     end
   end
 end
@@ -118,8 +116,6 @@ describe Kumade::Git, "#add_and_commit_all_assets_in" do
         f.write('some content')
       end
     end
-
-    subject.stubs(:success)
   end
 
   it "switches to the deploy branch" do
@@ -139,7 +135,7 @@ describe Kumade::Git, "#add_and_commit_all_assets_in" do
 
   it "prints a success message" do
     subject.add_and_commit_all_assets_in(directory)
-    subject.should have_received(:success).with('Added and committed all assets')
+    Kumade.outputter.should have_received(:success).with('Added and committed all assets')
   end
 
   context "if the command fails" do
@@ -158,7 +154,7 @@ end
 describe Kumade::Git, "#current_branch" do
   it "returns the current branch" do
     subject.current_branch.should == 'master'
-    `git checkout -b new-branch`
+    `git checkout -b new-branch 2>/dev/null`
     subject.current_branch.should == 'new-branch'
   end
 end
@@ -203,10 +199,6 @@ end
 
 
 describe Kumade::Git, "#ensure_clean_git" do
-  before do
-    subject.stubs(:success => nil, :error => nil)
-  end
-
   context "when pretending" do
     before do
       Kumade.configuration.pretending = true
@@ -215,14 +207,14 @@ describe Kumade::Git, "#ensure_clean_git" do
 
     it "prints a success message" do
       subject.ensure_clean_git
-      subject.should have_received(:success).with("Git repo is clean")
+      Kumade.outputter.should have_received(:success).with("Git repo is clean")
     end
   end
 
   context "when repo is clean" do
     it "prints a success message" do
       subject.ensure_clean_git
-      subject.should have_received(:success).with("Git repo is clean")
+      Kumade.outputter.should have_received(:success).with("Git repo is clean")
     end
   end
 
@@ -231,7 +223,7 @@ describe Kumade::Git, "#ensure_clean_git" do
 
     it "prints an error message" do
       subject.ensure_clean_git
-      subject.should have_received(:error).with("Cannot deploy: repo is not clean.")
+      Kumade.outputter.should have_received(:error).with("Cannot deploy: repo is not clean.")
     end
   end
 end

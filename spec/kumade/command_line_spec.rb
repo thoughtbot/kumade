@@ -1,18 +1,13 @@
 require 'spec_helper'
 
 describe Kumade::CommandLine, "#run_or_error" do
-  let(:command_line) { stub("Cocaine::CommandLine instance", :run => nil) }
-  subject            { Kumade::CommandLine.new("echo") }
-
-  before do
-    subject.stubs(:error)
-    subject.stubs(:say_status)
-
-    Cocaine::CommandLine.stubs(:new).returns(command_line)
-  end
+  subject { Kumade::CommandLine.new("echo") }
 
   context "when pretending" do
+    let(:command_line) { stub("Cocaine::CommandLine instance", :run => nil, :command => 'command') }
+
     before do
+      Cocaine::CommandLine.stubs(:new).returns(command_line)
       Kumade.configuration.pretending = true
     end
 
@@ -21,12 +16,16 @@ describe Kumade::CommandLine, "#run_or_error" do
 
       command_line.should have_received(:run).never
     end
+
+    it "prints the command" do
+      subject.run_or_error
+      Kumade.outputter.should have_received(:info).with(command_line.command).once
+    end
   end
 
   context "when successful" do
     before do
       Kumade.configuration.pretending = false
-      command_line.stubs(:run => true)
     end
 
     it "returns true" do
@@ -43,7 +42,7 @@ describe Kumade::CommandLine, "#run_or_error" do
     it "prints an error message" do
       subject.run_or_error("something bad")
 
-      subject.should have_received(:error).with("something bad")
+      Kumade.outputter.should have_received(:error).with("something bad")
     end
   end
 end
@@ -55,13 +54,12 @@ describe Kumade::CommandLine, "#run_with_status" do
 
   before do
     Cocaine::CommandLine.stubs(:new).returns(command_line)
-    subject.stubs(:say_status)
   end
 
   it "prints the command" do
     subject.run_with_status
 
-    subject.should have_received(:say_status).with(:run, "echo").once
+    Kumade.outputter.should have_received(:info).with(command).once
   end
 
   context "when pretending" do

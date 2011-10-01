@@ -16,7 +16,6 @@ describe Kumade::Deployer, "#deploy" do
   let(:remote_name) { 'staging' }
 
   before do
-    STDOUT.stubs(:puts)
     force_add_heroku_remote(remote_name)
   end
 
@@ -68,31 +67,28 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 
   context "when the remote points to Heroku" do
-    before { STDOUT.stubs(:puts) }
-
     it "does not print an error" do
       subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/==> !/)).never
+      Kumade.outputter.should have_received(:error).never
     end
 
     it "prints a success message" do
       subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/#{environment} is a Heroku remote/))
+      Kumade.outputter.should have_received(:success).with(regexp_matches(/#{environment} is a Heroku remote/))
     end
   end
 
   context "when the remote does not exist" do
     before do
       remove_remote(environment)
-      STDOUT.stubs(:puts)
     end
 
     it "prints an error" do
-      lambda { subject.ensure_heroku_remote_exists }.should raise_error(Kumade::DeploymentError)
+      subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
+      Kumade.outputter.should have_received(:error).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
     end
   end
 
@@ -101,14 +97,13 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
 
     before do
       `git remote add #{bad_environment} blerg@example.com`
-      STDOUT.stubs(:puts)
       Kumade.configuration.environment = bad_environment
     end
 
     it "prints an error" do
-      lambda { subject.ensure_heroku_remote_exists }.should raise_error(Kumade::DeploymentError)
+      subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
+      Kumade.outputter.should have_received(:error).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
     end
   end
 end

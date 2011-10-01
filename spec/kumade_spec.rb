@@ -16,3 +16,16 @@ describe Kumade, ".configuration=" do
     Kumade.configuration.should == "new-value"
   end
 end
+
+describe Kumade, ".outputter", :with_real_outputter => true do
+  it "defaults to a Kumade::Outputter instance" do
+    Kumade.outputter.should be_a Kumade::Outputter
+  end
+end
+
+describe Kumade, ".outputter=", :with_real_outputter => true do
+  it "sets Kumade.outputter" do
+    Kumade.outputter = "new-value"
+    Kumade.outputter.should == "new-value"
+  end
+end

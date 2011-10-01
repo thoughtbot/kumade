@@ -19,7 +19,6 @@ module GitRemoteHelpers
   end
 end
 
-
 spec_dir = Pathname.new(File.expand_path(File.dirname(__FILE__)))
 Dir[spec_dir.join('support', '**', "*.rb")].each {|f| require File.expand_path(f) }
 
@@ -43,6 +42,19 @@ RSpec.configure do |config|
       `git add .`
       `git commit -m First`
       example.run
+    end
+  end
+
+  # Ensure that examples tagged :with_real_outputter use a real outputter and
+  # everything else uses a mock.
+  config.before do |example_group|
+    if example_group.example.metadata.key?(:with_real_outputter)
+      if defined?(:@__real_outputter)
+        Kumade.outputter = @__real_outputter
+      end
+    else
+      @__real_outputter = Kumade.outputter unless Kumade.outputter.is_a?(Mocha::Mock)
+      Kumade.outputter = stub("Null Outputter", :success => true, :error => true, :info => true)
     end
   end
 

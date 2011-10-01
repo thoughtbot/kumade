@@ -44,11 +44,11 @@ module Kumade
 
     def deploy
       if Kumade.configuration.pretending?
-        puts "==> In Pretend Mode"
+        Kumade.outputter.info("In Pretend Mode")
       end
-      puts "==> Deploying to: #{Kumade.configuration.environment}"
+      Kumade.outputter.info("Deploying to: #{Kumade.configuration.environment}")
       self.class.deployer.new.deploy
-      puts "==> Deployed to: #{Kumade.configuration.environment}"
+      Kumade.outputter.info("Deployed to: #{Kumade.configuration.environment}")
     end
 
     def parse_arguments!(args)
