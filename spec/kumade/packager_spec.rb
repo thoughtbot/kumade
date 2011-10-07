@@ -28,7 +28,7 @@ describe Kumade::Packager, "#run" do
 
   it "precompiles assets" do
     subject.run
-    Kumade::RakeTaskRunner.should have_received(:new).with("kumade:before_asset_compilation", subject)
+    Kumade::RakeTaskRunner.should have_received(:new).with("kumade:before_asset_compilation")
     rake_task_runner.should have_received(:invoke)
   end
 
