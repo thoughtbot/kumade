@@ -11,7 +11,7 @@ module Kumade
     end
 
     def run_with_status
-      Kumade.outputter.info(command)
+      Kumade.outputter.say_command(command)
       Kumade.configuration.pretending? || run
     end
 

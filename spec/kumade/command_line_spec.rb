@@ -19,7 +19,7 @@ describe Kumade::CommandLine, "#run_or_error" do
 
     it "prints the command" do
       subject.run_or_error
-      Kumade.outputter.should have_received(:info).with(command_line.command).once
+      Kumade.outputter.should have_received(:say_command).with(command_line.command).once
     end
   end
 
@@ -59,7 +59,7 @@ describe Kumade::CommandLine, "#run_with_status" do
   it "prints the command" do
     subject.run_with_status
 
-    Kumade.outputter.should have_received(:info).with(command).once
+    Kumade.outputter.should have_received(:say_command).with(command).once
   end
 
   context "when pretending" do

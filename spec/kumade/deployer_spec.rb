@@ -41,7 +41,7 @@ describe Kumade::Deployer, "#sync_origin" do
   let(:new_branch) { 'new-branch' }
 
   before do
-    `git checkout -b #{new_branch}`
+    `git checkout -b #{new_branch} 2>/dev/null`
   end
 
   it "pushes the current branch to origin" do

@@ -12,5 +12,10 @@ module Kumade
       puts "==> ! #{message}"
       raise Kumade::DeploymentError, message
     end
+
+    def say_command(command)
+      prefix = " " * 8
+      puts "#{prefix}#{command}"
+    end
   end
 end

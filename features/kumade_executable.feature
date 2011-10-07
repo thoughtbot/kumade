@@ -22,13 +22,13 @@ Feature: Kumade executable
       """
       ==> Git repo is clean
       ==> Packaged with Kumade::JammitPackager
-               run  git push origin master
+              git push origin master
       ==> Pushed master -> origin
-               run  git branch deploy
-               run  git push -f pretend-staging deploy:master
+              git branch deploy >/dev/null
+              git push -f pretend-staging deploy:master
       ==> Pushed deploy:master -> pretend-staging
       ==> Migrated pretend-staging
-               run  git checkout master && git branch -D deploy
+              git checkout master 2>/dev/null && git branch -D deploy
       ==> Deployed to: pretend-staging
       """
     But the output should not contain "==> Packaged with Kumade::MorePackager"
@@ -53,13 +53,13 @@ Feature: Kumade executable
       """
       ==> Git repo is clean
       ==> Packaged with Kumade::JammitPackager
-               run  git push origin new_branch
+              git push origin new_branch
       ==> Pushed new_branch -> origin
-               run  git branch deploy
-               run  git push -f pretend-staging deploy:master
+              git branch deploy >/dev/null
+              git push -f pretend-staging deploy:master
       ==> Pushed deploy:master -> pretend-staging
       ==> Migrated pretend-staging
-               run  git checkout new_branch && git branch -D deploy
+              git checkout new_branch 2>/dev/null && git branch -D deploy
       ==> Deployed to: pretend-staging
       """
 

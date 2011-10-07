@@ -54,7 +54,7 @@ RSpec.configure do |config|
       end
     else
       @__real_outputter = Kumade.outputter unless Kumade.outputter.is_a?(Mocha::Mock)
-      Kumade.outputter = stub("Null Outputter", :success => true, :error => true, :info => true)
+      Kumade.outputter = stub("Null Outputter", :success => true, :error => true, :info => true, :say_command => true)
     end
   end
 

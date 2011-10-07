@@ -30,3 +30,21 @@ describe Kumade::Outputter, "#info", :with_real_outputter => true do
     STDOUT.should have_received(:puts).with(regexp_matches(/==> the more you know/))
   end
 end
+
+describe Kumade::Outputter, "#say_command", :with_real_outputter => true do
+  before { STDOUT.stubs(:puts) }
+
+  it "prints a formatted message to STDOUT" do
+    subject.say_command("git checkout master")
+    STDOUT.should have_received(:puts).with(" " * 8 + "git checkout master")
+  end
+end
+
+describe Kumade::Outputter, "#info", :with_real_outputter => true do
+  before { STDOUT.stubs(:puts) }
+
+  it "prints a message to STDOUT" do
+    subject.info("the more you know")
+    STDOUT.should have_received(:puts).with(regexp_matches(/==> the more you know/))
+  end
+end
