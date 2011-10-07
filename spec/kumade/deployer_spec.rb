@@ -28,12 +28,18 @@ describe Kumade::Deployer, "#deploy" do
     subject.deploy
   end
 
-  it "calls post_deploy if deploy fails" do
-    subject.git.stubs(:heroku_remote?).raises(RuntimeError)
+  context "if deploy fails" do
+    before { subject.git.stubs(:heroku_remote?).raises(RuntimeError.new("fun times")) }
 
-    subject.expects(:post_deploy)
+    it "calls post_deploy" do
+      subject.expects(:post_deploy)
+      subject.deploy
+    end
 
-    subject.deploy
+    it "prints the error" do
+      subject.deploy
+      Kumade.outputter.should have_received(:error).with("RuntimeError: fun times")
+    end
   end
 end
 
