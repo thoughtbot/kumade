@@ -29,8 +29,10 @@ module Kumade
     end
 
     def delete(branch_to_delete, branch_to_checkout)
-      command_line = CommandLine.new("git checkout #{branch_to_checkout} 2>/dev/null && git branch -D #{branch_to_delete}")
-      command_line.run_or_error("Failed to clean up #{branch_to_delete} branch")
+      if has_branch?(branch_to_delete)
+        command_line = CommandLine.new("git checkout #{branch_to_checkout} 2>/dev/null && git branch -D #{branch_to_delete}")
+        command_line.run_or_error("Failed to clean up #{branch_to_delete} branch")
+      end
     end
 
     def add_and_commit_all_assets_in(dir)
