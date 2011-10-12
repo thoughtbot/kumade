@@ -85,6 +85,14 @@ You can hook in any custom code you want to run there before deploying!
 Kumade ([pronunciation here](http://translate.google.com/#ja|en|熊手)) means
 "bamboo rake" in Japanese.
 
+## Credits
+
+![thoughtbot](http://thoughtbot.com/images/tm/logo.png)
+
+Kumade is maintained and funded by [thoughtbot, inc](http://thoughtbot.com/community)
+
+The names and logos for thoughtbot are trademarks of thoughtbot, inc.
+
 ## License
 
-kumade is Copyright © thoughtbot. It is free software, and may be redistributed under the terms specified in the LICENSE file.
+Kumade is Copyright © 2011 thoughtbot. It is free software, and may be redistributed under the terms specified in the LICENSE file.
