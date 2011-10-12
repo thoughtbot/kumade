@@ -43,28 +43,43 @@ end
 describe Kumade::Git, "#push" do
   let(:branch)       { 'branch' }
   let(:remote)       { 'my-remote' }
-  let(:command_line) { stub("Kumade::CommandLine instance", :run_or_error => true) }
 
-  before do
-    Kumade::CommandLine.stubs(:new => command_line)
-    subject.stubs(:success)
+  context "when the remote exists" do
+    let(:command_line) { stub("Kumade::CommandLine instance", :run_or_error => true) }
+
+    before do
+      Kumade::CommandLine.stubs(:new => command_line)
+      subject.stubs(:success)
+      subject.stubs(:remote_exists? => true)
+    end
+
+    it "pushes to the correct remote" do
+      subject.push(branch, remote)
+      Kumade::CommandLine.should have_received(:new).with("git push #{remote} #{branch}")
+      command_line.should have_received(:run_or_error).once
+    end
+
+    it "can force push" do
+      subject.push(branch, remote, true)
+      Kumade::CommandLine.should have_received(:new).with("git push -f #{remote} #{branch}")
+      command_line.should have_received(:run_or_error).once
+    end
+
+    it "prints a success message" do
+      subject.push(branch, remote)
+      subject.should have_received(:success).with("Pushed #{branch} -> #{remote}")
+    end
   end
-
-  it "pushes to the correct remote" do
-    subject.push(branch, remote)
-    Kumade::CommandLine.should have_received(:new).with("git push #{remote} #{branch}")
-    command_line.should have_received(:run_or_error).once
-  end
-
-  it "can force push" do
-    subject.push(branch, remote, true)
-    Kumade::CommandLine.should have_received(:new).with("git push -f #{remote} #{branch}")
-    command_line.should have_received(:run_or_error).once
-  end
-
-  it "prints a success message" do
-    subject.push(branch, remote)
-    subject.should have_received(:success).with("Pushed #{branch} -> #{remote}")
+  
+  context "when the remote does not exist" do
+    before do
+      subject.stubs(:remote_exists? => false)
+    end
+    
+    it "returns silently" do
+      subject.push(branch)
+      Kumade::CommandLine.should have_received(:new).never
+    end
   end
 end
 
