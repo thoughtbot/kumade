@@ -13,13 +13,6 @@ describe Kumade::Deployer, "#pre_deploy" do
 end
 
 describe Kumade::Deployer, "#deploy" do
-  let(:remote_name) { 'staging' }
-
-  before do
-    STDOUT.stubs(:puts)
-    force_add_heroku_remote(remote_name)
-  end
-
   it "calls the correct methods" do
     subject.heroku.expects(:pre_deploy)
     subject.expects(:pre_deploy)
