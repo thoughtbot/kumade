@@ -19,7 +19,6 @@ module GitRemoteHelpers
   end
 end
 
-
 spec_dir = Pathname.new(File.expand_path(File.dirname(__FILE__)))
 Dir[spec_dir.join('support', '**', "*.rb")].each {|f| require File.expand_path(f) }
 
@@ -44,6 +43,16 @@ RSpec.configure do |config|
       `git commit -m First`
       example.run
     end
+  end
+
+  config.treat_symbols_as_metadata_keys_with_true_values = true
+
+  config.before(:each, :with_mock_outputter) do
+    Kumade.configuration.outputter = stub("Null Outputter", :success => true, :error => true, :info => true, :say_command => true)
+  end
+
+  config.after(:each, :with_mock_outputter) do
+    Kumade.configuration.outputter = Kumade::Outputter.new
   end
 
   config.after do

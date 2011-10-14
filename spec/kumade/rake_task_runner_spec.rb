@@ -1,19 +1,17 @@
 require "spec_helper"
 
-describe Kumade::RakeTaskRunner do
-  let(:runner) { stub("runner", :success => true) }
-
+describe Kumade::RakeTaskRunner, :with_mock_outputter do
   context "when the task doesn't exist" do
-    subject { Kumade::RakeTaskRunner.new("bogus:task", runner) }
+    subject { Kumade::RakeTaskRunner.new("bogus:task") }
 
     it "does not notify the user that the task was run successfully" do
       subject.invoke
-      runner.should have_received(:success).never
+      Kumade.configuration.outputter.should have_received(:success).never
     end
   end
 
   context "when Rakefile exists" do
-    subject { Kumade::RakeTaskRunner.new("bogus:task", runner) }
+    subject { Kumade::RakeTaskRunner.new("bogus:task") }
 
     before do
       File.stubs(:exist?).with("Rakefile").returns(true)
@@ -40,7 +38,7 @@ describe Kumade::RakeTaskRunner do
       Rake::Task[task_name].reenable
     end
 
-    subject { Kumade::RakeTaskRunner.new(task_name, runner) }
+    subject { Kumade::RakeTaskRunner.new(task_name) }
 
     context "when pretending" do
       before do
@@ -49,7 +47,7 @@ describe Kumade::RakeTaskRunner do
 
       it "notifies the user that the task was run successfully" do
         subject.invoke
-        runner.should have_received(:success).with("Running rake task: #{task_name}")
+        Kumade.configuration.outputter.should have_received(:success).with("Running rake task: #{task_name}")
       end
 
       it "does not invoke the task" do
@@ -65,7 +63,7 @@ describe Kumade::RakeTaskRunner do
 
       it "notifies the user that the task was run successfully" do
         subject.invoke
-        runner.should have_received(:success).with("Running rake task: #{task_name}")
+        Kumade.configuration.outputter.should have_received(:success).with("Running rake task: #{task_name}")
       end
 
       it "invokes the task" do

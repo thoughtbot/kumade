@@ -1,5 +1,4 @@
 module Kumade
-  autoload :Base,            "kumade/base"
   autoload :Git,             "kumade/git"
   autoload :Deployer,        "kumade/deployer"
   autoload :CLI,             "kumade/cli"
@@ -14,6 +13,7 @@ module Kumade
   autoload :PackagerList,    "kumade/packager_list"
   autoload :RakeTaskRunner,  "kumade/rake_task_runner"
   autoload :CommandLine,     "kumade/command_line"
+  autoload :Outputter,       "kumade/outputter"
 
   def self.configuration
     @@configuration ||= Configuration.new

@@ -2,7 +2,7 @@ require "spec_helper"
 
 require "jammit"
 
-describe Kumade::JammitPackager do
+describe Kumade::JammitPackager, :with_mock_outputter do
   subject { Kumade::JammitPackager }
 
   it_should_behave_like "packager"

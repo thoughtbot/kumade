@@ -1,18 +1,17 @@
 require 'cocaine'
 
 module Kumade
-  class CommandLine < Base
+  class CommandLine
     def initialize(command_to_run)
-      super()
       @command_line = Cocaine::CommandLine.new(command_to_run)
     end
 
     def run_or_error(error_message = nil)
-      run_with_status || error(error_message)
+      run_with_status || Kumade.configuration.outputter.error(error_message)
     end
 
     def run_with_status
-      say_status(:run, command)
+      Kumade.configuration.outputter.say_command(command)
       Kumade.configuration.pretending? || run
     end
 

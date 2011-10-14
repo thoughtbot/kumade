@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade::Deployer, "#pre_deploy" do
+describe Kumade::Deployer, "#pre_deploy", :with_mock_outputter do
   let(:git) { subject.git }
 
   it "calls the correct methods" do
@@ -12,11 +12,10 @@ describe Kumade::Deployer, "#pre_deploy" do
   end
 end
 
-describe Kumade::Deployer, "#deploy" do
+describe Kumade::Deployer, "#deploy", :with_mock_outputter do
   let(:remote_name) { 'staging' }
 
   before do
-    STDOUT.stubs(:puts)
     force_add_heroku_remote(remote_name)
   end
 
@@ -29,20 +28,26 @@ describe Kumade::Deployer, "#deploy" do
     subject.deploy
   end
 
-  it "calls post_deploy if deploy fails" do
-    subject.git.stubs(:heroku_remote?).raises(RuntimeError)
+  context "if deploy fails" do
+    before { subject.git.stubs(:heroku_remote?).raises(RuntimeError.new("fun times")) }
 
-    subject.expects(:post_deploy)
+    it "calls post_deploy" do
+      subject.expects(:post_deploy)
+      subject.deploy
+    end
 
-    subject.deploy
+    it "prints the error" do
+      subject.deploy
+      Kumade.configuration.outputter.should have_received(:error).with("RuntimeError: fun times")
+    end
   end
 end
 
-describe Kumade::Deployer, "#sync_origin" do
+describe Kumade::Deployer, "#sync_origin", :with_mock_outputter do
   let(:new_branch) { 'new-branch' }
 
   before do
-    `git checkout -b #{new_branch}`
+    `git checkout -b #{new_branch} 2>/dev/null`
   end
 
   it "pushes the current branch to origin" do
@@ -52,14 +57,14 @@ describe Kumade::Deployer, "#sync_origin" do
   end
 end
 
-describe Kumade::Deployer, "#ensure_clean_git" do
+describe Kumade::Deployer, "#ensure_clean_git", :with_mock_outputter do
   it "calls git.ensure_clean_git" do
     subject.git.expects(:ensure_clean_git)
     subject.ensure_clean_git
   end
 end
 
-describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
+describe Kumade::Deployer, "#ensure_heroku_remote_exists", :with_mock_outputter do
   let(:environment) { 'staging' }
 
   before do
@@ -68,31 +73,28 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 
   context "when the remote points to Heroku" do
-    before { STDOUT.stubs(:puts) }
-
     it "does not print an error" do
       subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/==> !/)).never
+      Kumade.configuration.outputter.should have_received(:error).never
     end
 
     it "prints a success message" do
       subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/#{environment} is a Heroku remote/))
+      Kumade.configuration.outputter.should have_received(:success).with(regexp_matches(/#{environment} is a Heroku remote/))
     end
   end
 
   context "when the remote does not exist" do
     before do
       remove_remote(environment)
-      STDOUT.stubs(:puts)
     end
 
     it "prints an error" do
-      lambda { subject.ensure_heroku_remote_exists }.should raise_error(Kumade::DeploymentError)
+      subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
+      Kumade.configuration.outputter.should have_received(:error).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
     end
   end
 
@@ -101,19 +103,18 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
 
     before do
       `git remote add #{bad_environment} blerg@example.com`
-      STDOUT.stubs(:puts)
       Kumade.configuration.environment = bad_environment
     end
 
     it "prints an error" do
-      lambda { subject.ensure_heroku_remote_exists }.should raise_error(Kumade::DeploymentError)
+      subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
+      Kumade.configuration.outputter.should have_received(:error).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
     end
   end
 end
 
-describe Kumade::Deployer, "packaging" do
+describe Kumade::Deployer, "packaging", :with_mock_outputter do
   let(:git)      { stub("git", :current_branch => "awesome", :delete => true) }
   let(:packager) { stub("packager", :run => true) }
 

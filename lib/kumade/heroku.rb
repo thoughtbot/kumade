@@ -1,12 +1,11 @@
 require 'cocaine'
 
 module Kumade
-  class Heroku < Base
+  class Heroku
     DEPLOY_BRANCH = "deploy"
     attr_reader :git
 
     def initialize
-      super()
       @git    = Git.new
       @branch = @git.current_branch
     end
@@ -18,7 +17,7 @@ module Kumade
 
     def migrate_database
       heroku("rake db:migrate") unless Kumade.configuration.pretending?
-      success("Migrated #{Kumade.configuration.environment}")
+      Kumade.configuration.outputter.success("Migrated #{Kumade.configuration.environment}")
     end
 
     def delete_deploy_branch

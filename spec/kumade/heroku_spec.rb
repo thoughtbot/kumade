@@ -1,12 +1,12 @@
 require 'spec_helper'
 
-describe Kumade::Heroku, "DEPLOY_BRANCH" do
+describe Kumade::Heroku, "DEPLOY_BRANCH", :with_mock_outputter do
   subject { Kumade::Heroku::DEPLOY_BRANCH }
 
   it { should == "deploy" }
 end
 
-describe Kumade::Heroku, "#sync" do
+describe Kumade::Heroku, "#sync", :with_mock_outputter do
   let(:environment) { 'staging' }
 
   before do
@@ -23,11 +23,10 @@ describe Kumade::Heroku, "#sync" do
   end
 end
 
-describe Kumade::Heroku, "#migrate_database" do
+describe Kumade::Heroku, "#migrate_database", :with_mock_outputter do
   let(:environment) { 'staging' }
 
   before do
-    STDOUT.stubs(:puts)
     subject.stubs(:heroku)
     force_add_heroku_remote(environment)
   end
@@ -40,7 +39,6 @@ describe Kumade::Heroku, "#migrate_database" do
 
   context "when pretending" do
     before do
-      STDOUT.stubs(:puts)
       Kumade.configuration.pretending = true
     end
 
@@ -53,17 +51,16 @@ describe Kumade::Heroku, "#migrate_database" do
     it "prints a message" do
       subject.migrate_database
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/Migrated #{environment}/))
+      Kumade.configuration.outputter.should have_received(:success).with(regexp_matches(/Migrated #{environment}/))
     end
   end
 end
 
-describe Kumade::Heroku, "#heroku" do
+describe Kumade::Heroku, "#heroku", :with_mock_outputter do
   let(:command_instance) { stub("Kumade::CommandLine instance", :run_or_error => true) }
 
   before do
     Kumade::CommandLine.stubs(:new => command_instance)
-    STDOUT.stubs(:puts)
   end
 
   context "when on Cedar" do
@@ -89,7 +86,7 @@ describe Kumade::Heroku, "#heroku" do
   end
 end
 
-describe Kumade::Heroku, "#cedar?" do
+describe Kumade::Heroku, "#cedar?", :with_mock_outputter do
   context "when on Cedar" do
     include_context "when on Cedar"
 
@@ -107,17 +104,12 @@ describe Kumade::Heroku, "#cedar?" do
   end
 end
 
-describe Kumade::Heroku, "#delete_deploy_branch" do
-  let(:command_instance) { stub("Kumade::CommandLine instance", :run_or_error => true) }
-
-  before do
-    Kumade::CommandLine.stubs(:new => command_instance)
-  end
+describe Kumade::Heroku, "#delete_deploy_branch", :with_mock_outputter do
+  before { subject.git.stubs(:delete) }
 
   it "deletes the deploy branch" do
     subject.delete_deploy_branch
 
-    Kumade::CommandLine.should have_received(:new).with("git checkout master && git branch -D deploy").once
-    command_instance.should have_received(:run_or_error).once
+    subject.git.should have_received(:delete).with(Kumade::Heroku::DEPLOY_BRANCH, 'master').once
   end
 end

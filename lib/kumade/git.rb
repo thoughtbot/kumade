@@ -1,10 +1,6 @@
 require 'cocaine'
 module Kumade
-  class Git < Base
-    def initialize
-      super()
-    end
-
+  class Git
     def heroku_remote?
       remote_url = `git config --get remote.#{Kumade.configuration.environment}.url`.strip
       !! remote_url.strip.match(/^git@heroku\..+:(.+)\.git$/)
@@ -23,27 +19,29 @@ module Kumade
 
       command_line = CommandLine.new(command)
       command_line.run_or_error("Failed to push #{branch} -> #{remote}")
-      success("Pushed #{branch} -> #{remote}")
+      Kumade.configuration.outputter.success("Pushed #{branch} -> #{remote}")
     end
 
     def create(branch)
       unless has_branch?(branch)
-        CommandLine.new("git branch #{branch}").run_or_error("Failed to create #{branch}")
+        CommandLine.new("git branch #{branch} >/dev/null").run_or_error("Failed to create #{branch}")
       end
     end
 
     def delete(branch_to_delete, branch_to_checkout)
-      command_line = CommandLine.new("git checkout #{branch_to_checkout} && git branch -D #{branch_to_delete}")
-      command_line.run_or_error("Failed to clean up #{branch_to_delete} branch")
+      if has_branch?(branch_to_delete)
+        command_line = CommandLine.new("git checkout #{branch_to_checkout} 2>/dev/null && git branch -D #{branch_to_delete}")
+        command_line.run_or_error("Failed to clean up #{branch_to_delete} branch")
+      end
     end
 
     def add_and_commit_all_assets_in(dir)
-      command = ["git checkout -b #{Kumade::Heroku::DEPLOY_BRANCH}",
+      command = ["git checkout -b #{Kumade::Heroku::DEPLOY_BRANCH} 2>/dev/null",
                  "git add -f #{dir}",
                  "git commit -m 'Compiled assets.'"].join(' && ')
       command_line = CommandLine.new(command)
       command_line.run_or_error("Cannot deploy: couldn't commit assets")
-      success("Added and committed all assets")
+      Kumade.configuration.outputter.success("Added and committed all assets")
     end
 
     def current_branch
@@ -64,9 +62,9 @@ module Kumade
 
     def ensure_clean_git
       if ! Kumade.configuration.pretending? && dirty?
-        error("Cannot deploy: repo is not clean.")
+        Kumade.configuration.outputter.error("Cannot deploy: repo is not clean.")
       else
-        success("Git repo is clean")
+        Kumade.configuration.outputter.success("Git repo is clean")
       end
     end
 
