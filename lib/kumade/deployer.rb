@@ -18,6 +18,8 @@ module Kumade
         pre_deploy
         heroku.sync
         heroku.migrate_database
+      rescue Kumade::DeploymentError
+        raise
       rescue => deploying_error
         Kumade.configuration.outputter.error("#{deploying_error.class}: #{deploying_error.message}")
       ensure
