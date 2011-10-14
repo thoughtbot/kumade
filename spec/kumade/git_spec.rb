@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade::Git, "#heroku_remote?" do
+describe Kumade::Git, "#heroku_remote?", :with_mock_outputter do
   context "when the environment is a Heroku repository" do
     include_context "with Heroku environment"
 
@@ -20,7 +20,7 @@ describe Kumade::Git, "#heroku_remote?" do
   end
 end
 
-describe Kumade::Git, ".environments" do
+describe Kumade::Git, ".environments", :with_mock_outputter do
   let(:environment)      { 'staging' }
   let(:not_a_heroku_env) { 'fake_heroku' }
   let(:not_a_heroku_url) { 'git@github.com:gabebw/kumade.git' }
@@ -40,7 +40,7 @@ describe Kumade::Git, ".environments" do
   end
 end
 
-describe Kumade::Git, "#push" do
+describe Kumade::Git, "#push", :with_mock_outputter do
   let(:branch)       { 'branch' }
   let(:remote)       { 'my-remote' }
   let(:command_line) { stub("Kumade::CommandLine instance", :run_or_error => true) }
@@ -67,7 +67,7 @@ describe Kumade::Git, "#push" do
   end
 end
 
-describe Kumade::Git, "#create" do
+describe Kumade::Git, "#create", :with_mock_outputter do
   let(:branch) { "my-new-branch" }
   it "creates a branch" do
     subject.create(branch)
@@ -86,7 +86,7 @@ describe Kumade::Git, "#create" do
   end
 end
 
-describe Kumade::Git, "#delete" do
+describe Kumade::Git, "#delete", :with_mock_outputter do
   let(:branch_to_delete)   { 'branch_to_delete' }
   let(:branch_to_checkout) { 'branch_to_checkout' }
 
@@ -106,7 +106,7 @@ describe Kumade::Git, "#delete" do
   end
 end
 
-describe Kumade::Git, "#add_and_commit_all_assets_in" do
+describe Kumade::Git, "#add_and_commit_all_assets_in", :with_mock_outputter do
   let(:directory) { 'assets' }
 
   before do
@@ -151,7 +151,7 @@ describe Kumade::Git, "#add_and_commit_all_assets_in" do
   end
 end
 
-describe Kumade::Git, "#current_branch" do
+describe Kumade::Git, "#current_branch", :with_mock_outputter do
   it "returns the current branch" do
     subject.current_branch.should == 'master'
     `git checkout -b new-branch 2>/dev/null`
@@ -159,7 +159,7 @@ describe Kumade::Git, "#current_branch" do
   end
 end
 
-describe Kumade::Git, "#remote_exists?" do
+describe Kumade::Git, "#remote_exists?", :with_mock_outputter do
   context "when pretending" do
     before { Kumade.configuration.pretending = true }
     it "returns true no matter what" do
@@ -185,7 +185,7 @@ describe Kumade::Git, "#remote_exists?" do
   end
 end
 
-describe Kumade::Git, "#dirty?" do
+describe Kumade::Git, "#dirty?", :with_mock_outputter do
   context "when dirty" do
     before { dirty_the_repo }
 
@@ -198,7 +198,7 @@ describe Kumade::Git, "#dirty?" do
 end
 
 
-describe Kumade::Git, "#ensure_clean_git" do
+describe Kumade::Git, "#ensure_clean_git", :with_mock_outputter do
   context "when pretending" do
     before do
       Kumade.configuration.pretending = true

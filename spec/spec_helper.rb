@@ -45,17 +45,14 @@ RSpec.configure do |config|
     end
   end
 
-  # Ensure that examples tagged :with_real_outputter use a real outputter and
-  # everything else uses a mock.
-  config.before do |example_group|
-    if example_group.example.metadata.key?(:with_real_outputter)
-      if defined?(:@__real_outputter)
-        Kumade.outputter = @__real_outputter
-      end
-    else
-      @__real_outputter = Kumade.outputter unless Kumade.outputter.is_a?(Mocha::Mock)
-      Kumade.outputter = stub("Null Outputter", :success => true, :error => true, :info => true, :say_command => true)
-    end
+  config.treat_symbols_as_metadata_keys_with_true_values = true
+
+  config.before(:each, :with_mock_outputter) do
+    Kumade.outputter = stub("Null Outputter", :success => true, :error => true, :info => true, :say_command => true)
+  end
+
+  config.after(:each, :with_mock_outputter) do
+    Kumade.outputter = Kumade::Outputter.new
   end
 
   config.after do

@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe Kumade::RakeTaskRunner do
+describe Kumade::RakeTaskRunner, :with_mock_outputter do
   context "when the task doesn't exist" do
     subject { Kumade::RakeTaskRunner.new("bogus:task") }
 

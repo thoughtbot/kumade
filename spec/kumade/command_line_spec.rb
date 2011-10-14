@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade::CommandLine, "#run_or_error" do
+describe Kumade::CommandLine, "#run_or_error", :with_mock_outputter do
   subject { Kumade::CommandLine.new("echo") }
 
   context "when pretending" do
@@ -47,7 +47,7 @@ describe Kumade::CommandLine, "#run_or_error" do
   end
 end
 
-describe Kumade::CommandLine, "#run_with_status" do
+describe Kumade::CommandLine, "#run_with_status", :with_mock_outputter do
   let(:command)      { "echo" }
   let(:command_line) { stub("Cocaine::CommandLine instance", :run => nil, :command => command) }
   subject            { Kumade::CommandLine.new(command) }
@@ -87,7 +87,7 @@ describe Kumade::CommandLine, "#run_with_status" do
   end
 end
 
-describe Kumade::CommandLine, "#run" do
+describe Kumade::CommandLine, "#run", :with_mock_outputter do
   context "when successful" do
     subject { Kumade::CommandLine.new("echo") }
 

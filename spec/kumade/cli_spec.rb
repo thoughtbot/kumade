@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade::CLI do
+describe Kumade::CLI, :with_mock_outputter do
   let(:out)         { StringIO.new }
   let(:environment) { 'my-environment' }
   let(:deployer)          { stub("Deployer", :new => deployer_instance) }

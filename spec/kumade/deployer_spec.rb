@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade::Deployer, "#pre_deploy" do
+describe Kumade::Deployer, "#pre_deploy", :with_mock_outputter do
   let(:git) { subject.git }
 
   it "calls the correct methods" do
@@ -12,7 +12,7 @@ describe Kumade::Deployer, "#pre_deploy" do
   end
 end
 
-describe Kumade::Deployer, "#deploy" do
+describe Kumade::Deployer, "#deploy", :with_mock_outputter do
   let(:remote_name) { 'staging' }
 
   before do
@@ -43,7 +43,7 @@ describe Kumade::Deployer, "#deploy" do
   end
 end
 
-describe Kumade::Deployer, "#sync_origin" do
+describe Kumade::Deployer, "#sync_origin", :with_mock_outputter do
   let(:new_branch) { 'new-branch' }
 
   before do
@@ -57,14 +57,14 @@ describe Kumade::Deployer, "#sync_origin" do
   end
 end
 
-describe Kumade::Deployer, "#ensure_clean_git" do
+describe Kumade::Deployer, "#ensure_clean_git", :with_mock_outputter do
   it "calls git.ensure_clean_git" do
     subject.git.expects(:ensure_clean_git)
     subject.ensure_clean_git
   end
 end
 
-describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
+describe Kumade::Deployer, "#ensure_heroku_remote_exists", :with_mock_outputter do
   let(:environment) { 'staging' }
 
   before do
@@ -114,7 +114,7 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists" do
   end
 end
 
-describe Kumade::Deployer, "packaging" do
+describe Kumade::Deployer, "packaging", :with_mock_outputter do
   let(:git)      { stub("git", :current_branch => "awesome", :delete => true) }
   let(:packager) { stub("packager", :run => true) }
 

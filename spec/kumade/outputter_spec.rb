@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade::Outputter, "#success", :with_real_outputter => true do
+describe Kumade::Outputter, "#success" do
   before { STDOUT.stubs(:puts) }
 
   it "prints a message to STDOUT" do
@@ -9,7 +9,7 @@ describe Kumade::Outputter, "#success", :with_real_outputter => true do
   end
 end
 
-describe Kumade::Outputter, "#error", :with_real_outputter => true do
+describe Kumade::Outputter, "#error" do
   before { STDOUT.stubs(:puts) }
 
   it "raises a DeploymentError with the given message" do
@@ -22,7 +22,7 @@ describe Kumade::Outputter, "#error", :with_real_outputter => true do
   end
 end
 
-describe Kumade::Outputter, "#info", :with_real_outputter => true do
+describe Kumade::Outputter, "#info" do
   before { STDOUT.stubs(:puts) }
 
   it "prints a message to STDOUT" do
@@ -31,7 +31,7 @@ describe Kumade::Outputter, "#info", :with_real_outputter => true do
   end
 end
 
-describe Kumade::Outputter, "#say_command", :with_real_outputter => true do
+describe Kumade::Outputter, "#say_command" do
   before { STDOUT.stubs(:puts) }
 
   it "prints a formatted message to STDOUT" do
@@ -40,7 +40,7 @@ describe Kumade::Outputter, "#say_command", :with_real_outputter => true do
   end
 end
 
-describe Kumade::Outputter, "#info", :with_real_outputter => true do
+describe Kumade::Outputter, "#info" do
   before { STDOUT.stubs(:puts) }
 
   it "prints a message to STDOUT" do

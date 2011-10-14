@@ -2,7 +2,7 @@ require "spec_helper"
 
 require "less"
 
-describe Kumade::MorePackager do
+describe Kumade::MorePackager, :with_mock_outputter do
   subject { Kumade::MorePackager }
 
   before do

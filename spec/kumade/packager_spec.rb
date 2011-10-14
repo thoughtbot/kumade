@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade::Packager, ".available_packager" do
+describe Kumade::Packager, ".available_packager", :with_mock_outputter do
   let(:packager_1) { "1st packager" }
   let(:packager_2) { "2nd packager" }
 
@@ -15,7 +15,7 @@ describe Kumade::Packager, ".available_packager" do
   end
 end
 
-describe Kumade::Packager, "#run" do
+describe Kumade::Packager, "#run", :with_mock_outputter do
   let(:git)              { stub("git", :dirty? => true, :add_and_commit_all_assets_in => true) }
   let(:packager)         { stub("packager", :name => "MyPackager", :package => true, :assets_path => 'fake_assets_path') }
   let(:rake_task_runner) { stub("RakeTaskRunner", :invoke => true) }
