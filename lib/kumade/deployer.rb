@@ -15,7 +15,7 @@ module Kumade
 
     def deploy
       begin
-        ensure_heroku_remote_exists
+        heroku.ensure_heroku_remote_exists
         pre_deploy
         heroku.sync
         heroku.migrate_database
@@ -47,18 +47,6 @@ module Kumade
 
     def ensure_clean_git
       git.ensure_clean_git
-    end
-
-    def ensure_heroku_remote_exists
-      if git.remote_exists?(Kumade.configuration.environment)
-        if git.heroku_remote?
-          success("#{Kumade.configuration.environment} is a Heroku remote")
-        else
-          error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not point to Heroku})
-        end
-      else
-        error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not exist})
-      end
     end
   end
 end

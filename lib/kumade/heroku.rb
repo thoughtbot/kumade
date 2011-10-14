@@ -11,6 +11,18 @@ module Kumade
       @branch = @git.current_branch
     end
 
+    def ensure_heroku_remote_exists
+      if git.remote_exists?(Kumade.configuration.environment)
+        if git.heroku_remote?
+          success("#{Kumade.configuration.environment} is a Heroku remote")
+        else
+          error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not point to Heroku})
+        end
+      else
+        error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not exist})
+      end
+    end
+
     def sync
       git.create(DEPLOY_BRANCH)
       git.push("#{DEPLOY_BRANCH}:master", Kumade.configuration.environment, true)
