@@ -21,6 +21,7 @@ module Kumade
         heroku.migrate_database
       rescue Kumade::DeploymentError
         raise
+      rescue
       ensure
         post_deploy
       end
