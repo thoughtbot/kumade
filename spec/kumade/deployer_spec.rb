@@ -17,15 +17,6 @@ describe Kumade::Deployer, "#deploy" do
     subject.heroku.expects(:pre_deploy)
     subject.expects(:pre_deploy)
     subject.heroku.expects(:deploy)
-    subject.expects(:post_deploy)
-
-    subject.deploy
-  end
-
-  it "calls post_deploy if deploy fails" do
-    subject.heroku.stubs(:ensure_heroku_remote_exists).raises(RuntimeError)
-
-    subject.expects(:post_deploy)
 
     subject.deploy
   end
@@ -53,11 +44,13 @@ describe Kumade::Deployer, "#ensure_clean_git" do
 end
 
 describe Kumade::Deployer, "packaging" do
-  let(:git)      { stub("git", :current_branch => "awesome", :delete => true) }
-  let(:packager) { stub("packager", :run => true) }
+  let(:git)      { stub_everything("git") }
+  let(:heroku)   { stub_everything("heroku") }
+  let(:packager) { stub_everything("packager") }
 
   before do
     Kumade::Git.stubs(:new => git)
+    Kumade::Heroku.stubs(:new => heroku)
     Kumade::Packager.stubs(:new => packager)
   end
 

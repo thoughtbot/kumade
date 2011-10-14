@@ -16,9 +16,15 @@ module Kumade
     end
 
     def deploy
-      sync
-      migrate_database
-      post_deploy
+      begin
+        sync
+        migrate_database
+      rescue Kumade::DeploymentError
+        raise
+      rescue
+      ensure
+        post_deploy
+      end
     end
 
     def post_deploy

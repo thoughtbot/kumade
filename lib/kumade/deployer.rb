@@ -14,16 +14,9 @@ module Kumade
     end
 
     def deploy
-      begin
-        heroku.pre_deploy
-        pre_deploy
-        heroku.deploy
-      rescue Kumade::DeploymentError
-        raise
-      rescue
-      ensure
-        post_deploy
-      end
+      heroku.pre_deploy
+      pre_deploy
+      heroku.deploy
     end
 
     def pre_deploy
@@ -38,9 +31,6 @@ module Kumade
 
     def sync_origin
       git.push(@branch)
-    end
-
-    def post_deploy
     end
 
     def ensure_clean_git

@@ -20,6 +20,19 @@ describe Kumade::Heroku, "#deploy" do
     subject.expects(:post_deploy)
     subject.deploy
   end
+
+  it "calls post_deploy if the deploy fails" do
+    subject.stubs(:sync).raises(RuntimeError)
+    subject.expects(:post_deploy)
+    subject.deploy
+  end
+
+  it "reraises Kumade::DeploymentError's" do 
+    subject.stubs(:sync).raises(Kumade::DeploymentError)
+    subject.expects(:post_deploy)
+
+    expect { subject.deploy }.to raise_error(Kumade::DeploymentError)
+  end
 end
 
 describe Kumade::Heroku, "#post_deploy" do
