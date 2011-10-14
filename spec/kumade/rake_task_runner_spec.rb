@@ -6,7 +6,7 @@ describe Kumade::RakeTaskRunner, :with_mock_outputter do
 
     it "does not notify the user that the task was run successfully" do
       subject.invoke
-      Kumade.outputter.should have_received(:success).never
+      Kumade.configuration.outputter.should have_received(:success).never
     end
   end
 
@@ -47,7 +47,7 @@ describe Kumade::RakeTaskRunner, :with_mock_outputter do
 
       it "notifies the user that the task was run successfully" do
         subject.invoke
-        Kumade.outputter.should have_received(:success).with("Running rake task: #{task_name}")
+        Kumade.configuration.outputter.should have_received(:success).with("Running rake task: #{task_name}")
       end
 
       it "does not invoke the task" do
@@ -63,7 +63,7 @@ describe Kumade::RakeTaskRunner, :with_mock_outputter do
 
       it "notifies the user that the task was run successfully" do
         subject.invoke
-        Kumade.outputter.should have_received(:success).with("Running rake task: #{task_name}")
+        Kumade.configuration.outputter.should have_received(:success).with("Running rake task: #{task_name}")
       end
 
       it "invokes the task" do

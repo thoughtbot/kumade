@@ -21,16 +21,16 @@ module Kumade
     end
 
     def package
-      return Kumade.outputter.success(success_message) if Kumade.configuration.pretending?
+      return Kumade.configuration.outputter.success(success_message) if Kumade.configuration.pretending?
 
       begin
         @packager.package
         if @git.dirty?
           @git.add_and_commit_all_assets_in(@packager.assets_path)
-          Kumade.outputter.success(success_message)
+          Kumade.configuration.outputter.success(success_message)
         end
       rescue => packager_exception
-        Kumade.outputter.error("Error: #{packager_exception.class}: #{packager_exception.message}")
+        Kumade.configuration.outputter.error("Error: #{packager_exception.class}: #{packager_exception.message}")
       end
     end
 

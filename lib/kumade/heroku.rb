@@ -17,7 +17,7 @@ module Kumade
 
     def migrate_database
       heroku("rake db:migrate") unless Kumade.configuration.pretending?
-      Kumade.outputter.success("Migrated #{Kumade.configuration.environment}")
+      Kumade.configuration.outputter.success("Migrated #{Kumade.configuration.environment}")
     end
 
     def delete_deploy_branch

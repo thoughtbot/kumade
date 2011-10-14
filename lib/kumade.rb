@@ -22,12 +22,4 @@ module Kumade
   def self.configuration=(new_configuration)
     @@configuration = new_configuration
   end
-
-  def self.outputter
-    @@outputter ||= Outputter.new
-  end
-
-  def self.outputter=(new_outputter)
-    @@outputter = new_outputter
-  end
 end

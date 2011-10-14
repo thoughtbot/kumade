@@ -48,11 +48,11 @@ RSpec.configure do |config|
   config.treat_symbols_as_metadata_keys_with_true_values = true
 
   config.before(:each, :with_mock_outputter) do
-    Kumade.outputter = stub("Null Outputter", :success => true, :error => true, :info => true, :say_command => true)
+    Kumade.configuration.outputter = stub("Null Outputter", :success => true, :error => true, :info => true, :say_command => true)
   end
 
   config.after(:each, :with_mock_outputter) do
-    Kumade.outputter = Kumade::Outputter.new
+    Kumade.configuration.outputter = Kumade::Outputter.new
   end
 
   config.after do

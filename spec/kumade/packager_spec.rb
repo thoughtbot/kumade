@@ -40,7 +40,7 @@ describe Kumade::Packager, "#run", :with_mock_outputter do
 
       it "prints a success message" do
         subject.run
-        Kumade.outputter.should have_received(:success).with("Packaged with MyPackager")
+        Kumade.configuration.outputter.should have_received(:success).with("Packaged with MyPackager")
       end
 
       it "does not package" do
@@ -56,7 +56,7 @@ describe Kumade::Packager, "#run", :with_mock_outputter do
 
       it "prints a success message" do
         subject.run
-        Kumade.outputter.should have_received(:success).with("Packaged with MyPackager")
+        Kumade.configuration.outputter.should have_received(:success).with("Packaged with MyPackager")
       end
 
       it "packages" do
@@ -67,7 +67,7 @@ describe Kumade::Packager, "#run", :with_mock_outputter do
       it "prints an error if an exception is raised" do
         packager.stubs(:package).raises(RuntimeError.new("my specific error"))
         subject.run
-        Kumade.outputter.should have_received(:error).with("Error: RuntimeError: my specific error")
+        Kumade.configuration.outputter.should have_received(:error).with("Error: RuntimeError: my specific error")
       end
     end
   end
@@ -86,7 +86,7 @@ describe Kumade::Packager, "#run", :with_mock_outputter do
     it "prints the success message after committing" do
       git.stubs(:add_and_commit_all_assets_in).raises(RuntimeError.new("something broke"))
       subject.run
-      Kumade.outputter.should have_received(:success).never
+      Kumade.configuration.outputter.should have_received(:success).never
     end
   end
 
@@ -98,7 +98,7 @@ describe Kumade::Packager, "#run", :with_mock_outputter do
 
     it "does not print a success message" do
       subject.run
-      Kumade.outputter.should have_received(:success).never
+      Kumade.configuration.outputter.should have_received(:success).never
     end
 
     it "doesn't perform a commit" do

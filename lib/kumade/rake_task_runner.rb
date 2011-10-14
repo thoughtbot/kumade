@@ -7,7 +7,7 @@ module Kumade
     def invoke
       return unless task_defined?
 
-      Kumade.outputter.success("Running rake task: #{@task_name}")
+      Kumade.configuration.outputter.success("Running rake task: #{@task_name}")
       Rake::Task[@task_name].invoke if task_should_be_run?
     end
 

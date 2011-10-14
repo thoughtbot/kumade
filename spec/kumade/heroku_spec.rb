@@ -51,7 +51,7 @@ describe Kumade::Heroku, "#migrate_database", :with_mock_outputter do
     it "prints a message" do
       subject.migrate_database
 
-      Kumade.outputter.should have_received(:success).with(regexp_matches(/Migrated #{environment}/))
+      Kumade.configuration.outputter.should have_received(:success).with(regexp_matches(/Migrated #{environment}/))
     end
   end
 end

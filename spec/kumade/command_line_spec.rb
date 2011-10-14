@@ -19,7 +19,7 @@ describe Kumade::CommandLine, "#run_or_error", :with_mock_outputter do
 
     it "prints the command" do
       subject.run_or_error
-      Kumade.outputter.should have_received(:say_command).with(command_line.command).once
+      Kumade.configuration.outputter.should have_received(:say_command).with(command_line.command).once
     end
   end
 
@@ -42,7 +42,7 @@ describe Kumade::CommandLine, "#run_or_error", :with_mock_outputter do
     it "prints an error message" do
       subject.run_or_error("something bad")
 
-      Kumade.outputter.should have_received(:error).with("something bad")
+      Kumade.configuration.outputter.should have_received(:error).with("something bad")
     end
   end
 end
@@ -59,7 +59,7 @@ describe Kumade::CommandLine, "#run_with_status", :with_mock_outputter do
   it "prints the command" do
     subject.run_with_status
 
-    Kumade.outputter.should have_received(:say_command).with(command).once
+    Kumade.configuration.outputter.should have_received(:say_command).with(command).once
   end
 
   context "when pretending" do

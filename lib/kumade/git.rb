@@ -19,7 +19,7 @@ module Kumade
 
       command_line = CommandLine.new(command)
       command_line.run_or_error("Failed to push #{branch} -> #{remote}")
-      Kumade.outputter.success("Pushed #{branch} -> #{remote}")
+      Kumade.configuration.outputter.success("Pushed #{branch} -> #{remote}")
     end
 
     def create(branch)
@@ -41,7 +41,7 @@ module Kumade
                  "git commit -m 'Compiled assets.'"].join(' && ')
       command_line = CommandLine.new(command)
       command_line.run_or_error("Cannot deploy: couldn't commit assets")
-      Kumade.outputter.success("Added and committed all assets")
+      Kumade.configuration.outputter.success("Added and committed all assets")
     end
 
     def current_branch
@@ -62,9 +62,9 @@ module Kumade
 
     def ensure_clean_git
       if ! Kumade.configuration.pretending? && dirty?
-        Kumade.outputter.error("Cannot deploy: repo is not clean.")
+        Kumade.configuration.outputter.error("Cannot deploy: repo is not clean.")
       else
-        Kumade.outputter.success("Git repo is clean")
+        Kumade.configuration.outputter.success("Git repo is clean")
       end
     end
 

@@ -38,7 +38,7 @@ describe Kumade::Deployer, "#deploy", :with_mock_outputter do
 
     it "prints the error" do
       subject.deploy
-      Kumade.outputter.should have_received(:error).with("RuntimeError: fun times")
+      Kumade.configuration.outputter.should have_received(:error).with("RuntimeError: fun times")
     end
   end
 end
@@ -76,13 +76,13 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists", :with_mock_outputter 
     it "does not print an error" do
       subject.ensure_heroku_remote_exists
 
-      Kumade.outputter.should have_received(:error).never
+      Kumade.configuration.outputter.should have_received(:error).never
     end
 
     it "prints a success message" do
       subject.ensure_heroku_remote_exists
 
-      Kumade.outputter.should have_received(:success).with(regexp_matches(/#{environment} is a Heroku remote/))
+      Kumade.configuration.outputter.should have_received(:success).with(regexp_matches(/#{environment} is a Heroku remote/))
     end
   end
 
@@ -94,7 +94,7 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists", :with_mock_outputter 
     it "prints an error" do
       subject.ensure_heroku_remote_exists
 
-      Kumade.outputter.should have_received(:error).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
+      Kumade.configuration.outputter.should have_received(:error).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
     end
   end
 
@@ -109,7 +109,7 @@ describe Kumade::Deployer, "#ensure_heroku_remote_exists", :with_mock_outputter 
     it "prints an error" do
       subject.ensure_heroku_remote_exists
 
-      Kumade.outputter.should have_received(:error).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
+      Kumade.configuration.outputter.should have_received(:error).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
     end
   end
 end

@@ -63,7 +63,7 @@ describe Kumade::Git, "#push", :with_mock_outputter do
 
   it "prints a success message" do
     subject.push(branch, remote)
-    Kumade.outputter.should have_received(:success).with("Pushed #{branch} -> #{remote}")
+    Kumade.configuration.outputter.should have_received(:success).with("Pushed #{branch} -> #{remote}")
   end
 end
 
@@ -81,7 +81,7 @@ describe Kumade::Git, "#create", :with_mock_outputter do
 
     it "does not error" do
       subject.create(branch)
-      Kumade.outputter.should have_received(:error).never
+      Kumade.configuration.outputter.should have_received(:error).never
     end
   end
 end
@@ -135,7 +135,7 @@ describe Kumade::Git, "#add_and_commit_all_assets_in", :with_mock_outputter do
 
   it "prints a success message" do
     subject.add_and_commit_all_assets_in(directory)
-    Kumade.outputter.should have_received(:success).with('Added and committed all assets')
+    Kumade.configuration.outputter.should have_received(:success).with('Added and committed all assets')
   end
 
   context "if the command fails" do
@@ -207,14 +207,14 @@ describe Kumade::Git, "#ensure_clean_git", :with_mock_outputter do
 
     it "prints a success message" do
       subject.ensure_clean_git
-      Kumade.outputter.should have_received(:success).with("Git repo is clean")
+      Kumade.configuration.outputter.should have_received(:success).with("Git repo is clean")
     end
   end
 
   context "when repo is clean" do
     it "prints a success message" do
       subject.ensure_clean_git
-      Kumade.outputter.should have_received(:success).with("Git repo is clean")
+      Kumade.configuration.outputter.should have_received(:success).with("Git repo is clean")
     end
   end
 
@@ -223,7 +223,7 @@ describe Kumade::Git, "#ensure_clean_git", :with_mock_outputter do
 
     it "prints an error message" do
       subject.ensure_clean_git
-      Kumade.outputter.should have_received(:error).with("Cannot deploy: repo is not clean.")
+      Kumade.configuration.outputter.should have_received(:error).with("Cannot deploy: repo is not clean.")
     end
   end
 end

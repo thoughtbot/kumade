@@ -19,7 +19,7 @@ module Kumade
         heroku.sync
         heroku.migrate_database
       rescue => deploying_error
-        Kumade.outputter.error("#{deploying_error.class}: #{deploying_error.message}")
+        Kumade.configuration.outputter.error("#{deploying_error.class}: #{deploying_error.message}")
       ensure
         post_deploy
       end
@@ -50,12 +50,12 @@ module Kumade
     def ensure_heroku_remote_exists
       if git.remote_exists?(Kumade.configuration.environment)
         if git.heroku_remote?
-          Kumade.outputter.success("#{Kumade.configuration.environment} is a Heroku remote")
+          Kumade.configuration.outputter.success("#{Kumade.configuration.environment} is a Heroku remote")
         else
-          Kumade.outputter.error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not point to Heroku})
+          Kumade.configuration.outputter.error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not point to Heroku})
         end
       else
-        Kumade.outputter.error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not exist})
+        Kumade.configuration.outputter.error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not exist})
       end
     end
   end

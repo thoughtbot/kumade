@@ -7,11 +7,11 @@ module Kumade
     end
 
     def run_or_error(error_message = nil)
-      run_with_status || Kumade.outputter.error(error_message)
+      run_with_status || Kumade.configuration.outputter.error(error_message)
     end
 
     def run_with_status
-      Kumade.outputter.say_command(command)
+      Kumade.configuration.outputter.say_command(command)
       Kumade.configuration.pretending? || run
     end
 
