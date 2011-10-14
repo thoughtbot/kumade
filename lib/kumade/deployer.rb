@@ -1,5 +1,5 @@
 require "rake"
-require 'cocaine'
+require "cocaine"
 
 module Kumade
   class Deployer < Base
@@ -15,18 +15,14 @@ module Kumade
 
     def deploy
       heroku.pre_deploy
-      pre_deploy
-      heroku.deploy
-    end
-
-    def pre_deploy
       ensure_clean_git
       package_assets
       sync_origin
+      heroku.deploy
     end
 
     def package_assets
-      @packager.run
+      packager.run
     end
 
     def sync_origin

@@ -1,21 +1,11 @@
 require 'spec_helper'
 
-describe Kumade::Deployer, "#pre_deploy" do
-  let(:git) { subject.git }
-
-  it "calls the correct methods" do
-    git.expects(:ensure_clean_git)
-    subject.expects(:package_assets)
-    git.expects(:push).with(subject.git.current_branch)
-
-    subject.pre_deploy
-  end
-end
-
 describe Kumade::Deployer, "#deploy" do
   it "calls the correct methods" do
     subject.heroku.expects(:pre_deploy)
-    subject.expects(:pre_deploy)
+    subject.expects(:ensure_clean_git)
+    subject.expects(:package_assets)
+    subject.expects(:sync_origin)
     subject.heroku.expects(:deploy)
 
     subject.deploy
