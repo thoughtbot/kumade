@@ -41,7 +41,6 @@ module Kumade
     end
 
     def post_deploy
-      heroku.delete_deploy_branch
     end
 
     def ensure_clean_git

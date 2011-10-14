@@ -18,6 +18,11 @@ module Kumade
     def deploy
       sync
       migrate_database
+      post_deploy
+    end
+
+    def post_deploy
+      delete_deploy_branch
     end
 
     def ensure_heroku_remote_exists

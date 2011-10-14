@@ -17,7 +17,15 @@ describe Kumade::Heroku, "#deploy" do
   it "sync's and migrate's" do
     subject.expects(:sync)
     subject.expects(:migrate_database)
+    subject.expects(:post_deploy)
     subject.deploy
+  end
+end
+
+describe Kumade::Heroku, "#post_deploy" do
+  it "deletes the deploy branch" do
+    subject.expects(:delete_deploy_branch)
+    subject.post_deploy
   end
 end
 
