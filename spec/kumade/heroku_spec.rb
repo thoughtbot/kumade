@@ -6,6 +6,13 @@ describe Kumade::Heroku, "DEPLOY_BRANCH" do
   it { should == "deploy" }
 end
 
+describe Kumade::Heroku, "#pre_deploy" do
+  it "ensures heroku remote exists" do
+    subject.expects(:ensure_heroku_remote_exists)
+    subject.pre_deploy
+  end
+end
+
 describe Kumade::Heroku, "#ensure_heroku_remote_exists" do
   let(:environment) { 'staging' }
 

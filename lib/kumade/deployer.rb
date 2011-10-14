@@ -15,7 +15,7 @@ module Kumade
 
     def deploy
       begin
-        heroku.ensure_heroku_remote_exists
+        heroku.pre_deploy
         pre_deploy
         heroku.sync
         heroku.migrate_database

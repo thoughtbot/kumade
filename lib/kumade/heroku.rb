@@ -11,6 +11,10 @@ module Kumade
       @branch = @git.current_branch
     end
 
+    def pre_deploy
+      ensure_heroku_remote_exists
+    end
+
     def ensure_heroku_remote_exists
       if git.remote_exists?(Kumade.configuration.environment)
         if git.heroku_remote?

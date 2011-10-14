@@ -21,6 +21,7 @@ describe Kumade::Deployer, "#deploy" do
   end
 
   it "calls the correct methods" do
+    subject.heroku.expects(:pre_deploy)
     subject.expects(:pre_deploy)
     subject.heroku.expects(:sync)
     subject.heroku.expects(:migrate_database)
