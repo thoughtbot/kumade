@@ -17,8 +17,7 @@ module Kumade
       begin
         heroku.pre_deploy
         pre_deploy
-        heroku.sync
-        heroku.migrate_database
+        heroku.deploy
       rescue Kumade::DeploymentError
         raise
       rescue

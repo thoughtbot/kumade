@@ -13,6 +13,14 @@ describe Kumade::Heroku, "#pre_deploy" do
   end
 end
 
+describe Kumade::Heroku, "#deploy" do
+  it "sync's and migrate's" do
+    subject.expects(:sync)
+    subject.expects(:migrate_database)
+    subject.deploy
+  end
+end
+
 describe Kumade::Heroku, "#ensure_heroku_remote_exists" do
   let(:environment) { 'staging' }
 

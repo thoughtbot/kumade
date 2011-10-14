@@ -15,6 +15,11 @@ module Kumade
       ensure_heroku_remote_exists
     end
 
+    def deploy
+      sync
+      migrate_database
+    end
+
     def ensure_heroku_remote_exists
       if git.remote_exists?(Kumade.configuration.environment)
         if git.heroku_remote?
