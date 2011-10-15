@@ -80,6 +80,11 @@ end
 
 You can hook in any custom code you want to run there before deploying!
 
+## Development
+To generate coverage (only on 1.9.x), run rake with COVERAGE set:
+
+    COVERAGE=1 rake
+
 ## What's with the name?
 
 Kumade ([pronunciation here](http://translate.google.com/#ja|en|熊手)) means
