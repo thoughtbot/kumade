@@ -27,4 +27,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('jammit', '~> 0.6.3')
   s.add_development_dependency('less', '~> 2.0')
   s.add_development_dependency('bourne')
+  if RUBY_VERSION >= '1.9.0'
+    s.add_development_dependency('simplecov')
+  end
 end
