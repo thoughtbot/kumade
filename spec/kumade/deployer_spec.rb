@@ -23,6 +23,7 @@ describe Kumade::Deployer, "#deploy", :with_mock_outputter do
     subject.expects(:pre_deploy)
     subject.heroku.expects(:sync)
     subject.heroku.expects(:migrate_database)
+    subject.heroku.expects(:restart_app)
     subject.expects(:post_deploy)
 
     subject.deploy

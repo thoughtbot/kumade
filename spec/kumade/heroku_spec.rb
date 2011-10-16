@@ -56,6 +56,39 @@ describe Kumade::Heroku, "#migrate_database", :with_mock_outputter do
   end
 end
 
+describe Kumade::Heroku, "#restart_app", :with_mock_outputter do
+  let(:environment) { 'staging' }
+
+  before do
+    subject.stubs(:heroku)
+    force_add_heroku_remote(environment)
+  end
+
+  it "runs the heroku restart command" do
+    subject.restart_app
+
+    subject.should have_received(:heroku).with("restart")
+  end
+
+  it "prints a message" do
+    subject.restart_app
+
+    Kumade.configuration.outputter.should have_received(:success).with(regexp_matches(/Restarted #{environment}/))
+  end
+
+  context "when pretending" do
+    before do
+      Kumade.configuration.pretending = true
+    end
+
+    it "does not run the command" do
+      subject.restart_app
+
+      subject.should have_received(:heroku).never
+    end
+  end
+end
+
 describe Kumade::Heroku, "#heroku", :with_mock_outputter do
   let(:command_instance) { stub("Kumade::CommandLine instance", :run_or_error => true) }
 
