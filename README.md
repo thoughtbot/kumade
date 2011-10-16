@@ -22,9 +22,7 @@ process.
 ## Install
 In your Gemfile:
 
-```ruby
-gem 'kumade'
-```
+    gem 'kumade'
 
 ## Usage
 
@@ -70,15 +68,18 @@ Tested against:
 
 Want to run a task before bundling your assets on deploy? In your Rails app's rake tasks, drop in:
 
-``` ruby
-namespace :kumade do
-  task :before_asset_compilation do
-    puts "This runs before assets are committed and pushed to the remote"
-  end
-end
-```
+    namespace :kumade do
+      task :before_asset_compilation do
+        puts "This runs before assets are committed and pushed to the remote"
+      end
+    end
 
 You can hook in any custom code you want to run there before deploying!
+
+## Development
+To generate coverage (only on 1.9.x), run rake with COVERAGE set:
+
+    COVERAGE=1 rake
 
 ## What's with the name?
 

@@ -70,8 +70,8 @@ describe Kumade::CLI, ".deployer" do
 end
 
 describe Kumade::CLI, ".swapping_stdout_for" do
-  let(:stdout) { $stdout }
-  let(:output) { StringIO.new }
+  let!(:stdout) { $stdout }
+  let(:output)  { StringIO.new }
 
   before do
     stdout.stubs(:print => nil, :puts => nil)
@@ -83,6 +83,7 @@ describe Kumade::CLI, ".swapping_stdout_for" do
     end
 
     stdout.should have_received(:print).never
+    stdout.should have_received(:puts).never
 
     output.rewind
     output.read.should == "Hello, you can't see me.\n"
@@ -94,7 +95,7 @@ describe Kumade::CLI, ".swapping_stdout_for" do
       raise Kumade::DeploymentError.new("error")
     end
 
-    stdout.should have_received(:print)
+    stdout.should have_received(:print).with("Hello, you can see me!\n")
   end
 
   context "in print output mode" do
@@ -103,7 +104,7 @@ describe Kumade::CLI, ".swapping_stdout_for" do
         $stdout.puts "Hello, you can see me!"
       end
 
-      stdout.should have_received(:puts)
+      stdout.should have_received(:puts).with("Hello, you can see me!")
     end
   end
 end
