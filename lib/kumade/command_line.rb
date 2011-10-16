@@ -2,6 +2,8 @@ require 'cocaine'
 
 module Kumade
   class CommandLine
+    attr_reader :last_command_output
+
     def initialize(command_to_run)
       @command_line = Cocaine::CommandLine.new(command_to_run)
     end
@@ -17,7 +19,7 @@ module Kumade
 
     def run
       begin
-        @command_line.run
+        @last_command_output = @command_line.run
         true
       rescue Cocaine::ExitStatusError, Cocaine::CommandNotFoundError
         false

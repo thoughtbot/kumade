@@ -88,6 +88,15 @@ describe Kumade::CommandLine, "#run_with_status", :with_mock_outputter do
 end
 
 describe Kumade::CommandLine, "#run", :with_mock_outputter do
+
+  it "saves the output of the most recent command to the reader :last_command_output" do
+    (cmd_line = Kumade::CommandLine.new("echo 'test'")).run
+    cmd_line.last_command_output.should == "test\n"
+
+    (cmd_line = Kumade::CommandLine.new("echo 'yo'")).run
+    cmd_line.last_command_output.should == "yo\n"
+  end
+
   context "when successful" do
     subject { Kumade::CommandLine.new("echo") }
 
