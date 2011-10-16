@@ -1,19 +1,19 @@
 require 'spec_helper'
 
-describe Kumade::Heroku, "DEPLOY_BRANCH" do
+describe Kumade::Heroku, "DEPLOY_BRANCH", :with_mock_outputter do
   subject { Kumade::Heroku::DEPLOY_BRANCH }
 
   it { should == "deploy" }
 end
 
-describe Kumade::Heroku, "#pre_deploy" do
+describe Kumade::Heroku, "#pre_deploy", :with_mock_outputter do
   it "ensures heroku remote exists" do
     subject.expects(:ensure_heroku_remote_exists)
     subject.pre_deploy
   end
 end
 
-describe Kumade::Heroku, "#deploy" do
+describe Kumade::Heroku, "#deploy", :with_mock_outputter do
   it "sync's and migrate's" do
     subject.expects(:sync)
     subject.expects(:migrate_database)
@@ -21,28 +21,29 @@ describe Kumade::Heroku, "#deploy" do
     subject.deploy
   end
 
-  it "calls post_deploy if the deploy fails" do
+  it "calls post_deploy if the deploy fails", :with_mock_outputter do
     subject.stubs(:sync).raises(RuntimeError)
     subject.expects(:post_deploy)
     subject.deploy
   end
 
-  it "reraises Kumade::DeploymentError's" do 
-    subject.stubs(:sync).raises(Kumade::DeploymentError)
+  it "reraises Kumade::DeploymentError's", :with_mock_outputter do 
+    subject.stubs(:sync).raises("RuntimeError: fun times")
     subject.expects(:post_deploy)
 
-    expect { subject.deploy }.to raise_error(Kumade::DeploymentError)
+    subject.deploy
+    Kumade.configuration.outputter.should have_received(:error).with(regexp_matches(/RuntimeError: fun times/))
   end
 end
 
-describe Kumade::Heroku, "#post_deploy" do
+describe Kumade::Heroku, "#post_deploy", :with_mock_outputter do
   it "deletes the deploy branch" do
     subject.expects(:delete_deploy_branch)
     subject.post_deploy
   end
 end
 
-describe Kumade::Heroku, "#ensure_heroku_remote_exists" do
+describe Kumade::Heroku, "#ensure_heroku_remote_exists", :with_mock_outputter do
   let(:environment) { 'staging' }
 
   before do
@@ -51,31 +52,28 @@ describe Kumade::Heroku, "#ensure_heroku_remote_exists" do
   end
 
   context "when the remote points to Heroku" do
-    before { STDOUT.stubs(:puts) }
-
     it "does not print an error" do
       subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/==> !/)).never
+      Kumade.configuration.outputter.should have_received(:error).never
     end
 
     it "prints a success message" do
       subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/#{environment} is a Heroku remote/))
+      Kumade.configuration.outputter.should have_received(:success).with(regexp_matches(/#{environment} is a Heroku remote/))
     end
   end
 
   context "when the remote does not exist" do
     before do
       remove_remote(environment)
-      STDOUT.stubs(:puts)
     end
 
     it "prints an error" do
-      lambda { subject.ensure_heroku_remote_exists }.should raise_error(Kumade::DeploymentError)
+      subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
+      Kumade.configuration.outputter.should have_received(:error).with(regexp_matches(/Cannot deploy: "#{environment}" remote does not exist/))
     end
   end
 
@@ -84,19 +82,18 @@ describe Kumade::Heroku, "#ensure_heroku_remote_exists" do
 
     before do
       `git remote add #{bad_environment} blerg@example.com`
-      STDOUT.stubs(:puts)
       Kumade.configuration.environment = bad_environment
     end
 
     it "prints an error" do
-      lambda { subject.ensure_heroku_remote_exists }.should raise_error(Kumade::DeploymentError)
+      subject.ensure_heroku_remote_exists
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
+      Kumade.configuration.outputter.should have_received(:error).with(regexp_matches(/Cannot deploy: "#{bad_environment}" remote does not point to Heroku/))
     end
   end
 end
 
-describe Kumade::Heroku, "#sync" do
+describe Kumade::Heroku, "#sync", :with_mock_outputter do
   let(:environment) { 'staging' }
 
   before do
@@ -113,11 +110,10 @@ describe Kumade::Heroku, "#sync" do
   end
 end
 
-describe Kumade::Heroku, "#migrate_database" do
+describe Kumade::Heroku, "#migrate_database", :with_mock_outputter do
   let(:environment) { 'staging' }
 
   before do
-    STDOUT.stubs(:puts)
     subject.stubs(:heroku)
     force_add_heroku_remote(environment)
   end
@@ -130,7 +126,6 @@ describe Kumade::Heroku, "#migrate_database" do
 
   context "when pretending" do
     before do
-      STDOUT.stubs(:puts)
       Kumade.configuration.pretending = true
     end
 
@@ -143,17 +138,16 @@ describe Kumade::Heroku, "#migrate_database" do
     it "prints a message" do
       subject.migrate_database
 
-      STDOUT.should have_received(:puts).with(regexp_matches(/Migrated #{environment}/))
+      Kumade.configuration.outputter.should have_received(:success).with(regexp_matches(/Migrated #{environment}/))
     end
   end
 end
 
-describe Kumade::Heroku, "#heroku" do
+describe Kumade::Heroku, "#heroku", :with_mock_outputter do
   let(:command_instance) { stub("Kumade::CommandLine instance", :run_or_error => true) }
 
   before do
     Kumade::CommandLine.stubs(:new => command_instance)
-    STDOUT.stubs(:puts)
   end
 
   context "when on Cedar" do
@@ -179,7 +173,7 @@ describe Kumade::Heroku, "#heroku" do
   end
 end
 
-describe Kumade::Heroku, "#cedar?" do
+describe Kumade::Heroku, "#cedar?", :with_mock_outputter do
   context "when on Cedar" do
     include_context "when on Cedar"
 
@@ -197,17 +191,12 @@ describe Kumade::Heroku, "#cedar?" do
   end
 end
 
-describe Kumade::Heroku, "#delete_deploy_branch" do
-  let(:command_instance) { stub("Kumade::CommandLine instance", :run_or_error => true) }
-
-  before do
-    Kumade::CommandLine.stubs(:new => command_instance)
-  end
+describe Kumade::Heroku, "#delete_deploy_branch", :with_mock_outputter do
+  before { subject.git.stubs(:delete) }
 
   it "deletes the deploy branch" do
     subject.delete_deploy_branch
 
-    Kumade::CommandLine.should have_received(:new).with("git checkout master && git branch -D deploy").once
-    command_instance.should have_received(:run_or_error).once
+    subject.git.should have_received(:delete).with(Kumade::Heroku::DEPLOY_BRANCH, 'master').once
   end
 end

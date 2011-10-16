@@ -5,6 +5,19 @@ describe Kumade::Configuration, "by default" do
   it { should_not be_pretending }
 end
 
+describe Kumade::Configuration, "#outputter" do
+  it "defaults to a Kumade::Outputter instance" do
+    subject.outputter.should be_a Kumade::Outputter
+  end
+end
+
+describe Kumade::Configuration, "#outputter=" do
+  it "sets outputter" do
+    subject.outputter = "new-value"
+    subject.outputter.should == "new-value"
+  end
+end
+
 describe Kumade::Configuration, "#pretending" do
   it "has read/write access for the pretending attribute" do
     subject.pretending = true

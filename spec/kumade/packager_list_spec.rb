@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade::PackagerList, "detecting packages" do
+describe Kumade::PackagerList, "detecting packages", :with_mock_outputter do
   it "returns an array containing the Jammit packager if Jammit is installed" do
     Kumade::JammitPackager.stubs(:installed? => true)
     Kumade::MorePackager.stubs(:installed? => false)

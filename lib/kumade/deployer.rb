@@ -2,11 +2,10 @@ require "rake"
 require "cocaine"
 
 module Kumade
-  class Deployer < Base
+  class Deployer
     attr_reader :git, :heroku, :packager
 
     def initialize
-      super()
       @git      = Git.new
       @heroku   = Heroku.new
       @branch   = @git.current_branch

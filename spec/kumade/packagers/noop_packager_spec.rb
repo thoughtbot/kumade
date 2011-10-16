@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe Kumade::NoopPackager do
+describe Kumade::NoopPackager, :with_mock_outputter do
   subject { Kumade::NoopPackager }
 
   it_should_behave_like "packager"

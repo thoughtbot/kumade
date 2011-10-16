@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade::Deployer, "#deploy" do
+describe Kumade::Deployer, "#deploy", :with_mock_outputter do
   it "calls the correct methods" do
     subject.heroku.expects(:pre_deploy)
     subject.expects(:ensure_clean_git)
@@ -12,11 +12,11 @@ describe Kumade::Deployer, "#deploy" do
   end
 end
 
-describe Kumade::Deployer, "#sync_origin" do
+describe Kumade::Deployer, "#sync_origin", :with_mock_outputter do
   let(:new_branch) { 'new-branch' }
 
   before do
-    `git checkout -b #{new_branch}`
+    `git checkout -b #{new_branch} 2>/dev/null`
   end
 
   it "pushes the current branch to origin" do
@@ -26,14 +26,14 @@ describe Kumade::Deployer, "#sync_origin" do
   end
 end
 
-describe Kumade::Deployer, "#ensure_clean_git" do
+describe Kumade::Deployer, "#ensure_clean_git", :with_mock_outputter do
   it "calls git.ensure_clean_git" do
     subject.git.expects(:ensure_clean_git)
     subject.ensure_clean_git
   end
 end
 
-describe Kumade::Deployer, "packaging" do
+describe Kumade::Deployer, "packaging", :with_mock_outputter do
   let(:git)      { stub_everything("git") }
   let(:heroku)   { stub_everything("heroku") }
   let(:packager) { stub_everything("packager") }

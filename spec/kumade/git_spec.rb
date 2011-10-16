@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Kumade::Git, "#heroku_remote?" do
+describe Kumade::Git, "#heroku_remote?", :with_mock_outputter do
   context "when the environment is a Heroku repository" do
     include_context "with Heroku environment"
 
@@ -20,7 +20,7 @@ describe Kumade::Git, "#heroku_remote?" do
   end
 end
 
-describe Kumade::Git, ".environments" do
+describe Kumade::Git, ".environments", :with_mock_outputter do
   let(:environment)      { 'staging' }
   let(:not_a_heroku_env) { 'fake_heroku' }
   let(:not_a_heroku_url) { 'git@github.com:gabebw/kumade.git' }
@@ -40,7 +40,7 @@ describe Kumade::Git, ".environments" do
   end
 end
 
-describe Kumade::Git, "#push" do
+describe Kumade::Git, "#push", :with_mock_outputter do
   let(:branch)       { 'branch' }
   let(:remote)       { 'my-remote' }
 
@@ -49,7 +49,6 @@ describe Kumade::Git, "#push" do
 
     before do
       Kumade::CommandLine.stubs(:new => command_line)
-      subject.stubs(:success)
       subject.stubs(:remote_exists? => true)
     end
 
@@ -67,7 +66,7 @@ describe Kumade::Git, "#push" do
 
     it "prints a success message" do
       subject.push(branch, remote)
-      subject.should have_received(:success).with("Pushed #{branch} -> #{remote}")
+      Kumade.configuration.outputter.should have_received(:success).with("Pushed #{branch} -> #{remote}")
     end
   end
   
@@ -83,27 +82,26 @@ describe Kumade::Git, "#push" do
   end
 end
 
-describe Kumade::Git, "#create" do
+describe Kumade::Git, "#create", :with_mock_outputter do
   let(:branch) { "my-new-branch" }
   it "creates a branch" do
     subject.create(branch)
-    system("git show-ref #{branch}").should be_true
+    system("git show-ref #{branch} > /dev/null").should be_true
   end
 
   context "when the branch already exists" do
     before do
       subject.create(branch)
-      subject.stubs(:error)
     end
 
     it "does not error" do
       subject.create(branch)
-      subject.should have_received(:error).never
+      Kumade.configuration.outputter.should have_received(:error).never
     end
   end
 end
 
-describe Kumade::Git, "#delete" do
+describe Kumade::Git, "#delete", :with_mock_outputter do
   let(:branch_to_delete)   { 'branch_to_delete' }
   let(:branch_to_checkout) { 'branch_to_checkout' }
 
@@ -123,7 +121,7 @@ describe Kumade::Git, "#delete" do
   end
 end
 
-describe Kumade::Git, "#add_and_commit_all_assets_in" do
+describe Kumade::Git, "#add_and_commit_all_assets_in", :with_mock_outputter do
   let(:directory) { 'assets' }
 
   before do
@@ -133,8 +131,6 @@ describe Kumade::Git, "#add_and_commit_all_assets_in" do
         f.write('some content')
       end
     end
-
-    subject.stubs(:success)
   end
 
   it "switches to the deploy branch" do
@@ -154,7 +150,7 @@ describe Kumade::Git, "#add_and_commit_all_assets_in" do
 
   it "prints a success message" do
     subject.add_and_commit_all_assets_in(directory)
-    subject.should have_received(:success).with('Added and committed all assets')
+    Kumade.configuration.outputter.should have_received(:success).with('Added and committed all assets')
   end
 
   context "if the command fails" do
@@ -170,15 +166,15 @@ describe Kumade::Git, "#add_and_commit_all_assets_in" do
   end
 end
 
-describe Kumade::Git, "#current_branch" do
+describe Kumade::Git, "#current_branch", :with_mock_outputter do
   it "returns the current branch" do
     subject.current_branch.should == 'master'
-    `git checkout -b new-branch`
+    `git checkout -b new-branch 2>/dev/null`
     subject.current_branch.should == 'new-branch'
   end
 end
 
-describe Kumade::Git, "#remote_exists?" do
+describe Kumade::Git, "#remote_exists?", :with_mock_outputter do
   context "when pretending" do
     before { Kumade.configuration.pretending = true }
     it "returns true no matter what" do
@@ -204,7 +200,7 @@ describe Kumade::Git, "#remote_exists?" do
   end
 end
 
-describe Kumade::Git, "#dirty?" do
+describe Kumade::Git, "#dirty?", :with_mock_outputter do
   context "when dirty" do
     before { dirty_the_repo }
 
@@ -217,11 +213,7 @@ describe Kumade::Git, "#dirty?" do
 end
 
 
-describe Kumade::Git, "#ensure_clean_git" do
-  before do
-    subject.stubs(:success => nil, :error => nil)
-  end
-
+describe Kumade::Git, "#ensure_clean_git", :with_mock_outputter do
   context "when pretending" do
     before do
       Kumade.configuration.pretending = true
@@ -230,14 +222,14 @@ describe Kumade::Git, "#ensure_clean_git" do
 
     it "prints a success message" do
       subject.ensure_clean_git
-      subject.should have_received(:success).with("Git repo is clean")
+      Kumade.configuration.outputter.should have_received(:success).with("Git repo is clean")
     end
   end
 
   context "when repo is clean" do
     it "prints a success message" do
       subject.ensure_clean_git
-      subject.should have_received(:success).with("Git repo is clean")
+      Kumade.configuration.outputter.should have_received(:success).with("Git repo is clean")
     end
   end
 
@@ -246,7 +238,7 @@ describe Kumade::Git, "#ensure_clean_git" do
 
     it "prints an error message" do
       subject.ensure_clean_git
-      subject.should have_received(:error).with("Cannot deploy: repo is not clean.")
+      Kumade.configuration.outputter.should have_received(:error).with("Cannot deploy: repo is not clean.")
     end
   end
 end
