@@ -20,6 +20,11 @@ module Kumade
       Kumade.configuration.outputter.success("Migrated #{Kumade.configuration.environment}")
     end
 
+    def restart_app
+      heroku("restart") unless Kumade.configuration.pretending?
+      Kumade.configuration.outputter.success("Restarted #{Kumade.configuration.environment}")
+    end
+
     def delete_deploy_branch
       git.delete(DEPLOY_BRANCH, @branch)
     end
