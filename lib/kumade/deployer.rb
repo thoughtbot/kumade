@@ -1,5 +1,5 @@
 require "rake"
-require 'cocaine'
+require "cocaine"
 
 module Kumade
   class Deployer
@@ -13,50 +13,23 @@ module Kumade
     end
 
     def deploy
-      begin
-        ensure_heroku_remote_exists
-        pre_deploy
-        heroku.sync
-        heroku.migrate_database
-      rescue => deploying_error
-        Kumade.configuration.outputter.error("#{deploying_error.class}: #{deploying_error.message}")
-      ensure
-        post_deploy
-      end
-    end
-
-    def pre_deploy
+      heroku.pre_deploy
       ensure_clean_git
       package_assets
       sync_origin
+      heroku.deploy
     end
 
     def package_assets
-      @packager.run
+      packager.run
     end
 
     def sync_origin
       git.push(@branch)
     end
 
-    def post_deploy
-      heroku.delete_deploy_branch
-    end
-
     def ensure_clean_git
       git.ensure_clean_git
-    end
-
-    def ensure_heroku_remote_exists
-      if git.remote_exists?(Kumade.configuration.environment)
-        if git.heroku_remote?
-          Kumade.configuration.outputter.success("#{Kumade.configuration.environment} is a Heroku remote")
-        else
-          Kumade.configuration.outputter.error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not point to Heroku})
-        end
-      else
-        Kumade.configuration.outputter.error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not exist})
-      end
     end
   end
 end

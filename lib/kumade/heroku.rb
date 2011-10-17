@@ -10,6 +10,37 @@ module Kumade
       @branch = @git.current_branch
     end
 
+    def pre_deploy
+      ensure_heroku_remote_exists
+    end
+
+    def deploy
+      begin
+        sync
+        migrate_database
+      rescue => deploying_error
+        Kumade.configuration.outputter.error("#{deploying_error.class}: #{deploying_error.message}")
+      ensure
+        post_deploy
+      end
+    end
+
+    def post_deploy
+      delete_deploy_branch
+    end
+
+    def ensure_heroku_remote_exists
+      if git.remote_exists?(Kumade.configuration.environment)
+        if git.heroku_remote?
+          Kumade.configuration.outputter.success("#{Kumade.configuration.environment} is a Heroku remote")
+        else
+          Kumade.configuration.outputter.error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not point to Heroku})
+        end
+      else
+        Kumade.configuration.outputter.error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not exist})
+      end
+    end
+
     def sync
       git.create(DEPLOY_BRANCH)
       git.push("#{DEPLOY_BRANCH}:master", Kumade.configuration.environment, true)
@@ -35,7 +66,8 @@ module Kumade
 
       command_line = CommandLine.new("bundle exec heroku stack --remote #{Kumade.configuration.environment}")
 
-      @cedar = command_line.run_or_error.split("\n").grep(/\*/).any? do |line|
+      command_line.run_or_error "Error while checking Heroku stack"
+      @cedar = command_line.last_command_output.split("\n").grep(/\*/).any? do |line|
         line.include?("cedar")
       end
     end
