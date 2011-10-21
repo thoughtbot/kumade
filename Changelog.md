@@ -1,3 +1,6 @@
+## 0.7.0 (2011-10-15)
+* Kumade now has a working check for the Cedar stack.
+
 ## 0.6.0 (2011-10-15)
 * Remove thor dependency, since Thor is no longer in the gem.
 
