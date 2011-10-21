@@ -18,7 +18,14 @@ When /^I commit everything in the current repo$/ do
   end
 end
 
+Before("@creates-remote") do
+  in_current_dir do
+    remove_all_git_remotes
+  end
+end
+
 After("@creates-remote") do
-  heroku_remotes = `git remote -v show | grep heroku | grep fetch | cut -f1`.strip.split
-  heroku_remotes.each { |remote| `git remote rm #{remote} 2> /dev/null` }
+  in_current_dir do
+    remove_all_git_remotes
+  end
 end
