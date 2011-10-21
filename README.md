@@ -45,8 +45,7 @@ The default is to deploy to staging:
 
 Kumade auto-generates a deploy:ENV task for every Heroku environment. You don't
 need to do anything to get the Rake tasks, they're automatically set up for you.
-They're of the form deploy:ENV, so if you have a "staging" remote, you would
-run:
+If you have a "staging" remote, you would run:
 
     $ rake deploy:staging
 
