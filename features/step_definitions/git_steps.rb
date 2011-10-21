@@ -8,13 +8,13 @@ end
 
 When /^I set up a git repo$/ do
   ["git init", "touch .gitkeep", "git add .", "git commit -am First"].each do |git_command|
-    run_simple(unescape(git_command))
+    run_simple(git_command)
   end
 end
 
 When /^I commit everything in the current repo$/ do
   ['git add .', 'git commit -am MY_MESSAGE'].each do |git_command|
-    run_simple(unescape(git_command))
+    run_simple(git_command)
   end
 end
 
