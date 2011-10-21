@@ -8,7 +8,6 @@ Feature: Railtie
     Given a new Rails application with Kumade
     When I require the kumade railtie in the Rakefile
     And I create a Heroku remote named "staging"
-    And I create a non-Heroku remote named "bad-remote"
-    And I run `bundle exec rake -T`
-    Then the output should match /deploy:staging.+Deploy to staging environment/
-    But the output from "bundle exec rake -T" should not contain "deploy:bad-remote"
+    And I create a non-Heroku remote named "bad_remote"
+    Then the rake tasks should include "deploy:staging" with a description of "Deploy to staging environment"
+    But the rake tasks should not include "deploy:bad_remote"
