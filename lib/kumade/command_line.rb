@@ -18,7 +18,6 @@ module Kumade
     def run
       begin
         @command_line.run
-        true
       rescue Cocaine::ExitStatusError, Cocaine::CommandNotFoundError
         false
       end
