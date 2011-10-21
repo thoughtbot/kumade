@@ -11,8 +11,8 @@ Feature: Kumade executable
     And I add "jammit" to the Gemfile
     And I bundle
     When I set up a git repo
-    And I create a Heroku remote for "pretend-staging-app" named "pretend-staging"
-    And I create a Heroku remote for "app-two" named "staging"
+    And I create a Heroku remote named "pretend-staging"
+    And I create a Heroku remote named "staging"
     And I create a non-Heroku remote named "bad-remote"
 
   Scenario: Pretend mode with a Heroku remote

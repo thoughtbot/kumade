@@ -7,7 +7,7 @@ Feature: Railtie
   Scenario: Rake tasks are loaded
     Given a new Rails application with Kumade
     When I require the kumade railtie in the Rakefile
-    And I create a Heroku remote for "my-app" named "staging"
+    And I create a Heroku remote named "staging"
     And I create a non-Heroku remote named "bad-remote"
     And I run `bundle exec rake -T`
     Then the output should match /deploy:staging.+Deploy to staging environment/

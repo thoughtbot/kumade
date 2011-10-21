@@ -7,7 +7,7 @@ Feature: Kumade without jammit
     And I set up the Gemfile with kumade
     And I bundle
     When I set up a git repo
-    And I create a Heroku remote for "pretend-staging-app" named "pretend-staging"
+    And I create a Heroku remote named "pretend-staging"
 
   Scenario: Jammit packager does not run if Jammit is not installed
     When I run kumade with "pretend-staging"

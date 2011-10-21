@@ -1,4 +1,4 @@
-When /^I create a Heroku remote for "([^"]*)" named "([^"]*)"$/ do |app_name, remote_name|
+When /^I create a Heroku remote named "([^"]*)"$/ do |remote_name|
   add_heroku_remote_named(remote_name)
 end
 
