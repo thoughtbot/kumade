@@ -31,7 +31,6 @@ Feature: Kumade executable
       ==> Restarted pretend-staging
       ==> Deployed to: pretend-staging
       """
-    But the output should not contain "==> Packaged with Kumade::MorePackager"
 
   Scenario: Default environment is staging
     When I run kumade with "-p"
