@@ -11,8 +11,8 @@ rebase against master a couple times before your pull request can be merged.
 ## What does Kumade do?
 Before deploying, Kumade ensures the git repo is clean.
 After that, it packages assets using
-[Jammit](http://documentcloud.github.com/jammit/) and/or
-[More](https://github.com/cloudhead/more), commits them, and pushes to origin.
+[Jammit](http://documentcloud.github.com/jammit/) (if it's installed), commits
+them, and pushes to origin.
 Then it force pushes to the correct Heroku remote, runs `rake db:migrate` on the
 Heroku app, and then restarts the app.
 

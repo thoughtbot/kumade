@@ -2,7 +2,7 @@ module Kumade
   class PackagerList
     include Enumerable
 
-    PACKAGERS = [MorePackager, JammitPackager]
+    PACKAGERS = [JammitPackager]
 
     def initialize
       @packagers = build_packagers_list
