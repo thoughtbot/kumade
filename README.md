@@ -43,16 +43,12 @@ The default is to deploy to staging:
 
 ## Rake
 
-Kumade auto-generates a deploy:ENV task for every Heroku environment.
-
-    # in your Rakefile:
-    require 'kumade/railtie'
-    # Kumade must be required before this line
-    Blog::Application.load_tasks!
+Kumade auto-generates a deploy:ENV task for every Heroku environment. You don't
+need to do anything to get the Rake tasks, they're automatically set up for you.
+They're of the form deploy:ENV, so if you have a "staging" remote, you would
+run:
 
     $ rake deploy:staging
-
-If you use rake tasks, you can't pass in options (like -p/--pretend).
 
 ## Does it support the Cedar stack?
 

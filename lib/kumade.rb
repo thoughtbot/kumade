@@ -1,8 +1,9 @@
+require 'kumade/railtie'
+
 module Kumade
   autoload :Git,             "kumade/git"
   autoload :Deployer,        "kumade/deployer"
   autoload :CLI,             "kumade/cli"
-  autoload :Railtie,         "kumade/railtie"
   autoload :DeploymentError, "kumade/deployment_error"
   autoload :Configuration,   "kumade/configuration"
   autoload :Heroku,          "kumade/heroku"
