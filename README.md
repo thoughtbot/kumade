@@ -13,8 +13,8 @@ Before deploying, Kumade ensures the git repo is clean.
 After that, it packages assets using
 [Jammit](http://documentcloud.github.com/jammit/) and/or
 [More](https://github.com/cloudhead/more), commits them, and pushes to origin.
-Then it force pushes to the correct Heroku remote and runs `rake db:migrate` on the
-Heroku app.
+Then it force pushes to the correct Heroku remote, runs `rake db:migrate` on the
+Heroku app, and then restarts the app.
 
 If any step fails, it immediately prints an error and stops the deploy
 process.
