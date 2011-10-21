@@ -1,25 +1,21 @@
 When /^I create a Heroku remote for "([^"]*)" named "([^"]*)"$/ do |app_name, remote_name|
-  When %{I successfully run `git remote add #{remote_name} git@heroku.com:#{app_name}.git`}
+  run_simple(unescape("git remote add #{remote_name} git@heroku.com:#{app_name}.git"))
 end
 
 When /^I create a non-Heroku remote named "([^"]*)"$/ do |remote_name|
-  When %{I successfully run `git remote add #{remote_name} git@github.com:gabebw/kumade.git`}
+  run_simple(unescape("git remote add #{remote_name} git@github.com:gabebw/kumade.git"))
 end
 
 When /^I set up a git repo$/ do
-  steps %{
-    When I successfully run `git init`
-    And I successfully run `touch .gitkeep`
-    And I successfully run `git add .`
-    And I successfully run `git commit -am First`
-  }
+  ["git init", "touch .gitkeep", "git add .", "git commit -am First"].each do |git_command|
+    run_simple(unescape(git_command))
+  end
 end
 
 When /^I commit everything in the current repo$/ do
-  steps %{
-    When I successfully run `git add .`
-    And I successfully run `git commit -am MY_MESSAGE`
-  }
+  ['git add .', 'git commit -am MY_MESSAGE'].each do |git_command|
+    run_simple(unescape(git_command))
+  end
 end
 
 After("@creates-remote") do
