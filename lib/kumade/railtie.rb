@@ -1,9 +1,8 @@
-# add rake tasks if we are inside Rails
 if defined?(Rails::Railtie)
-  class Module
+  module Kumade
     class Railtie < ::Rails::Railtie
       rake_tasks do
-        load File.expand_path("../../tasks/deploy.rake", __FILE__)
+        load "kumade/tasks/deploy.rake"
       end
     end
   end

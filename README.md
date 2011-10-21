@@ -46,7 +46,9 @@ The default is to deploy to staging:
 Kumade auto-generates a deploy:ENV task for every Heroku environment.
 
     # in your Rakefile:
-    require 'kumade'
+    require 'kumade/railtie'
+    # Kumade must be required before this line
+    Blog::Application.load_tasks!
 
     $ rake deploy:staging
 
