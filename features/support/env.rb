@@ -6,6 +6,6 @@ end
 require 'aruba/cucumber'
 require 'kumade'
 
-Before('@extra-timeout') do
+Before('@slow') do
   @aruba_timeout_seconds = 15
 end
