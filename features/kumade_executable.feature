@@ -28,6 +28,7 @@ Feature: Kumade executable
               git push -f pretend-staging deploy:master
       ==> Pushed deploy:master -> pretend-staging
       ==> Migrated pretend-staging
+      ==> Restarted pretend-staging
       ==> Deployed to: pretend-staging
       """
     But the output should not contain "==> Packaged with Kumade::MorePackager"
@@ -58,6 +59,7 @@ Feature: Kumade executable
               git push -f pretend-staging deploy:master
       ==> Pushed deploy:master -> pretend-staging
       ==> Migrated pretend-staging
+      ==> Restarted pretend-staging
       ==> Deployed to: pretend-staging
       """
 
