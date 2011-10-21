@@ -40,7 +40,8 @@ module Kumade
 
       command_line = CommandLine.new("bundle exec heroku stack --remote #{Kumade.configuration.environment}")
 
-      @cedar = command_line.run_or_error.split("\n").grep(/\*/).any? do |line|
+      command_line.run_or_error "Error while checking Heroku stack"
+      @cedar = command_line.last_command_output.split("\n").grep(/\*/).any? do |line|
         line.include?("cedar")
       end
     end
