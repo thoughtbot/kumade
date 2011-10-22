@@ -25,7 +25,7 @@ module Kumade
 
       begin
         @packager.package
-        if @git.dirty?
+        if @git.dirty? || @git.has_untracked_files_in?(@packager.assets_path)
           @git.add_and_commit_all_assets_in(@packager.assets_path)
           Kumade.configuration.outputter.success(success_message)
         end
