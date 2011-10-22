@@ -21,7 +21,7 @@ module Kumade
     end
 
     def package
-      return Kumade.configuration.outputter.success(success_message) if Kumade.configuration.pretending?
+      return Kumade.configuration.outputter.success(success_message) if Kumade.configuration.pretending? || @packager == NoopPackager
 
       begin
         @packager.package

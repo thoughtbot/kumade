@@ -5,13 +5,14 @@ Feature: No-op packager
   So that I am not forced to package my assets
 
   Background:
-    Given a new Rails app
-    When I create a Heroku remote for "my-app" named "staging"
+    Given a new Rails application with Kumade
+    When I create a Heroku remote named "staging"
 
   Scenario: No-op packager runs in pretend mode if Jammit is not installed
     When I run kumade with "staging -p"
     Then the output should contain "==> Packaged with Kumade::NoopPackager"
 
   Scenario: No-op packager runs in normal mode if Jammit is not installed
-    When I run kumade with "staging -v"
+    When I add the origin remote
+    And I run kumade
     Then the output should contain "==> Packaged with Kumade::NoopPackager"

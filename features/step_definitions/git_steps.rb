@@ -29,3 +29,7 @@ end
 When /^I modify a tracked file$/ do
   modify_tracked_file
 end
+
+When /^I add the origin remote$/ do
+  add_origin_remote
+end
