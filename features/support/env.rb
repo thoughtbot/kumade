@@ -7,5 +7,9 @@ require 'aruba/cucumber'
 require 'kumade'
 
 Before('@slow') do
-  @aruba_timeout_seconds = 15
+  @aruba_timeout_seconds = 60
+end
+
+After('@slow') do
+  @aruba_timeout_seconds = Aruba::Api::DEFAULT_TIMEOUT_SECONDS
 end
