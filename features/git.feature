@@ -17,3 +17,8 @@ Feature: Git cleanliness
     When I modify a tracked file
     And I run kumade with "pretend-staging"
     Then the output should contain "==> ! Cannot deploy: repo is not clean"
+
+  Scenario: Git repo is always clean when pretending
+    Given a dirty repo
+    When I run kumade with "pretend-staging -p"
+    Then the output should contain "==> Git repo is clean"

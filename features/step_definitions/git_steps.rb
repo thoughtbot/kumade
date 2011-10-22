@@ -22,8 +22,10 @@ When /^I create an untracked file$/ do
   write_file("untracked-file", "anything")
 end
 
+Given /^a dirty repo$/ do
+  modify_tracked_file
+end
+
 When /^I modify a tracked file$/ do
-  write_file('tracked-file', 'clean')
-  commit_everything_in_repo
-  append_to_file('tracked-file', 'dirty it up')
+  modify_tracked_file
 end
