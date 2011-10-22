@@ -1,4 +1,4 @@
-@slow @disable-bundler
+@slow
 Feature: Kumade without jammit
 
   Background:

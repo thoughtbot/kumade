@@ -1,4 +1,3 @@
-@disable-bundler
 Feature: Git cleanliness
   As a user
   I want Kumade to check if git is clean before deploying

@@ -1,4 +1,4 @@
-@slow @disable-bundler
+@slow
 Feature: Jammit
   As a user
   I want Kumade to auto-package with Jammit

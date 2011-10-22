@@ -1,4 +1,4 @@
-@slow @disable-bundler
+@slow
 Feature: Kumade executable
   As a user
   I want to be able to use the kumade executable

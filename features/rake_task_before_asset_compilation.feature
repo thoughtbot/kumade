@@ -1,4 +1,4 @@
-@slow @disable-bundler
+@slow
 Feature: Rake task that runs before asset compilation
   As a user
   I want a Rake task that runs before packaging
