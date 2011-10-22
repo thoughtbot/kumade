@@ -36,7 +36,7 @@ Feature: Kumade executable
     When I run kumade with "-p"
     Then the output should contain "==> Deployed to: staging"
 
-  Scenario: Can deploy to arbitrary environment
+  Scenario: Deploying to an arbitrary environment fails
     When I run kumade with "bamboo"
     Then the output should contain "==> Deploying to: bamboo"
     And the output should match /Cannot deploy: /
@@ -45,19 +45,8 @@ Feature: Kumade executable
     When I run kumade with "bad-remote"
     Then the output should match /==> ! Cannot deploy: "bad-remote" remote does not point to Heroku/
 
-  Scenario: Deploy from another branch
+  Scenario: Deploy from a branch that isn't "master"
     When I run `git checkout -b new_branch`
     And I run kumade with "pretend-staging -p"
-    Then the output should contain:
-      """
-      ==> Git repo is clean
-      ==> Packaged with Kumade::JammitPackager
-              git push origin new_branch
-      ==> Pushed new_branch -> origin
-              git branch deploy >/dev/null
-              git push -f pretend-staging deploy:master
-      ==> Pushed deploy:master -> pretend-staging
-      ==> Migrated pretend-staging
-      ==> Restarted pretend-staging
-      ==> Deployed to: pretend-staging
-      """
+    Then the output should contain "==> Pushed new_branch -> origin"
+    And the output should contain "==> Deployed to: pretend-staging"
