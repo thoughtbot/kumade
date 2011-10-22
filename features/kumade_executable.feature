@@ -79,20 +79,3 @@ Feature: Kumade executable
     When I append to "new-file" with "dirty it up"
     And I run kumade with "pretend-staging"
     Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Cannot deploy: repo is not clean"
-
-  Scenario: Jammit packager runs if Jammit is installed
-    When I run kumade with "pretend-staging"
-    Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Error: Jammit::MissingConfiguration"
-
-  Scenario: Run custom task before jammit
-    Given I write to "Rakefile" with:
-      """
-      namespace :kumade do
-        task :before_asset_compilation do
-          puts 'Hi!'
-        end
-      end
-      """
-    When I run kumade with "pretend-staging -p"
-    Then the output should contain "kumade:before_asset_compilation"
-    And the output should contain "==> Packaged with Kumade::JammitPackager"
