@@ -7,3 +7,4 @@ tmp/
 *.sw[op]
 .rvmrc
 coverage/
+tags
