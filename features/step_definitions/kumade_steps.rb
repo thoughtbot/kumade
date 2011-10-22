@@ -1,3 +1,7 @@
+When /^I run kumade$/ do
+  run_simple("bundle exec kumade")
+end
+
 When /^I run kumade with "([^"]+)"$/ do |args|
   run_simple("bundle exec kumade #{args}")
 end

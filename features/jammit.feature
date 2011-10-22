@@ -1,31 +1,20 @@
-@creates-remote @disable-bundler
+@slow @creates-remote @disable-bundler
 Feature: Jammit
   As a user
   I want Kumade to auto-package with Jammit
   So that I don't have to remember to package assets
 
   Background:
-    Given a directory named "executable"
-    And I cd to "executable"
-    And I set up the Gemfile with kumade
-    And I add "jammit" to the Gemfile
-    And I bundle
-    When I set up a git repo
-    And I create a Heroku remote named "pretend-staging"
+    Given a new Rails application with Kumade and Jammit
+    When I configure my Rails app for Jammit
+    And I create a Heroku remote named "staging"
 
   Scenario: Jammit packager runs if Jammit is installed
-    When I run kumade with "pretend-staging"
-    Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Error: Jammit::MissingConfiguration"
+    When I run kumade
+    Then the output should contain "==> Packaged with Kumade::JammitPackager"
 
   Scenario: Run custom task before jammit
-    Given I write to "Rakefile" with:
-      """
-      namespace :kumade do
-        task :before_asset_compilation do
-          puts 'Hi!'
-        end
-      end
-      """
-    When I run kumade with "pretend-staging -p"
+    When I add a pre-compilation rake task that prints "Hi!"
+    And I run kumade
     Then the output should contain "kumade:before_asset_compilation"
-    And the output should contain "==> Packaged with Kumade::JammitPackager"
+    And the output should contain "Hi!"
