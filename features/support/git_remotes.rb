@@ -20,6 +20,18 @@ module GitRemoteHelpers
     run_simple("git remote add #{remote_name} git@github.com:gabebw/kumade.git")
     @@created_remotes << remote_name
   end
+
+  def add_origin_remote
+    original_dir = current_dir
+    create_dir("../origin")
+    cd("../origin")
+    run_simple("git init --bare")
+
+    cd("../#{File.basename(original_dir)}")
+    run_simple("git remote add origin ../origin")
+    run_simple("git push origin")
+    @@created_remotes << 'origin'
+  end
 end
 
 World(GitRemoteHelpers)
