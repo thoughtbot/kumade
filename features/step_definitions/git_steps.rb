@@ -11,15 +11,11 @@ When /^I create a non-Heroku remote named "([^"]*)"$/ do |remote_name|
 end
 
 When /^I set up a git repo$/ do
-  ["git init", "touch .gitkeep", "git add .", "git commit -am First"].each do |git_command|
-    run_simple(git_command)
-  end
+  set_up_git_repo
 end
 
 When /^I commit everything in the current repo$/ do
-  ['git add .', 'git commit -am MY_MESSAGE'].each do |git_command|
-    run_simple(git_command)
-  end
+  commit_everything_in_repo
 end
 
 When /^I create an untracked file$/ do
@@ -27,12 +23,7 @@ When /^I create an untracked file$/ do
 end
 
 When /^I modify a tracked file$/ do
-  steps %{
-    Given I write to "new-file" with:
-      """
-      clean
-      """
-    And I commit everything in the current repo
-    When I append to "new-file" with "dirty it up"
-  }
+  write_file('tracked-file', 'clean')
+  commit_everything_in_repo
+  append_to_file('tracked-file', 'dirty it up')
 end
