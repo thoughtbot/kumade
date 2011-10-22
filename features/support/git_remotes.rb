@@ -34,3 +34,7 @@ module GitRemoteHelpers
 end
 
 World(GitRemoteHelpers)
+
+After do
+  remove_all_created_remotes
+end

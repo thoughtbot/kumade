@@ -1,4 +1,4 @@
-@slow @creates-remote @disable-bundler
+@slow @disable-bundler
 Feature: Kumade without jammit
 
   Background:

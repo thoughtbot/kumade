@@ -1,7 +1,3 @@
-After("@creates-remote") do
-  remove_all_created_remotes
-end
-
 When /^I create a Heroku remote named "([^"]*)"$/ do |remote_name|
   add_heroku_remote_named(remote_name)
 end

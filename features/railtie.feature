@@ -3,7 +3,7 @@ Feature: Railtie
   I want Kumade to autoload Rake tasks for my Rails application
   So that I can integrate Kumade with other Rake tasks
 
-  @creates-remote @disable-bundler @slow
+  @disable-bundler @slow
   Scenario: Rake tasks are loaded
     Given a new Rails application with Kumade
     When I create a Heroku remote named "staging"

@@ -1,4 +1,4 @@
-@slow @creates-remote @disable-bundler
+@slow @disable-bundler
 Feature: Kumade executable
   As a user
   I want to be able to use the kumade executable

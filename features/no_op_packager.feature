@@ -1,4 +1,4 @@
-@slow @creates-remote @disable-bundler
+@slow @disable-bundler
 Feature: No-op packager
   As a user
   I want Kumade to gracefully handle occasions when I have no assets to package
