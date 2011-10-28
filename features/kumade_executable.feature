@@ -1,17 +1,12 @@
-@slow @creates-remote @disable-bundler
+@slow
 Feature: Kumade executable
   As a user
   I want to be able to use the kumade executable
   So I can have a better experience than Rake provides
 
   Background:
-    Given a directory named "executable"
-    And I cd to "executable"
-    And I set up the Gemfile with kumade
-    And I add "jammit" to the Gemfile
-    And I bundle
-    When I set up a git repo
-    And I create a Heroku remote named "pretend-staging"
+    Given a new Rails application with Kumade and Jammit
+    When I create a Heroku remote named "pretend-staging"
     And I create a Heroku remote named "staging"
     And I create a non-Heroku remote named "bad-remote"
 
@@ -36,7 +31,7 @@ Feature: Kumade executable
     When I run kumade with "-p"
     Then the output should contain "==> Deployed to: staging"
 
-  Scenario: Can deploy to arbitrary environment
+  Scenario: Deploying to an arbitrary environment fails
     When I run kumade with "bamboo"
     Then the output should contain "==> Deploying to: bamboo"
     And the output should match /Cannot deploy: /
@@ -45,54 +40,8 @@ Feature: Kumade executable
     When I run kumade with "bad-remote"
     Then the output should match /==> ! Cannot deploy: "bad-remote" remote does not point to Heroku/
 
-  Scenario: Deploy from another branch
-    When I run `git checkout -b new_branch`
+  Scenario: Deploy from a branch that isn't "master"
+    When I switch to the "new_branch" branch
     And I run kumade with "pretend-staging -p"
-    Then the output should contain:
-      """
-      ==> Git repo is clean
-      ==> Packaged with Kumade::JammitPackager
-              git push origin new_branch
-      ==> Pushed new_branch -> origin
-              git branch deploy >/dev/null
-              git push -f pretend-staging deploy:master
-      ==> Pushed deploy:master -> pretend-staging
-      ==> Migrated pretend-staging
-      ==> Restarted pretend-staging
-      ==> Deployed to: pretend-staging
-      """
-
-  Scenario: Git is clean if there are untracked files
-    Given I write to "new-file" with:
-      """
-      clean
-      """
-    When I run kumade with "pretend-staging"
-    Then the output from "bundle exec kumade pretend-staging" should not contain "==> ! Cannot deploy: repo is not clean"
-
-  Scenario: Git is not clean if a tracked file is modified
-    Given I write to "new-file" with:
-      """
-      clean
-      """
-    And I commit everything in the current repo
-    When I append to "new-file" with "dirty it up"
-    And I run kumade with "pretend-staging"
-    Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Cannot deploy: repo is not clean"
-
-  Scenario: Jammit packager runs if Jammit is installed
-    When I run kumade with "pretend-staging"
-    Then the output from "bundle exec kumade pretend-staging" should contain "==> ! Error: Jammit::MissingConfiguration"
-
-  Scenario: Run custom task before jammit
-    Given I write to "Rakefile" with:
-      """
-      namespace :kumade do
-        task :before_asset_compilation do
-          puts 'Hi!'
-        end
-      end
-      """
-    When I run kumade with "pretend-staging -p"
-    Then the output should contain "kumade:before_asset_compilation"
-    And the output should contain "==> Packaged with Kumade::JammitPackager"
+    Then the output should contain "==> Pushed new_branch -> origin"
+    And the output should contain "==> Deployed to: pretend-staging"

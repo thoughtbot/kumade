@@ -227,3 +227,27 @@ describe Kumade::Git, "#ensure_clean_git", :with_mock_outputter do
     end
   end
 end
+
+describe Kumade::Git, "#has_untracked_files_in?", :with_mock_outputter do
+  let(:untracked_dir) { 'untracked' }
+
+  context "in normal mode" do
+    before do
+      Kumade.configuration.pretending = false
+      create_untracked_file_in(untracked_dir)
+    end
+
+    it "detects untracked files" do
+      subject.should have_untracked_files_in(untracked_dir)
+    end
+
+    it "detects untracked files when given an absolute path" do
+      subject.should have_untracked_files_in(File.expand_path("./" + untracked_dir))
+    end
+
+    it "does not get confused by tracked files" do
+      `git add . && git commit -am Message`
+      subject.should_not have_untracked_files_in(untracked_dir)
+    end
+  end
+end

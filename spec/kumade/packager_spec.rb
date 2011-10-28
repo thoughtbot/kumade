@@ -9,7 +9,7 @@ describe Kumade::Packager, ".available_packager", :with_mock_outputter do
     Kumade::Packager.available_packager.should == packager_1
   end
 
-  it "returns nil if no packagers are availabke" do
+  it "returns nil if no packagers are available" do
     Kumade::PackagerList.stubs(:new => [])
     Kumade::Packager.available_packager.should be_nil
   end
@@ -17,7 +17,7 @@ end
 
 describe Kumade::Packager, "#run", :with_mock_outputter do
   let(:git)              { stub("git", :dirty? => true, :add_and_commit_all_assets_in => true) }
-  let(:packager)         { stub("packager", :name => "MyPackager", :package => true, :assets_path => 'fake_assets_path') }
+  let(:packager)         { stub("packager", :name => "MyPackager", :package => true, :assets_path => 'fake_assets_path', :installed? => true) }
   let(:rake_task_runner) { stub("RakeTaskRunner", :invoke => true) }
 
   before do

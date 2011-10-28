@@ -68,6 +68,12 @@ module Kumade
       end
     end
 
+    def has_untracked_files_in?(directory)
+      relative_dir = directory.sub(Dir.pwd + '/', '')
+      untracked_output = CommandLine.new("git status --porcelain --untracked-files").run
+      untracked_output.split("\n").grep(/^\?{2} #{relative_dir}/).size > 0
+    end
+
     private
 
     def has_branch?(branch)

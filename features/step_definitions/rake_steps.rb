@@ -24,3 +24,15 @@ Then /^the rake tasks should not include "([^"]+)"/ do |task_name|
     Then the output from "bundle exec rake -T" should not contain "#{task_name}"
   }
 end
+
+When /^I add a pre-compilation rake task that prints "Hi!"$/ do
+  append_to_file("Rakefile", <<-CUSTOM_TASK)
+      namespace :kumade do
+        task :before_asset_compilation do
+          puts 'Hi!'
+        end
+      end
+  CUSTOM_TASK
+
+  commit_everything_in_repo
+end
