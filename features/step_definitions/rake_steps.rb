@@ -34,5 +34,5 @@ When /^I add a pre-compilation rake task that prints "Hi!"$/ do
       end
   CUSTOM_TASK
 
-  When "I commit everything in the current repo"
+  commit_everything_in_repo
 end

@@ -7,7 +7,7 @@ Given /^a new Rails application with Kumade and Jammit$/ do
 end
 
 When /^I configure my Rails app for Jammit$/ do
-  run_bundler#_from_vendor
+  run_bundler
   set_up_jammit
   add_origin_remote
 end

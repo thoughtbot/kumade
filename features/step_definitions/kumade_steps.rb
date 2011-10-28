@@ -7,11 +7,9 @@ When /^I run kumade with "([^"]+)"$/ do |args|
 end
 
 Given /^a directory set up for kumade$/ do
-  steps %{
-    Given a directory named "the-kumade-directory"
-    When I cd to "the-kumade-directory"
-    And I set up the Gemfile with kumade
-    And I bundle
-    And I set up a git repo
-  }
+  create_dir('the-kumade-directory')
+  cd('the-kumade-directory')
+  add_kumade_to_gemfile
+  run_bundler
+  set_up_git_repo
 end
