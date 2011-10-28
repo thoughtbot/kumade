@@ -5,13 +5,8 @@ Feature: Kumade executable
   So I can have a better experience than Rake provides
 
   Background:
-    Given a directory named "executable"
-    And I cd to "executable"
-    And I set up the Gemfile with kumade
-    And I add "jammit" to the Gemfile
-    And I bundle
-    When I set up a git repo
-    And I create a Heroku remote named "pretend-staging"
+    Given a new Rails application with Kumade and Jammit
+    When I create a Heroku remote named "pretend-staging"
     And I create a Heroku remote named "staging"
     And I create a non-Heroku remote named "bad-remote"
 
@@ -46,7 +41,7 @@ Feature: Kumade executable
     Then the output should match /==> ! Cannot deploy: "bad-remote" remote does not point to Heroku/
 
   Scenario: Deploy from a branch that isn't "master"
-    When I run `git checkout -b new_branch`
+    When I switch to the "new_branch" branch
     And I run kumade with "pretend-staging -p"
     Then the output should contain "==> Pushed new_branch -> origin"
     And the output should contain "==> Deployed to: pretend-staging"

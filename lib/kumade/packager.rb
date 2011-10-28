@@ -6,8 +6,10 @@ module Kumade
     end
 
     def run
-      precompile_assets
-      package
+      if @packager.installed?
+        precompile_assets
+        package
+      end
     end
 
     def self.available_packager
@@ -21,7 +23,7 @@ module Kumade
     end
 
     def package
-      return Kumade.configuration.outputter.success(success_message) if Kumade.configuration.pretending? || @packager == NoopPackager
+      return Kumade.configuration.outputter.success(success_message) if Kumade.configuration.pretending?
 
       begin
         @packager.package

@@ -29,3 +29,7 @@ end
 When /^I add the origin remote$/ do
   add_origin_remote
 end
+
+When /^I switch to the "([^"]+)" branch$/ do |branch_name|
+  run_simple("git checkout -b #{branch_name}")
+end

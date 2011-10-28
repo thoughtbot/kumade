@@ -8,11 +8,11 @@ Feature: No-op packager
     Given a new Rails application with Kumade
     When I create a Heroku remote named "staging"
 
-  Scenario: No-op packager runs in pretend mode if Jammit is not installed
+  Scenario: No-op packager does not run in pretend mode if Jammit is not installed
     When I run kumade with "staging -p"
-    Then the output should contain "==> Packaged with Kumade::NoopPackager"
+    Then the output should not contain "==> Packaged with Kumade::NoopPackager"
 
-  Scenario: No-op packager runs in normal mode if Jammit is not installed
+  Scenario: No-op packager does not run in normal mode if Jammit is not installed
     When I add the origin remote
     And I run kumade
-    Then the output should contain "==> Packaged with Kumade::NoopPackager"
+    Then the output should not contain "==> Packaged with Kumade::NoopPackager"
