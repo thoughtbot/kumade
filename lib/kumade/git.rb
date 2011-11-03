@@ -11,6 +11,7 @@ module Kumade
     end
 
     def push(branch, remote = 'origin', force = false)
+      return unless remote_exists?(remote)
       command = ["git push"]
       command << "-f" if force
       command << remote
