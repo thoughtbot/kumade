@@ -1,3 +1,6 @@
+## 0.8.1 (2011-11-08)
+* Correctly restart apps
+
 ## 0.8.0 (2011-10-21)
 * Kumade now has working (and autoloaded!) Rake tasks. `rake deploy:staging`
   will Just Work.
