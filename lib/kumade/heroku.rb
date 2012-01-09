@@ -22,8 +22,7 @@ module Kumade
 
     def restart_app
       unless Kumade.configuration.pretending?
-        command_line = CommandLine.new("bundle exec heroku restart --remote #{Kumade.configuration.environment}")
-        command_line.run_or_error("Failed to restart #{Kumade.configuration.environment}")
+        heroku("restart")
       end
       Kumade.configuration.outputter.success("Restarted #{Kumade.configuration.environment}")
     end
