@@ -1,3 +1,8 @@
+## 0.8.2 (2011-11-09)
+* Add kumade:pre\_deploy Rake task hook
+
+* Git#push when remote does not exist returns silently
+
 ## 0.8.1 (2011-11-08)
 * Correctly restart apps
 
