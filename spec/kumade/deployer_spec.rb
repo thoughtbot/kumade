@@ -1,7 +1,14 @@
 require 'spec_helper'
 
 describe Kumade::Deployer, "#pre_deploy", :with_mock_outputter do
-  let(:git) { subject.git }
+  let(:git)              { subject.git }
+  let(:rake_task_runner) { stub("RakeTaskRunner", :invoke => true) }
+  let(:packager)         { stub("packager", :run => true) }
+
+  before do
+    Kumade::Packager.stubs(:new => packager)
+    Kumade::RakeTaskRunner.stubs(:new).with("kumade:pre_deploy").returns(rake_task_runner)
+  end
 
   it "calls the correct methods" do
     git.expects(:ensure_clean_git)
@@ -9,6 +16,13 @@ describe Kumade::Deployer, "#pre_deploy", :with_mock_outputter do
     git.expects(:push).with(subject.git.current_branch)
 
     subject.pre_deploy
+  end
+
+  it "invokes the kumade:pre_deploy task" do
+    subject.pre_deploy
+
+    Kumade::RakeTaskRunner.should have_received(:new).with("kumade:pre_deploy")
+    rake_task_runner.should have_received(:invoke)
   end
 end
 

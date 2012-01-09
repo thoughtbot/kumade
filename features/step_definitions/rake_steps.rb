@@ -36,3 +36,15 @@ When /^I add a pre-compilation rake task that prints "Hi!"$/ do
 
   commit_everything_in_repo
 end
+
+When /^I add a pre-deploy rake task that prints "Hi!"$/ do
+  append_to_file("Rakefile", <<-CUSTOM_TASK)
+      namespace :kumade do
+        task :pre_deploy do
+          puts 'Hi!'
+        end
+      end
+  CUSTOM_TASK
+
+  commit_everything_in_repo
+end

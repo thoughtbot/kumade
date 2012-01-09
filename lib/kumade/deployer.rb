@@ -28,6 +28,7 @@ module Kumade
 
     def pre_deploy
       ensure_clean_git
+      run_predeploy_task
       package_assets
       sync_origin
     end
@@ -58,6 +59,12 @@ module Kumade
       else
         Kumade.configuration.outputter.error(%{Cannot deploy: "#{Kumade.configuration.environment}" remote does not exist})
       end
+    end
+
+    private
+
+    def run_predeploy_task
+      RakeTaskRunner.new("kumade:pre_deploy").invoke
     end
   end
 end
