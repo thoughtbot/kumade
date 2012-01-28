@@ -6,7 +6,7 @@ end
 module Kumade
   class JammitPackager
     def self.assets_path
-      File.join(Jammit::PUBLIC_ROOT, Jammit.package_path)
+      File.join(public_root, Jammit.package_path)
     end
 
     def self.installed?
@@ -15,6 +15,12 @@ module Kumade
 
     def self.package
       Jammit.package!
+    end
+
+    private
+
+    def self.public_root
+      defined?(Jammit.public_root) ? Jammit.public_root : Jammit::PUBLIC_ROOT
     end
   end
 end
