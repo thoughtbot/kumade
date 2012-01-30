@@ -39,7 +39,7 @@ describe Kumade::Deployer, "#post_deploy_success", :with_mock_outputter do
     subject.post_deploy_success
   end
 
-  it "invokes the kumade:pre_deploy task" do
+  it "invokes the kumade:post_deploy task" do
     subject.post_deploy_success
 
     Kumade::RakeTaskRunner.should have_received(:new).with("kumade:post_deploy")
