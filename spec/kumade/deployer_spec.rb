@@ -12,6 +12,7 @@ describe Kumade::Deployer, "#pre_deploy", :with_mock_outputter do
 
   it "calls the correct methods" do
     git.expects(:ensure_clean_git)
+    subject.expects(:run_pre_deploy_task)
     subject.expects(:package_assets)
     git.expects(:push).with(subject.git.current_branch)
 

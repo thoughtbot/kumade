@@ -28,7 +28,7 @@ module Kumade
 
     def pre_deploy
       ensure_clean_git
-      run_predeploy_task
+      run_pre_deploy_task
       package_assets
       sync_origin
     end
@@ -63,7 +63,7 @@ module Kumade
 
     private
 
-    def run_predeploy_task
+    def run_pre_deploy_task
       RakeTaskRunner.new("kumade:pre_deploy").invoke
     end
   end
