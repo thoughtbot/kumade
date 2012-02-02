@@ -19,6 +19,7 @@ module Kumade
         heroku.sync
         heroku.migrate_database
         heroku.restart_app
+        post_deploy_success
       rescue => deploying_error
         Kumade.configuration.outputter.error("#{deploying_error.class}: #{deploying_error.message}")
       ensure
@@ -31,6 +32,10 @@ module Kumade
       run_pre_deploy_task
       package_assets
       sync_origin
+    end
+
+    def post_deploy_success
+      run_post_deploy_task
     end
 
     def package_assets
@@ -65,6 +70,10 @@ module Kumade
 
     def run_pre_deploy_task
       RakeTaskRunner.new("kumade:pre_deploy").invoke
+    end
+
+    def run_post_deploy_task
+      RakeTaskRunner.new("kumade:post_deploy").invoke
     end
   end
 end
