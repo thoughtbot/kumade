@@ -7,7 +7,7 @@ describe Kumade::JammitPackager, :with_mock_outputter do
 
   it_should_behave_like "packager"
 
-  its(:assets_path) { should == File.join(Jammit::PUBLIC_ROOT, Jammit.package_path) }
+  its(:assets_path) { should == File.join(Jammit::DEFAULT_PUBLIC_ROOT, Jammit.package_path) }
 
   it "knows how to package itself" do
     ::Jammit.stubs(:package!)

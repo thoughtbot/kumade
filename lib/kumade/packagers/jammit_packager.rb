@@ -6,7 +6,7 @@ end
 module Kumade
   class JammitPackager
     def self.assets_path
-      File.join(Jammit::PUBLIC_ROOT, Jammit.package_path)
+      File.join(Jammit::DEFAULT_PUBLIC_ROOT, Jammit.package_path)
     end
 
     def self.installed?
