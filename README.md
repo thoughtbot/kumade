@@ -60,6 +60,7 @@ Tested against:
 
 * MRI 1.8.7
 * MRI 1.9.2
+* MRI 1.9.3
 * REE 1.8.7
 
 ## Miscellaneous Features
