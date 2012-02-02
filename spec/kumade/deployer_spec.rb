@@ -27,6 +27,27 @@ describe Kumade::Deployer, "#pre_deploy", :with_mock_outputter do
   end
 end
 
+describe Kumade::Deployer, "#post_deploy_success", :with_mock_outputter do
+  let(:rake_task_runner) { stub("RakeTaskRunner", :invoke => true) }
+
+  before do
+    Kumade::RakeTaskRunner.stubs(:new).with("kumade:post_deploy").returns(rake_task_runner)
+  end
+
+  it "calls the correct methods" do
+    subject.expects(:run_post_deploy_task)
+
+    subject.post_deploy_success
+  end
+
+  it "invokes the kumade:post_deploy task" do
+    subject.post_deploy_success
+
+    Kumade::RakeTaskRunner.should have_received(:new).with("kumade:post_deploy")
+    rake_task_runner.should have_received(:invoke)
+  end
+end
+
 describe Kumade::Deployer, "#deploy", :with_mock_outputter do
   let(:remote_name) { 'staging' }
 
@@ -40,6 +61,7 @@ describe Kumade::Deployer, "#deploy", :with_mock_outputter do
     subject.heroku.expects(:migrate_database)
     subject.heroku.expects(:restart_app)
     subject.expects(:post_deploy)
+    subject.expects(:post_deploy_success)
 
     subject.deploy
   end

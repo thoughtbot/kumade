@@ -14,7 +14,8 @@ After that, it packages assets using
 [Jammit](http://documentcloud.github.com/jammit/) (if it's installed), commits
 them, and pushes to origin.
 Then it force pushes to the correct Heroku remote, runs `rake db:migrate` on the
-Heroku app, and then restarts the app.
+Heroku app, and then restarts the app.  If all of this succeeds, it will
+also run the rake task `kumade:post_deploy` if it is defined.
 
 If any step fails, it immediately prints an error and stops the deploy
 process.
