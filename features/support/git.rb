@@ -1,6 +1,6 @@
 module GitHelpers
   def set_up_git_repo
-    ["git init", "touch .gitkeep", "git add .", "git commit -am First"].each do |git_command|
+    ["git init --template=/dev/null", "touch .gitkeep", "git add .", "git commit -am First"].each do |git_command|
       run_simple(git_command)
     end
   end
