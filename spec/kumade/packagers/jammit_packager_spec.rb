@@ -7,8 +7,9 @@ describe Kumade::JammitPackager, :with_mock_outputter do
 
   it_should_behave_like "packager"
 
-  let(:jammit_public_root) { defined?(Jammit.public_root) ? Jammit.public_root : Jammit::PUBLIC_ROOT }
-  its(:assets_path) { should == File.join(jammit_public_root, Jammit.package_path) }
+  it "has the correct asset path" do
+    subject.assets_path.should == File.join(jammit_public_root, Jammit.package_path)
+  end
 
   it "knows how to package itself" do
     ::Jammit.stubs(:package!)
@@ -24,5 +25,9 @@ describe Kumade::JammitPackager, :with_mock_outputter do
   context "when Jammit is not defined" do
     before { Object.send(:remove_const, :Jammit) }
     it     { should_not be_installed }
+  end
+
+  def jammit_public_root
+    defined?(Jammit.public_root) ? Jammit.public_root : Jammit::PUBLIC_ROOT
   end
 end
