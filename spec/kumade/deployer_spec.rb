@@ -34,7 +34,7 @@ describe Kumade::Deployer, "#post_deploy_success", :with_mock_outputter do
   end
 
   it "calls the correct methods" do
-    subject.expects(:run_postdeploy_task)
+    subject.expects(:run_post_deploy_task)
 
     subject.post_deploy_success
   end

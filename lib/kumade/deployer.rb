@@ -35,7 +35,7 @@ module Kumade
     end
 
     def post_deploy_success
-      run_postdeploy_task
+      run_post_deploy_task
     end
 
     def package_assets
@@ -72,7 +72,7 @@ module Kumade
       RakeTaskRunner.new("kumade:pre_deploy").invoke
     end
 
-    def run_postdeploy_task
+    def run_post_deploy_task
       RakeTaskRunner.new("kumade:post_deploy").invoke
     end
   end
