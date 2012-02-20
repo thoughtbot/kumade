@@ -12,7 +12,7 @@ Feature: Rake task that runs before asset compilation
     Then the output should contain "kumade:before_asset_compilation"
     And the output should contain "Hi!"
 
-  Scenario: Custom task runs does not run if Jammit is not installed
+  Scenario: Custom task does not run if Jammit is not installed
     Given a new Rails application with Kumade
     When I create a Heroku remote named "pretend-staging"
     And I add a pre-compilation rake task that prints "Hi!"
