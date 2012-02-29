@@ -32,7 +32,7 @@ module Kumade
     end
 
     def heroku(command)
-      full_heroku_command = "#{bundle_exec_heroku} #{command} --remote #{Kumade.configuration.environment}"
+      full_heroku_command = "#{bundle_exec_heroku(command)} --remote #{Kumade.configuration.environment}"
       command_line = CommandLine.new(full_heroku_command)
       command_line.run_or_error("Failed to run #{command} on Heroku")
     end
@@ -49,11 +49,11 @@ module Kumade
 
     private
 
-    def bundle_exec_heroku
-      if cedar?
-        "bundle exec heroku run"
+    def bundle_exec_heroku(command)
+      if cedar? and command != 'restart'
+        "bundle exec heroku run #{command}"
       else
-        "bundle exec heroku"
+        "bundle exec heroku #{command}"
       end
     end
   end
