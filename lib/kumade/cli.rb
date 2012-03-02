@@ -34,6 +34,7 @@ module Kumade
         rescue Kumade::DeploymentError
           io.rewind
           real_stdout.print(io.read)
+          exit 1
         ensure
           $stdout = real_stdout
         end
