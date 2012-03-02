@@ -50,7 +50,7 @@ module Kumade
     private
 
     def bundle_exec_heroku(command)
-      if cedar? and command != 'restart'
+      if cedar? && command != 'restart'
         "bundle exec heroku run #{command}"
       else
         "bundle exec heroku #{command}"
