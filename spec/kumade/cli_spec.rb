@@ -89,13 +89,18 @@ describe Kumade::CLI, ".swapping_stdout_for" do
     output.read.should == "Hello, you can't see me.\n"
   end
 
-  it 'dumps the output stash to real stdout when an error happens' do
-    Kumade::CLI.swapping_stdout_for(output) do
-      $stdout.puts "Hello, you can see me!"
-      raise Kumade::DeploymentError.new("error")
+  context 'when print_output is false' do
+    subject do
+      Kumade::CLI.swapping_stdout_for(output) do
+        $stdout.puts "Hello, you can see me!"
+        raise Kumade::DeploymentError.new("error")
+      end
     end
 
-    stdout.should have_received(:print).with("Hello, you can see me!\n")
+    it 'dumps the output stash to real stdout when an error happens, exits with non-zero status' do
+      expect { subject }.should raise_error SystemExit
+      stdout.should have_received(:print).with("Hello, you can see me!\n")
+    end
   end
 
   context "in print output mode" do
