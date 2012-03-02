@@ -105,6 +105,13 @@ describe Kumade::Heroku, "#heroku", :with_mock_outputter do
       Kumade::CommandLine.should have_received(:new).with(regexp_matches(/bundle exec heroku run rake/)).once
       command_instance.should have_received(:run_or_error).once
     end
+
+    it "runs restart command without `run`" do
+      subject.heroku("restart")
+
+      Kumade::CommandLine.should have_received(:new).with(regexp_matches(/bundle exec heroku restart/)).once
+      command_instance.should have_received(:run_or_error).once
+    end
   end
 
   context "when not on Cedar" do
