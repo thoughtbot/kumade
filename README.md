@@ -3,6 +3,10 @@ Kumade is a command-line program  for deploying to Heroku. It aims to
 provide most of what you want. Unlike other Heroku deploy gems, it is
 well-tested.
 
+# Deprecated!
+
+Kumade is deprecated. Please use the Cedar stack on Heroku instead.
+
 ## Development
 Development is happening very fast, and the internals are in constant flux. The
 public API is constant (e.g. `kumade production` will work), but you may have to
