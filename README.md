@@ -99,4 +99,4 @@ The names and logos for thoughtbot are trademarks of thoughtbot, inc.
 
 ## License
 
-Kumade is Copyright © 2011 thoughtbot. It is free software, and may be redistributed under the terms specified in the LICENSE file.
+Kumade is Copyright © 2012 thoughtbot. It is free software, and may be redistributed under the terms specified in the LICENSE file.
